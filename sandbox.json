@@ -14,5 +14,11 @@
     },
     "agent": {
         "endpoint": "ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaamiuzkcah5roqh4lyguzro7f7d25kjp36zqpjn7g5mmia"
+    },
+    "bucket": {
+        "namespace": "axaemuxiyife",
+        "bucketName": "InnovationLabBucket",
+        "prefix": "asagarwa"
     }
+    
 }

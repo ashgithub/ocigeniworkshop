@@ -10,13 +10,13 @@ Note: Oracle Speech does support realtime voice transcription capability, but it
 When using STT, we will be uploading the documents to an object bucket:
     - Please use the PHX tenancy to work with your object bucket. The Chicago tenancy is a read-only replica.
     - As you are working in a shared sandbox, use a unique prefix (prefix is analogous to a subfolder) (e.g., your Oracle ID).
-    - Remember to update the code in this module with the details of your bucket (NAMESPACE, BUCKET_NAME, FILE_NAME, PREFIX)
-    - Remember to update the FILE_TO_ANALYZE to the local file you want to analyze
+    - Remember to  bucket section of sandbox.config details of your bucket (NAMESPACE, BUCKET_NAME, FILE_NAME, PREFIX)
+    - Remember to update the FILE_TO_ANALYZE variable in code to the local file you want to analyze
+When using TTS
+    - remeber to update the filename variable to the path of teh file where you want the audio file to be stored 
+    - Try adding different SAML tags to improve the quality of your response 
 
-As always, make sure your OCI client config & the compartment you are assigned to are correct:
-    - Config file is assumed to be in ~/.oci/config. Change it if needed.
-    - CONFIG_PROFILE: for the section on your local OCI config file that you configured for use with the sandbox
-    - COMPARTMENT_ID: OCID of the compartment assigned to you
+Remember to set up your sandbox.json file per your environment. This module  uses the "oci" & "bucket" section
 
 Example code in this module is available both as Jupyter notebook & Python code. They are very similar:
 
@@ -35,8 +35,8 @@ Here are some ideas of projects you can do (See notebook files for details):
 
 Here are few links to help you: 
 
-#igiu-innovation-lab
-#igiu-ai-learning
-#oci_speech_service_users
+#igiu-innovation-lab for project ideas
+#igiu-ai-learning  for any issues with code or environment 
+#oci_speech_service_users ofr quiestions on OCI speech APIs
 
 https://docs.oracle.com/en-us/iaas/Content/speech/home.htm

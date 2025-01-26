@@ -16,10 +16,7 @@ Note:
 2. There are streaming and non streaming versions of code. Streaming version is fragile. 
 
 
-As always, make sure your OCI client config & the compartment you are assigned to are correct:
-    - Config file is assumed to be in ~/.oci/config. Change it if needed.
-    - CONFIG_PROFILE: for the section on your local OCI config file that you configured for use with the sandbox
-    - COMPARTMENT_ID: OCID of the compartment assigned to you
+Remember to set up your sandbox.json file per your environment. This module only uses the "oci" section 
 
 Example code in this module is available both as Jupyter notebook & Python code. They are very similar:
 
