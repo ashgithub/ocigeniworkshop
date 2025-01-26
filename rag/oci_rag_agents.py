@@ -52,7 +52,7 @@ endpoint = scfg["agent"]["endpoint"]
 genai_client = get_genai_client(config)
 
 create_session_details = oci.generative_ai_agent_runtime.models.CreateSessionDetails(
-    display_name="Inno Lab C2M Agnet ", description="The end has access to C2M documentation and can answer any questions on it"
+    display_name="Inno Lab C2M Agent ", description="The end has access to C2M documentation and can answer any questions on it"
 )
 create_session_response = genai_client.create_session(create_session_details,endpoint )
 session_id = create_session_response.data.id
