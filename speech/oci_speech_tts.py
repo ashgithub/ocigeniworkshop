@@ -1,26 +1,30 @@
+#https://github.com/oracle/oci-python-sdk/tree/22fd62c8dbbd1aaed6b75754ec1ba8a3c16a4e5a/src/oci/ai_speech
+#https://docs.oracle.com/en-us/iaas/Content/speech/home.htm
+# oci_speech_service_users or #igiu-innovation-lab slack channel
+
+# if you have errors running sample code reach out for help in #igiu-ai-learning
+
 from oci.ai_speech import AIServiceSpeechClient
 from oci.ai_speech.models import *
 from oci.config import from_file
 from oci.signer import load_private_key_from_file
 import oci
-import os
+import json, os
    
 """
 configure these constant variables as per your use case
 configurable values begin
 """
-
 #####
-#Setup
-#Change the compartmentid to yhe ocid of your compartment
-#Change the profile if needed
+#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-
-CONFIG_PROFILE = "AISANDBOX"
-compartmentId= "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga" 
+SANDBOX_CONFIG_FILE = "sandbox.json"
+compartmentId= None # read from config 
 endpoint = "https://speech.aiservice.us-phoenix-1.oci.oraclecloud.com"
   
-
+# Replace filename with the file name to save the response
+#filename = "brian_natural.mp3"
+filename = "stacy_standard.mp3"
    
 # The input text can be passed in an SSML format as well.
 # You can enable SSML by selecting textType as TEXT_TYPE_SSML
@@ -43,9 +47,7 @@ text = "A paragraph is a series of sentences that are organized and coherent, an
 #voiceId = "Brian"  # natural brian, annabell, Bob, Stacy, Cindy, Phil 
 voiceId = "Stacy" # std voceis Bob, Stacy, Cindy, Phil
    
-# Replace filename with the file name to save the response
-#filename = "brian_natural.mp3"
-filename = "stacy_standard.mp3"
+
 
 # If you want to enable streaming, set this value to true.
 # With streaming, response is sent back in chunks.
@@ -72,7 +74,20 @@ speechMarkTypes = [TtsOracleSpeechSettings.SPEECH_MARK_TYPES_WORD, TtsOracleSpee
 """
 configurable values end
 """
-   
+
+
+def load_config(config_path):
+    """Load configuration from a JSON file."""
+    try:
+        with open(config_path, 'r') as f:
+                return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Configuration file '{config_path}' not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
+        return None
+       
 def main():
     # get client for authentication and authorization
     client = get_client()
@@ -89,8 +104,12 @@ def main():
           
    
 def get_client():
-    config = from_file('~/.oci/config', CONFIG_PROFILE)
+    global compartmentId
+    #set up the oci gen ai client based on config 
+    scfg = load_config(SANDBOX_CONFIG_FILE)
+    config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
     private_key = load_private_key_from_file(config['key_file'])
+    compartmentId = scfg["oci"]["compartment"]
 
     return AIServiceSpeechClient(config=config,signer= oci.signer.Signer(
         tenancy=config["tenancy"],
