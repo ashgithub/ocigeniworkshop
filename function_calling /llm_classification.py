@@ -1,22 +1,45 @@
 #!/Users/ashish/anaconda3/bin/python
 
 # Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
+# if you have errors running sample code reach out for help in #igiu-ai-learning
 
 from oci.generative_ai_inference import GenerativeAiInferenceClient
 from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
-import oci
+import oci, json, os 
 
 #####
-#Setup
-#Change the compartmentid to yhe ocid of your compartment
-#Change the profile if needed
+#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
+SANDBOX_CONFIG_FILE = "sandbox.json"
 
-CONFIG_PROFILE = "AISANDBOX"
-compartmentId= "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga" 
+# available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+# cohere.command-r-16k
+# cohere.command-r-plus
+# cohere.command-r-08-2024
+# cohere.command-r-plus-08-2024
+# meta.llama-3.1-405b-instruct
+# meta.llama-3.1-70b-instruct
+# meta.llama-3.2-90b-vision-instruct
+
+LLM_MODEL = "cohere.command-r-16k" 
+
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+
 llm_client = None
 llm_payload = None
+
+
+def load_config(config_path):
+    """Load configuration from a JSON file."""
+    try:
+        with open(config_path, 'r') as f:
+                return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Configuration file '{config_path}' not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
+        return None
 
 def get_chat_request():
         cohere_chat_request = CohereChatRequest()
@@ -44,7 +67,7 @@ def get_chat_request():
 
         return cohere_chat_request
 
-def get_chat_detail (llm_request):
+def get_chat_detail (llm_request,compartmentId):
         chat_detail = ChatDetails()
         chat_detail.serving_mode = OnDemandServingMode(model_id="cohere.command-r-plus")
         chat_detail.compartment_id = compartmentId
@@ -52,14 +75,19 @@ def get_chat_detail (llm_request):
 
         return chat_detail
 
-config = oci.config.from_file('~/.oci/config', CONFIG_PROFILE)
+
+#set up the oci gen ai client based on config 
+scfg = load_config(SANDBOX_CONFIG_FILE)
+config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
 
 llm_client = GenerativeAiInferenceClient(
                 config=config,
                 service_endpoint=llm_service_endpoint,
                 retry_strategy=oci.retry.NoneRetryStrategy(),
                 timeout=(10,240))
-llm_payload =get_chat_detail(get_chat_request())
+chat_request = get_chat_request();
+llm_payload =get_chat_detail(chat_request,scfg["oci"]["compartment"])
+
 llm_payload.chat_request.message = "why is my bill so high"
 
 llm_response = llm_client.chat(llm_payload)

@@ -37,8 +37,8 @@ Here are some ideas of projects you can do (See notebook files for details):
         - use oci speech to convert reach dialog into audio, use different voice for each person
         - combine them into a single audio file
 
-Here are few links to help you: 
+Here are few slack channels to help you: 
 
-#igiu-innovation-lab
-#igiu-ai-learning
-#generative-ai-users
+#igiu-ai-learning  : if you have issues with environment or cant get this code working 
+#igiu-innovation-lab : discuss project ideas
+#generative-ai-users :  if you have questions about OCI GenAI  API  

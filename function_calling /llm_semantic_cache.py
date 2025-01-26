@@ -1,37 +1,24 @@
 #!/Users/ashish/anaconda3/bin/python
 
 # Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
+# if you have errors running sample code reach out for help in #igiu-ai-learning
+
 from oci.generative_ai_inference import GenerativeAiInferenceClient
 from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
 import oracledb
 import array
 import oci
-import sys
-import os
-
-CONFIG_PROFILE = "DEFAULT"
-
-print (" change the table names to your name, update the wallet infro  & comment the line below")
-#sys.exit(1)
+import os, json
 
 #####
-#Setup
-#Change the compartmentid to yhe ocid of your compartment
-#Change the profile if needed
+#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
+SANDBOX_CONFIG_FILE = "sandbox.json"
 
-CONFIG_PROFILE = "AISANDBOX"
-compartmentId= "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga" 
-endpointId= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+EMBED_MODEL = "cohere.embed-multilingual-v3.0"
+LLM_MODEL = "cohere.command-r-08-2024" 
+llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-
-# Change to your wallet
-DB_CONFIG_DIR = os.path.expanduser("~/.workshop/inno_wallet")
-DB_USER = "ONNOVATE"
-DB_PASS = "Welcome_2025"
-DB_DSN = "innovationlab_medium"
-DB_WALLET_LOC=os.path.expanduser("~/.workshop/inno_wallet")
-DB_WALLET_PASS="41_innovation" 
 
 
 
@@ -80,14 +67,30 @@ qa_pairs = [
     }
 ]
 
+tablename_prefix = None
+compartmentId = None
+
+def load_config(config_path):
+    """Load configuration from a JSON file."""
+    
+    try:
+        with open(config_path, 'r') as f:
+                return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Configuration file '{config_path}' not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
+        return None
 
  
 def create_table(cursor):
 	sql = [
-		"""drop table if exists asagarwa_semantic_cache purge"""	,
+		f"""drop table if exists {tablename_prefix}_semantic_cache purge"""	,
   
-		"""
- 		create table asagarwa_semantic_cache (
+  
+		f"""
+ 		create table {tablename_prefix}_semantic_cache (
    			id number,
 			question varchar2(4000),
 			answer varchar2(4000),
@@ -101,24 +104,23 @@ def create_table(cursor):
 
 
 def insert_data(cursor, id, question, answer, vec):
-	cursor.execute("insert into asagarwa_semantic_cache values (:1, :2, :3, :4)", [
+	cursor.execute(f"insert into {tablename_prefix}_semantic_cache values (:1, :2, :3, :4)", [
 				   id, question, answer, vec])
 
 
 def read_data(cursor):
-	cursor.execute('select id,question,answer from asagarwa_semantic_cache')
+	cursor.execute(f"select id,question,answer from {tablename_prefix}_semantic_cache")
 	for row in cursor:
 		print(f"{row[0]}:{row[1]}:{[row[2]]}")
 
  # COSINE, DOT, EUCLIDEAN
 def search_data(cursor, vec,):
-
- # COSINE, DOT, EUCLIDEAN
-	cursor.execute("""
-		select id,question,answer, vector_distance(embedding, :1, EUCLIDEAN) d 
-		from asagarwa_semantic_cache
+# try adding the constraint the distance of < 0.5 is something we will need to finetune based on data
+	cursor.execute(f"""
+		select id,question,answer, vector_distance(embedding, :1, COSINE) d 
+		from {tablename_prefix}_semantic_cache
 		order by d
-		fetch first 10 rows only
+		fetch first 3 rows only
 	""", [vec])
 
 	rows =[]
@@ -130,34 +132,40 @@ def search_data(cursor, vec,):
 	return rows
 
 #boilerplate text for embeddings
-def get_embed_payload(questions):
+def get_embed_payload(questions,embed_type):
 	embed_text_detail = EmbedTextDetails()
 	embed_text_detail.serving_mode = OnDemandServingMode(model_id="cohere.embed-english-v3.0")
 	embed_text_detail.truncate = embed_text_detail.TRUNCATE_END
-	embed_text_detail.input_type = embed_text_detail.INPUT_TYPE_SEARCH_DOCUMENT
+	embed_text_detail.input_type =embed_type 
 	embed_text_detail.compartment_id = compartmentId
 	embed_text_detail.inputs = questions
 	return  embed_text_detail
 
 
 
-config = oci.config.from_file('~/.oci/config', CONFIG_PROFILE)
+#set up the oci gen ai client based on config 
+scfg = load_config(SANDBOX_CONFIG_FILE)
+config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
+compartmentId = scfg["oci"]["compartment"]
+tablename_prefix = scfg["db"]["tablePrefix"]
+wallet = os.path.expanduser(scfg["db"]["walletPath"])
+
 
 
 # create a llm client 
 llm_client = GenerativeAiInferenceClient(
 				config=config, 
-				service_endpoint=endpointId, 
+				service_endpoint=llm_service_endpoint, 
 				retry_strategy=oci.retry.NoneRetryStrategy(),
 				timeout=(10,240))	
 
 
 print("creating embeddings")
-response = llm_client.embed_text(get_embed_payload([pair["question"] for pair in qa_pairs]))
+response = llm_client.embed_text(get_embed_payload([pair["question"] for pair in qa_pairs], EmbedTextDetails.INPUT_TYPE_SEARCH_DOCUMENT))
 embeddings = response.data.embeddings
 
 # insert & query  vectors
-with oracledb.connect( config_dir= DB_CONFIG_DIR, user= DB_USER, password=DB_PASS, dsn=DB_DSN,wallet_location=DB_WALLET_LOC, wallet_password=DB_WALLET_PASS) as db:
+with oracledb.connect(  config_dir=scfg["db"]["walletPath"],user= scfg["db"]["username"], password=scfg["db"]["password"], dsn=scfg["db"]["dsn"],wallet_location=scfg["db"]["walletPath"],wallet_password=scfg["db"]["walletPass"]) as db:
 	cursor = db.cursor()
 
 	print("creating table")
@@ -176,7 +184,7 @@ with oracledb.connect( config_dir= DB_CONFIG_DIR, user= DB_USER, password=DB_PAS
 		query = input("Ask a question: ").strip().lower()
 		q=[]
 		q.append(query)
-		prompt_embed = llm_client.embed_text (get_embed_payload(q))
+		prompt_embed = llm_client.embed_text (get_embed_payload(q, EmbedTextDetails.INPUT_TYPE_SEARCH_QUERY))
 		vec = array.array("f",prompt_embed.data.embeddings[0])
 		
 		# R of RAG : retrieving appicable text 

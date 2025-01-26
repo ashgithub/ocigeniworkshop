@@ -90,7 +90,7 @@ def read_data(cursor):
 def search_data(cursor, vec,):
 
  # COSINE, DOT, EUCLIDEAN
- # the distance of < 0.3 is something we will need to finetune based on data 
+ # try adding an constraint on the distance eg < 0.5 is something we will need to finetune based on data 
 	cursor.execute(f"""
 		select id,text, vector_distance(vec, :1, COSINE) d, chapter,section 
 		from {tablename_prefix}_embedding
@@ -172,7 +172,6 @@ response = llm_client.embed_text(get_embed_payload(chunks,EmbedTextDetails.INPUT
 embeddings = response.data.embeddings
 
 # insert & query  vectors
-#with oracledb.connect( config_dir= DB_CONFIG_DIR, user= DB_USER, password=DB_PASS, dsn=DB_DSN,wallet_location=DB_WALLET_LOC, wallet_password=DB_WALLET_PASS) as db:
 with oracledb.connect(  config_dir=scfg["db"]["walletPath"],user= scfg["db"]["username"], password=scfg["db"]["password"], dsn=scfg["db"]["dsn"],wallet_location=scfg["db"]["walletPath"],wallet_password=scfg["db"]["walletPass"]) as db:
 	cursor = db.cursor()
 

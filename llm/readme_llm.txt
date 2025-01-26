@@ -28,9 +28,9 @@ Here are some ideas of projects you can do (See notebook files for details):
     - ask the question again and see that it retirns the 5 spots in the format asked 
     - remove the schema and see if you can stream the response    
 
-Here are few links to help you: 
+Here are few slack channels to help you:  
 
 #igiu-ai-learning  : if you have issues with environment or cant get this code working 
-#igiu-innovation-lab : if yuo ahve questions about OCI den ai api 
-#generative-ai-users :  discuss project ideas
+#igiu-innovation-lab : discuss project ideas
+#generative-ai-users :  if you have questions about OCI GenAI  API  
 
