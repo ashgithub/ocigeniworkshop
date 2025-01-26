@@ -1,0 +1,17 @@
+{
+    "oci": {
+        "configFile" : "~/.oci/config",
+        "profile" : "AISANDBOX",
+        "compartment" : "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga" 
+    },
+    "database": {
+        "host": "localhost",
+        "port": 5432,
+        "username": "myuser",
+        "password": "mypassword"
+    },
+    "bucket": {
+        "endpoint": "https://api.example.com",
+        "key": "my_api_key"
+    }
+}

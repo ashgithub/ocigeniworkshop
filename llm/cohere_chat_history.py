@@ -1,0 +1,103 @@
+#!/Users/ashish/anaconda3/bin/python
+
+
+# Questions use #generative-ai-users  or #igiu-innovation-lab slack channels
+
+from oci.generative_ai_inference import GenerativeAiInferenceClient
+from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
+import oci
+import json, os 
+
+#####
+#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#####
+SANDBOX_CONFIG_FILE = "sandbox.json"
+
+# available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+# cohere.command-r-16k
+# cohere.command-r-plus
+# cohere.command-r-08-2024
+# cohere.command-r-plus-08-2024
+# meta.llama-3.1-405b-instruct
+# meta.llama-3.1-70b-instruct
+# meta.llama-3.2-90b-vision-instruct
+
+LLM_MODEL = "cohere.command-r-16k" 
+
+llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+
+
+PREAMBLE = """
+        Answer the questions in a professional tine, based on thw conversation history
+"""
+#defined later
+MESSAGE = """
+"""
+
+
+
+def load_config(config_path):
+    """Load configuration from a JSON file."""
+    try:
+        with open(config_path, 'r') as f:
+                return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Configuration file '{config_path}' not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
+        return None
+
+def get_chat_request():
+        llm_chat_request = CohereChatRequest()
+        llm_chat_request.preamble_override = PREAMBLE 
+        llm_chat_request.message = MESSAGE
+        llm_chat_request.is_stream = False 
+        llm_chat_request.max_tokens = 500 # max token to generate, can lead to incomplete responses
+        llm_chat_request.temperature = 1.0 # higer value menas more randon, defaul = 0.3
+        llm_chat_request.seed = 7555 # makes the best effort to make answer determininstic , not gaureented 
+        llm_chat_request.top_p = 0.7  # ensures only tokens with toptal probabely of p are considered, max value = 0.99, min 0.01, default 0.75
+        llm_chat_request.top_k = 0  #Ensures that only top k tokens are considered, 0 turns it off, max = 500
+        llm_chat_request.frequency_penalty = 0.0 # reduces the repeatedness of tokens max value 1.9=0, min 0,0 
+        llm_chat_request.chat_history = get_history() # comment this out to see how history impacts 
+
+        return llm_chat_request
+
+
+def get_chat_detail (llm_request,compartmentId):
+        chat_detail = ChatDetails()
+        chat_detail.serving_mode = OnDemandServingMode(model_id=LLM_MODEL)
+        chat_detail.compartment_id = compartmentId
+        chat_detail.chat_request = llm_request
+
+        return chat_detail
+
+
+#here we are seeding the history. You should do it based on actual interaction
+# note we seed history in pair, one of user question and other for LLM response
+def get_history():
+        previous_chat_message = oci.generative_ai_inference.models.CohereUserMessage(message="Tell me something about Oracle.")
+        previous_chat_reply = oci.generative_ai_inference.models.CohereChatBotMessage(message="Oracle is one of the largest vendors in the enterprise IT market and the shorthand name of its flagship product. The database software sits at the center of many corporate IT")
+        return [previous_chat_message, previous_chat_reply]
+
+
+#set up the oci gen ai client based on config 
+scfg = load_config(SANDBOX_CONFIG_FILE)
+config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
+
+llm_client = GenerativeAiInferenceClient(
+                config=config,
+                service_endpoint=llm_service_endpoint,
+                retry_strategy=oci.retry.NoneRetryStrategy(),
+                timeout=(10,240))
+llm_payload =get_chat_detail(get_chat_request(),scfg["oci"]["compartment"])
+llm_payload.chat_request.message = "what is its flagship product?" # try with and withuot history. its via history that llm now what "it" is 
+
+llm_response = llm_client.chat(llm_payload)
+
+# Print result
+print("**************************Chat Result**************************")
+llm_text = llm_response.data.chat_response.text
+print(llm_text)
+        
+
