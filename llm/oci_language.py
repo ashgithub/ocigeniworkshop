@@ -5,6 +5,8 @@ import oci, os, json
 # #oci_ai_lang_service_users or #igiu-innovation-lab slack channels
 # Small language models can be a good choice for simple tasks. 
 
+# if you have errors running sample code reach out for help in #igiu-ai-learning
+
 #####
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####

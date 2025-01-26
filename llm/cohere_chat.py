@@ -1,6 +1,7 @@
 #!/Users/ashish/anaconda3/bin/python
 
 # Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
+# if you have errors running sample code reach out for help in #igiu-ai-learning
 # sdk code : https://github.com/oracle/oci-python-sdk/blob/22fd62c8dbbd1aaed6b75754ec1ba8a3c16a4e5a/src/oci/generative_ai_inference/models/
 
 from oci.generative_ai_inference import GenerativeAiInferenceClient

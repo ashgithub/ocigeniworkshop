@@ -5,7 +5,7 @@
 # https://www.danielcorin.com/posts/2024/lm-streaming-with-sse/
 
 # Questions use #generative-ai-users  or #igiu-innovation-lab slack channels
-
+# if you have errors running sample code reach out for help in #igiu-ai-learning
 
 from oci.generative_ai_inference import GenerativeAiInferenceClient
 from oci.generative_ai_inference.models import OnDemandServingMode, CohereChatRequest, ChatDetails

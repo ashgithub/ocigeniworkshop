@@ -1,46 +1,42 @@
 
-Welcome to the agents Module. In this module, we will experiment with the llms ability to call functions.  
-Funtion calling ability is synonymous to using a tool. Agent can be given a set of tools and Agent can decomprose the problem and se the set of tools to solve it
+Welcome to the RAG (Retrival Augmented Generation) Module. In this module, we will experiment with the llm ability to answer questions using  proprietary data
 
 
 In this module we will look at following ability
-1. Single Step tool:  LLM invoking a single function/ using a single tool  
-2. multi step tool : LLM orcestrating a sequence of function 
-
-Following two are not directly reated to the tools/function but can help in your LLM/RAG pipeline: 
-3. Clssification: using llm to classify a given text. This can be used to find the right set of tools to give the llm 
-4. Semantic Cache: Ability to cache answers and retrieve it using semantic serach insted of key lookup
-
-Note: 
-1. OCI Gen AI only supports function calling for cohere models and not llama 
-2. There are streaming and non streaming versions of code. Streaming version is fragile. 
+1. "documents" attribute of oci gen ai api & ability for citations
+2. Using Oci Agents ofr "off the shelf Rag ability 
+3. leveraging 23ai database for home grown rag 
+4. introduction to sleect AI 
+5. Select AI with RAG
 
 
-As always, make sure your OCI client config & the compartment you are assigned to are correct:
-    - Config file is assumed to be in ~/.oci/config. Change it if needed.
-    - CONFIG_PROFILE: for the section on your local OCI config file that you configured for use with the sandbox
-    - COMPARTMENT_ID: OCID of the compartment assigned to you
+Remember to set up your sandbox.json file per your environment. This module only uses the "oci" & "db" section 
+The database requires the wallet to be downlaoded. remember to update the database section per your setup 
+as multiple folks are reusing the same enviornment, to avaid tableconflicts use your oracel as as tablePrefix
 
 Example code in this module is available both as Jupyter notebook & Python code. They are very similar:
 
-1. single_step_demo.py, single_step_demo_streaming.py, singlestep_tool.ipynb : llm calling a function 
-2. multi_step_demo.py, multi_step_demo_streaming.py, multistep_tool.ipynb : llm orcestration across multiple tools
-3. llm_classification.py, classifiction.ipynb : classifying the given sentence
-4. llm_semntic_cache.py, semantic_cache.ipynb : ability to cache answers and retrieve them basdd on a smilair questions
+1. cohere_chat_citation, RAG-documents.ipynb: we pass teh document text to llm and see how it can cite the right document in resposne
+2. oci_rag_agents, RAG-agents.ipynb: we invoke the rag agent setup in oci. (see agent_readme.md for setup) 
+3. cohere_rag_23ai.py, RAG-full.ipynb: full homegrown rag implementation using 23ai
+4. select_ai.sql: sql sript to demonstrate selectai capability
+5. rag.sql: sql script for doing full rag in database.
+
 
 
 Here are some ideas of projects you can do (See notebook files for details):
-    - Upload your video recoding from a zoom call, transcribe (Ai speech) & summarize it (Gen-AI)
-    - try ranscription on different langaues, mixed langauges etc. Compafre oracle vs whisper models. 
-    - Create a audio conversation between two people
-        - Ask ai to generate the transcript (Gen AI)
-        - use oci speech to convert reach dialog into audio, use different voice for each person
-        - combine them into a single audio file
+   
+1. create an "talk to my document" application by hand 
+    - allow user to upload the docs
+    - parse and chunck the doc using various chunking strategies (semnatic chunking is adviced. search teh net ofr different approaches)
+    - try different algorithm for similarity search. COSINE is popular, but Euclidean, DOR etc are also common 
+    - try rerankers to see if your retrived documents were reordered
+    - include citations in your
 
 Here are few links to help you: 
 
-#igiu-innovation-lab
-#igiu-ai-learning
-#oci_speech_service_users
+#igiu-innovation-lab : discuss project ideas
+#igiu-ai-learning : if you have issues with environment or cant get your code to work 
+#generative-ai-users : questions about oci gen ai 
+#adb-select-ai-users : questions about oracle 23ai select ai 
 
-https://docs.oracle.com/en-us/iaas/Content/speech/home.htm

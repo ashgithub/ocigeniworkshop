@@ -41,6 +41,4 @@ Here are few links to help you:
 
 #igiu-innovation-lab
 #igiu-ai-learning
-#oci_speech_service_users
-
-https://docs.oracle.com/en-us/iaas/Content/speech/home.htm
+#generative-ai-users

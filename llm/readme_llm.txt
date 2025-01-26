@@ -8,7 +8,7 @@ Specifically, we will try the following capabilities:
 4. enforcing the output format for LLM responses 
 5. oci langauge service as an example for small language model 
 
-Remember to set up your config.json file per your envisonment 
+Remember to set up your config.json file per your environment. This module only uses the "oci" section 
 
 Example code in this module is available both as Jupyter notebook & Python code. They are very similar:
 
@@ -30,7 +30,7 @@ Here are some ideas of projects you can do (See notebook files for details):
 
 Here are few links to help you: 
 
-#igiu-innovation-lab
-#igiu-ai-learning
-#generative-ai-users
+#igiu-ai-learning  : if you have issues with environment or cant get this code working 
+#igiu-innovation-lab : if yuo ahve questions about OCI den ai api 
+#generative-ai-users :  discuss project ideas
 
