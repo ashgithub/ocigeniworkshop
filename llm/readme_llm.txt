@@ -8,7 +8,7 @@ Specifically, we will try the following capabilities:
 4. enforcing the output format for LLM responses 
 5. oci langauge service as an example for small language model 
 
-Remember to set up your config.json file per your environment. This module only uses the "oci" section 
+Remember to set up your sandbox.json file per your environment. This module only uses the "oci" section 
 
 Example code in this module is available both as Jupyter notebook & Python code. They are very similar:
 
