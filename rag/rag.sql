@@ -1,3 +1,7 @@
+-- if you have errors running sample code reach out for help in #igiu-ai-learning
+-- #igiu-innovation-lab: discuss project ideas 
+-- #adb-select-ai-users : questions about oracle 23ai select ai 
+
 BEGIN
 dbms_cloud_ai.drop_profile(
     profile_name => 'ocirag',

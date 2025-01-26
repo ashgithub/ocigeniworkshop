@@ -4,14 +4,15 @@
         "profile" : "AISANDBOX",
         "compartment" : "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga" 
     },
-    "database": {
-        "host": "localhost",
-        "port": 5432,
-        "username": "myuser",
-        "password": "mypassword"
+    "db": {
+        "dsn": "innovationlab_medium",
+        "username": "ONNOVATE",
+        "password": "Welcome_2025",
+        "walletPath": "/Users/ashish/.workshop/inno_wallet",
+        "tablePrefix" : "asagarwa",
+        "walletPass" : "41_innovation"
     },
-    "bucket": {
-        "endpoint": "https://api.example.com",
-        "key": "my_api_key"
+    "agent": {
+        "endpoint": "ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaamiuzkcah5roqh4lyguzro7f7d25kjp36zqpjn7g5mmia"
     }
 }
