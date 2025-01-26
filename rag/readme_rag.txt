@@ -33,7 +33,7 @@ Here are some ideas of projects you can do (See notebook files for details):
     - try rerankers to see if your retrived documents were reordered
     - include citations in your
 
-Here are few links to help you: 
+Here are few slack channels to help you:  
 
 #igiu-innovation-lab : discuss project ideas
 #igiu-ai-learning : if you have issues with environment or cant get your code to work 
