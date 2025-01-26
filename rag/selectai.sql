@@ -1,6 +1,9 @@
 
 
 --https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/select-ai-examples.html#GUID-2FBD7DDB-CAC3-47AF-AB66-17F44C2ADAA4
+--  if you have errors running sample code reach out for help in #igiu-ai-learning
+-- #igiu-innovation-lab: discuss project ideas 
+-- #adb-select-ai-users : questions about oracle 23ai select ai 
 SELECT USER FROM DUAL;
 
 BEGIN
