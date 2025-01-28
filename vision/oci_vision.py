@@ -1,55 +1,74 @@
 #https://github.com/oracle/oci-python-sdk/tree/22fd62c8dbbd1aaed6b75754ec1ba8a3c16a4e5a/src/oci/ai_vision
 #https://docs.oracle.com/en-us/iaas/Content/vision/using/home.htm
 
-import oci
-import io
-import uuid
+# if you have errors running sample code reach out for help in #igiu-ai-learning
+# other questions #igiu-innovation-lab or #oci_ai_vision_support
+
+import oci,io 
+import json,os
 from oci.object_storage import ObjectStorageClient
 
-CONFIG_PROFILE = "AISANDBOX"
 
-config = oci.config.from_file('~/.oci/config', CONFIG_PROFILE)
+#####
+#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#####
 
-
-#### change per your environment
-COMPARTMENT_ID= "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga" 
-NAMESPACE = "axaemuxiyife"
-BUCKET_NAME = "workshopbucket"
-PREFIX = "AAGARWA" # ********* CHANGE ME ************
-FILE_NAME ="reciept.png"
-FILE_TO_ANALYZE = "/tmp/images/reciept.png"
+SANDBOX_CONFIG_FILE = "sandbox.json"
+FILE_TO_ANALYZE = "./vision/reciept.png"
 
 
-def upload(file_TO_ANALYZE):
-    object_storage_client = ObjectStorageClient(config)
-    print(f"Uploading file {file_TO_ANALYZE} ...")
-    object_storage_client.put_object(NAMESPACE, BUCKET_NAME, f"{PREFIX}/{FILE_NAME}, io.open(file_TO_ANALYZE,'rb'))
+def load_config(config_path):
+    """Load configuration from a JSON file."""
+    try:
+        with open(config_path, 'r') as f:
+                return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Configuration file '{config_path}' not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
+        return None
+
+def upload(oci_cfg, bucket_cfg):
+    object_storage_client = ObjectStorageClient(oci_cfg)
+    print(f"Uploading file {FILE_TO_ANALYZE} ...")
+    object_storage_client.put_object(bucket_cfg["namespace"], 
+                                     bucket_cfg["bucketName"], 
+                                     f"{bucket_cfg['prefix']}/{os.path.basename(FILE_TO_ANALYZE)}", 
+                                     io.open(FILE_TO_ANALYZE,'rb'))
     print("Upload completed !")
 
 
-def get_imag_location(file_name): 
+def get_imag_location(bucket_cfg): 
     image = oci.ai_vision.models.ObjectStorageImageDetails(
                             source = "OBJECT_STORAGE",
-                            namespace_name = NAMESPACE,
-                            bucket_name=BUCKET_NAME,
-                            object_name=file_name
+                            namespace_name =  bucket_cfg["namespace"]  ,
+                            bucket_name=bucket_cfg["bucketName"]  ,
+                            object_name=f"{bucket_cfg['prefix']}/{os.path.basename(FILE_TO_ANALYZE)}"
     )
 
     return image
 
-def get_details(features, file_name) :
+def get_details(features, compartmentId, bucket_cfg) :
     details = oci.ai_vision.models.AnalyzeImageDetails(
         
         features = features,
-        image = get_imag_location(file_name),
-        compartment_id=COMPARTMENT_ID
+        image = get_imag_location(bucket_cfg),
+        compartment_id=compartmentId
     )
 
     return details
 
 
-upload(FILE_TO_ANALYZE)
-vision_client = oci.ai_vision.AIServiceVisionClient(config=config)
+
+#read the config files 
+scfg = load_config(SANDBOX_CONFIG_FILE)
+oci_cfg = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
+bucket_cfg = scfg["bucket"]
+compartmentId =scfg["oci"]["compartment"] 
+
+upload(oci_cfg,bucket_cfg)
+vision_client = oci.ai_vision.AIServiceVisionClient(config=oci_cfg)
 
 features = [ 
             oci.ai_vision.models.ImageClassificationFeature(),
@@ -58,6 +77,6 @@ features = [
             oci.ai_vision.models.FaceDetectionFeature()
            ]
 
-response = vision_client.analyze_image ( get_details (features, FILE_NAME))
+response = vision_client.analyze_image ( get_details (features, compartmentId, bucket_cfg))
 
 print(response.data)
