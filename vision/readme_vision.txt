@@ -7,16 +7,7 @@ Specifically, we will try the following capabilities:
 3. Using OCI Vision for analyzing video: object (including text) detection & classification
 4. Using multimodel LLM (Llama 3.2) for working with images using LLM
 
-When using OCI AI Vision & Document Understanding services, we will be uploading the documents to an object bucket:
-    - Please use the PHX tenancy to work with your object bucket. The Chicago tenancy is a read-only replica.
-    - As you are working in a shared sandbox, use a unique prefix (prefix is analogous to a subfolder) (e.g., your Oracle ID).
-    - Remember to update the code in this module with the details of your bucket (NAMESPACE, BUCKET_NAME, FILE_NAME, PREFIX)
-    - Remember to update the FILE_TO_ANALYZE to the local file you want to analyze
-
-As always, make sure your OCI client config & the compartment you are assigned to are correct:
-    - Config file is assumed to be in ~/.oci/config. Change it if needed.
-    - CONFIG_PROFILE: for the section on your local OCI config file that you configured for use with the sandbox
-    - COMPARTMENT_ID: OCID of the compartment assigned to you
+Remember to set up your sandbox.json file per your environment. This module  uses the "oci" & "bucket" section
 
 Example code in this module is available both as Jupyter notebook & Python code. They are very similar:
 
@@ -36,9 +27,11 @@ Here are some ideas of projects you can do (See notebook files for details):
 
 Here are few links to help you: 
 
-#igiu-innovation-lab
-#igiu-ai-learning
-#generative-ai-users_
+#igiu-innovation-lab for project ideas
+#igiu-ai-learning for issues with the code or environment 
+#oci_ai_vis_service_users for oci vision api questions 
+#video-analysis-beta for oci video  api questions 
+#oci_ai_document_service_users for oci document service  api questions 
 
 https://docs.oracle.com/en-us/iaas/Content/vision/using/home.htm
 
