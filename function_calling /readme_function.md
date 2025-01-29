@@ -16,7 +16,7 @@ Note:
 1. OCI Gen AI only supports function calling for cohere models and not llama 
 2. There are streaming and non streaming versions of code. Streaming version is fragile. 
 
-Oracle 23 ai databased is used in this module: 
+Oracle 23 ai databased is used in this module:refer to [this page](https://confluence.oraclecorp.com/confluence/display/D2OPS/AISandbox#AISandbox-ToAccessADW)
     - The database requires the wallet to be downlaoded. 
     - Remember to update the database section per your setup in `sandbox.json` 
     - As the database schmea is shared, set a unique `prefix` in teh datbase section of `sanbox.json`. Your Oralce user id is a good choice
