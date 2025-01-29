@@ -5,20 +5,19 @@
         "compartment" : "ocid1.compartment.oc1..aaaaaaaaboqoghc43bbqvei5y4pmnzia36wuh7fpcxn6fia7pfyelyg4rj7a"
     },
     "db": {
-        "dsn": "innovationlab_medium",
-        "username": "ONNOVATE",
-        "password": "Welcome_2025",
-        "walletPath": "/Users/ashish/.workshop/inno_wallet",
+        "dsn": "aisandboxadw_medium",
+        "username": "aisandboxuser",
+        "password": "<db passwd>",
+        "walletPath": "/Users/ashish/.workshop/ai-sandbox",
         "tablePrefix" : "asagarwa",
-        "walletPass" : "41_innovation"
+        "walletPass" : "<wallet password>"
     },
     "agent": {
-        "endpoint": "ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaamiuzkcah5roqh4lyguzro7f7d25kjp36zqpjn7g5mmia"
+        "endpoint": "ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaahvvdyd5xkuuwtdbadewhsde6llewuq3a2vv7vx4xswqa"
     },
     "bucket": {
         "namespace": "axaemuxiyife",
-        "bucketName": "InnovationLabBucket",
+        "bucketName": "AISandbox-Bucket",
         "prefix": "asagarwa"
     }
-    
 }

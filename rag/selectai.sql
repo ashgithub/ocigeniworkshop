@@ -6,6 +6,17 @@
 -- #adb-select-ai-users : questions about oracle 23ai select ai 
 SELECT USER FROM DUAL;
 
+ -- change the details per your user. you can file the details in your ~/.oci/config file thay you setup
+ -- copy & paste the private key frm uyour keypair file that you setup NOTE. this is provate key not the public key that is referenced in 
+ DBMS_CLOUD.CREATE_CREDENTIAL(
+    credential_name =>              'OCI_GENAI_CRED',
+    user_ocid =>'your user ocid', 
+    tenancy_ocid => 'ocid1.tenancy.oc1..aaaaaaaapdvbfci2muxdqdwwpm6ubi2at6ys6wzat6l7etv2kkno6ot2litq',
+    private_key => 'your key',
+    fingerprint => '5a:a1:1c:1d:a5:c2:00:e8:5a:2c:2f:93:bb:f9:c0:8f');
+END;
+/
+
 BEGIN
 dbms_cloud_ai.drop_profile(
     profile_name => 'genaish',
