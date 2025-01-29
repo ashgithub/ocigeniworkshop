@@ -11,7 +11,7 @@ Follow these steps in your OCI console.
    2. Select one of the existing active agent 
    3. Select one of the active knowledge bases for that agent 
    4. select the data source for the knowledge
-   5. check teh bucket used by the datasource
+   5. Note the bucket used by the datasource
 2. Upload the document to datasource found above
    1. Change the tenancy to phx
    2. Go to object storage and to the bucket we found in the steps above
@@ -19,12 +19,13 @@ Follow these steps in your OCI console.
    4. Upload your file 
 3. Restart the pipeline 
    1. Change tenancy to Chicago
-   2. Navigate  agent, knowledgebase & data source
-   3. Click in the datasource and select the new file
-   4. Check teh auto restart the ingestuin job
-   5. Wait for ingest to complete 
-   6. Click to create teh injestion job and wait for it to finish 
-4. go to chat console for the agent 
+   2. Navigate  agent, knowledgebase 
+   3. Click on  the datasouce 
+   4. Create a new ingestion job 
+   5. Wait for ingest to complete. 
+      1. you can track teh %age complete by navigating to work requests for ingestion job
+      2. Small files are fatser than large files. it can take more than 5 mins ofr longer files
+4. Go to chat console for the agent 
    1. Go the agent 
    2. Click on the endpoint 
    3. Click on launch chat 
