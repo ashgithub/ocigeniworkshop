@@ -26,7 +26,8 @@ SANDBOX_CONFIG_FILE = "sandbox.json"
 # meta.llama-3.1-70b-instruct
 # meta.llama-3.2-90b-vision-instruct
 
-LLM_MODEL = "cohere.command-r-16k" 
+
+LLM_MODEL = "cohere.command-r-08-2024" 
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
