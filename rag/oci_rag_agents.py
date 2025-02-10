@@ -31,7 +31,11 @@ def load_config(config_path):
 def inference_api(message, session_id, endpoint,preamble=""):
     chat_detail = oci.generative_ai_agent_runtime.models.ChatDetails()
     chat_detail.user_message = preamble + " " + message
-    chat_detail.session_id = session_id
+    if message.startswith("please"):
+        print("session passed")
+        chat_detail.session_id = session_id
+    else:
+        print("session skipped")
     chat_response = genai_client.chat(endpoint, chat_detail)
     return chat_response.data.message.content
 

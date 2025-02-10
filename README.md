@@ -15,8 +15,8 @@ The examples are based on python. Both python code & nobebook sampels are availb
    - Set up api keys & db access based on document [here](https://confluence.oraclecorp.com/confluence/display/D2OPS/AISandbox#AISandbox-ToAccessADW)
    - Update the  `sanbox.json` file per your environment   
   
-2. Note the AU sanbox gives you acess to two regions
-   1. Chicago:  AI services& AI Playground, Gen AI Agents are in this reagion
+2. Note the AI sandbox gives you acess to two regions
+   1. Chicago:  AI services, AI Playground & Gen AI Agents are in this reagion
    2. Phx : 23 AI Databse, Object buckets and compute (If  available) will be in this region
    3. Object bucket in CHI is a read only replica, so any files you drop in PHX will show up in chicago automatically
    4. Same bucket is shared by all users of AI sandbox, thus best to use your Oracle Userid  as `prefix` for your objects. (configure it in `sandbox.json`)
