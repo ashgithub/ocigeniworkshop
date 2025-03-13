@@ -2,7 +2,7 @@
 
 You can use this learning path with the our AI sandbox. See instructions in #igiu-ai-learning slack channel
 
-Other resources of helpp: 
+Other resources of help: 
 1. [Training Video](https://oracle-my.sharepoint.com/:v:/p/ashish_ag_agarwal/EUIBQblxmdlGtxFPg6C6Vv4Byx9KZRCQWaoELwUvLMYyXw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=BC9qVl)
 2. [Powerpoint](https://oracle-my.sharepoint.com/:p:/p/ashish_ag_agarwal/EW8530J_QrpTi8XIe3FMmZABjOfVlJQQkfoUqCNDxpUDQQ?e=HcViLd)
 
@@ -13,7 +13,7 @@ The examples are based on python. Both python code & nobebook sampels are availb
 
 1. Request access to sandbox `#igiu-ai-learning`
    - Set up api keys & db access based on document [here](https://confluence.oraclecorp.com/confluence/display/D2OPS/AISandbox#AISandbox-ToAccessADW)
-   - Update the  `sanbox.json` file per your environment   
+   - Update the  `sandbox.json` file per your environment   
   
 2. Note the AI sandbox gives you acess to two regions
    1. Chicago:  AI services, AI Playground & Gen AI Agents are in this reagion
