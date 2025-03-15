@@ -31,11 +31,7 @@ def load_config(config_path):
 def inference_api(message, session_id, endpoint,preamble=""):
     chat_detail = oci.generative_ai_agent_runtime.models.ChatDetails()
     chat_detail.user_message = preamble + " " + message
-    if message.startswith("please"):
-        print("session passed")
-        chat_detail.session_id = session_id
-    else:
-        print("session skipped")
+    chat_detail.session_id = session_id
     chat_response = genai_client.chat(endpoint, chat_detail)
     return chat_response.data.message.content
 
@@ -52,14 +48,22 @@ def get_genai_client(config):
 #set up the oci gen ai client based on config 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
-endpoint = scfg["agent"]["endpoint"]
+session_endpoint = scfg["agent"]["endpoint"] 
+sessionless_endpoint = scfg["agent"]["no_session_endpoint"] 
+session = scfg["agent"]["session"]  
 genai_client = get_genai_client(config)
 
-create_session_details = oci.generative_ai_agent_runtime.models.CreateSessionDetails(
-    display_name="Inno Lab C2M Agent ", description="The end has access to C2M documentation and can answer any questions on it"
-)
-create_session_response = genai_client.create_session(create_session_details,endpoint )
-session_id = create_session_response.data.id
+if session == True:
+
+    create_session_details = oci.generative_ai_agent_runtime.models.CreateSessionDetails(
+        display_name="Inno Lab C2M Agent ", description="The end has access to C2M documentation and can answer any questions on it"
+    )
+    create_session_response = genai_client.create_session(create_session_details,session_endpoint )
+    session_id = create_session_response.data.id if session == True else None
+    endpoint = session_endpoint
+else:
+    session_id = None
+    endpoint = sessionless_endpoint
 
 while True:
         query = input("\n\nAsk a question: ").strip().lower()
