@@ -1,0 +1,24 @@
+{
+    "oci": {
+        "configFile" : "~/.oci/config",
+        "profile" : "AI-PLAYGROUND",
+        "compartment" : "ocid1.compartment.oc1..aaaaaaaaboqoghc43bbqvei5y4pmnzia36wuh7fpcxn6fia7pfyelyg4rj7a"
+    },
+    "db": {
+        "dsn": "aisandboxadw_medium",
+        "username": "aisandboxuser",
+        "password": "<password here, get from admins>",
+        "walletPath": "<directory where you downlaoded and expanded the wallet zip>",
+        "tablePrefix" : "<your oracle user username here eg: asagarwa for me >",
+        "walletPass" : "AISandb0x"
+    },
+    "agent": {
+        "endpoint": "<ocid ofr your agent endpoint with session eg: ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaamiuzkcah5roqh4lyguzro7f7d25kjp36zqpjn7g5mmia>",
+        "no_session_endpoint": "<ocid ofr your agent endpoint witout sessions eg: ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaasclnx2dbalx56ot2nll7oygholltqfgszdebfszhuyqq>"
+    },
+    "bucket": {
+        "namespace": "axaemuxiyife",
+        "bucketName": "AISandbox-Bucket",
+        "prefix": "<your oracle user username here eg: asagarwa for me >",
+    }
+}
