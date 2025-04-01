@@ -20,7 +20,7 @@ llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oracleclo
 
 
 PREAMBLE = None
-MESSAGE = "hat is the capital of France?"
+MESSAGE = "what is the capital of France?"
 
 
 llm_client = None
