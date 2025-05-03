@@ -12,7 +12,7 @@ import oci, os, json
 #####
 SANDBOX_CONFIG_FILE = "sandbox.json"
 
-test_string = "Oracle Cloud Infrastructure is built for enterprises seeking higher performance, lower costs, and easier cloud migration for their applications. Customers choose Oracle Cloud Infrastructure over AWS for several reasons: First, they can consume cloud services in the public cloud or within their own data center with Oracle Dedicated Region Cloud@Customer. Second, they can migrate and run any workload as is on Oracle Cloud, including Oracle databases and applications, VMware, or bare metal servers. Third, customers can easily implement security controls and automation to prevent misconfiguration errors and implement security best practices. Fourth, they have lower risks with Oracle’s end-to-end SLAs covering performance, availability, and manageability of services. Finally, their workloads achieve better performance at a significantly lower cost with Oracle Cloud Infrastructure than AWS. Take a look at what makes Oracle Cloud Infrastructure a better cloud platform than AWS."
+test_string = "Oracle Cloud Infrastructure is built for enterprises seeking higher performance, lower costs, and easier cloud migration for their applications. Customers choose Oracle Cloud Infrastructure over AWS for several reasons: First, they can consume cloud services in the public cloud or within their own data center with Oracle Dedicated Region Cloud@Customer. Second, they can migrate and run any workload as is on Oracle Cloud, including Oracle databases and applications, VMware, or bare metal servers. Third, customers can easily implement security controls and automation to prevent misconfiguration errors and implement security best practices. Fourth, they have lower risks with Oracle’s end-to-end SLAs covering performance, availability, and manageability of services. Finally, their workloads achieve better performance at a significantly lower cost with Oracle Cloud Infrastructure than AWS. Take a look at what makes Oracle Cloud Infrastructure a better cloud platform than AWS. Contact Oracle at 1-800.555.1234 or at 123, oracle way, reswood shores, ca-100110"
 compartmentId = None
 
 def load_config(config_path):
@@ -96,6 +96,18 @@ def TextClassification(AI_client, text_document):
         print(e)
     return
 
+def PII_Masking(AI_client,text_document,mask_config):
+    try:
+        response =AI_client.batch_detect_language_pii_entities(
+                batch_detect_language_pii_entities_details=oci.ai_language.models.BatchDetectLanguagePiiEntitiesDetails(
+                    documents=[text_document], compartment_id=compartmentId, masking=mask_config
+                )
+            )
+        return response.data
+    except Exception as e:
+        print(e)
+        return 
+    
 
 def printWelcomeMessage():
     print("Welcome to OCI AI Language example.")
@@ -108,7 +120,7 @@ def printDivider():
     print("\n")
 
 
-def printAllResponses(sentiment_response, key_phrase_response, named_entity_response, text_classification_response):
+def printAllResponses(sentiment_response, key_phrase_response, named_entity_response, text_classification_response, pii_masking_response):
     print("Sentiment Analysis on text:")
     for i in range(0, len(sentiment_response.documents)):
         for j in range(0, len(sentiment_response.documents[i].aspects)):
@@ -144,6 +156,12 @@ def printAllResponses(sentiment_response, key_phrase_response, named_entity_resp
             print("\tScore: ", text_classification_response.documents[i].text_classification[j].score)
 
 
+    printDivider()
+    print("PII masking on text:")
+    for i in range(len(pii_masking_response.documents)):
+        for j in range(len(pii_masking_response.documents[i].entities)):
+            print("\tScore: ", pii_masking_response.documents[i].entities[j])
+
 def runModel(data, config_path, text_model_key, language_code):
 
     global compartmentId
@@ -162,9 +180,15 @@ def runModel(data, config_path, text_model_key, language_code):
     named_entity_response = NamedEntityExtraction(language_client, text_document)
     text_classification_response = TextClassification(language_client, text_document)
 
+    piiEntityMasking = oci.ai_language.models.PiiEntityMask(mode="MASK", masking_character="*", leave_characters_unmasked=4,
+                                                        is_unmasked_from_end=True)
+    masking = {"ALL": piiEntityMasking}
+
+    pii_masking_response = PII_Masking(language_client, text_document,masking)
+
     printWelcomeMessage()
 
-    printAllResponses(sentiment_response, key_phrase_response, named_entity_response, text_classification_response)
+    printAllResponses(sentiment_response, key_phrase_response, named_entity_response, text_classification_response,pii_masking_response)
 
 
 # Run example model
