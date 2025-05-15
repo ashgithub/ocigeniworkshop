@@ -15,8 +15,10 @@ SANDBOX_CONFIG_FILE = "sandbox.json"
 # available models with tool calling support
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
+# cohere.command-a-03-2025
 
-LLM_MODEL = "cohere.command-r-16k" 
+#LLM_MODEL = "cohere.command-r-16k" 
+LLM_MODEL = "cohere.command-a-03-2025" 
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
@@ -80,8 +82,7 @@ chat_request.is_force_single_step = False
 chat_request.tools = [ report_tool, calculator_tool ]
 
 chat_detail = oci.generative_ai_inference.models.ChatDetails()
-#chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id="cohere.command-r-plus-08-2024")
-chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id="cohere.command-r-16k")
+chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id=LLM_MODEL)
 # chat_detail.serving_mode = generative_ai_service_bmc_python_client.models.DedicatedServingMode(
 #     endpoint_id="ocid1.generativeaiendpoint.oc1.us-chicago-1.amaaaaaabgjpxjqa43esnc2c6yluihthqqfa24ll5y5d4jhct6rgq523rena")
 chat_detail.compartment_id =  scfg["oci"]["compartment"]

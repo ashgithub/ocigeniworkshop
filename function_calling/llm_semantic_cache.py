@@ -16,10 +16,20 @@ import os, json
 SANDBOX_CONFIG_FILE = "sandbox.json"
 
 EMBED_MODEL = "cohere.embed-multilingual-v3.0"
-LLM_MODEL = "cohere.command-r-08-2024" 
+
+# cohere.embed-english-v3.0
+# cohere.embed-multilingual-v3.0
+# cohere.embed-english-light-v3.0 
+# cohere.embed-multilingual-light-v3.0
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
+# available models with tool calling support
+# cohere.command-r-08-2024
+# cohere.command-r-plus-08-2024
+# cohere.command-a-03-2025
 
+#LLM_MODEL = "cohere.command-r-16k" 
+LLM_MODEL = "cohere.command-a-03-2025" 
 
 
 

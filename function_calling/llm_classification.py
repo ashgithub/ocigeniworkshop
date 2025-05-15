@@ -12,16 +12,16 @@ import oci, json, os
 #####
 SANDBOX_CONFIG_FILE = "sandbox.json"
 
-# available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-# cohere.command-r-16k
-# cohere.command-r-plus
+# cohere.command-a-03-2025
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
 # meta.llama-3.1-405b-instruct
-# meta.llama-3.1-70b-instruct
+# meta.llama-3.3-70b-instruct
 # meta.llama-3.2-90b-vision-instruct
+# meta.llama-4-maverick-17b-128e-instruct-fp8
+# meta.llama-4-scout-17b-16e-instruct
 
-LLM_MODEL = "cohere.command-r-16k" 
+LLM_MODEL = "cohere.command-a-03-2025" 
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
@@ -69,7 +69,7 @@ def get_chat_request():
 
 def get_chat_detail (llm_request,compartmentId):
         chat_detail = ChatDetails()
-        chat_detail.serving_mode = OnDemandServingMode(model_id="cohere.command-r-plus")
+        chat_detail.serving_mode = OnDemandServingMode(model_id=LLM_MODEL)
         chat_detail.compartment_id = compartmentId
         chat_detail.chat_request = llm_request
 
