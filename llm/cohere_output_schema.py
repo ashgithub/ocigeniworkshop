@@ -15,13 +15,14 @@ import json, os
 SANDBOX_CONFIG_FILE = "sandbox.json"
 
 # available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-# cohere.command-r-16k
-# cohere.command-r-plus
+# cohere.command-a-03-2025
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
 # meta.llama-3.1-405b-instruct
-# meta.llama-3.1-70b-instruct
+# meta.llama-3.3-70b-instruct
 # meta.llama-3.2-90b-vision-instruct
+# meta.llama-4-maverick-17b-128e-instruct-fp8
+# meta.llama-4-scout-17b-16e-instruct
 
 LLM_MODEL = "cohere.command-r-08-2024" # response schema is only supported for cohere models. Also the support is for models 08-2024 and later
 

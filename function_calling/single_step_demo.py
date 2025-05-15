@@ -15,8 +15,10 @@ SANDBOX_CONFIG_FILE = "sandbox.json"
 # available models with tool calling support
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
+# cohere.command-a-03-2025
 
-LLM_MODEL = "cohere.command-r-16k" 
+#LLM_MODEL = "cohere.command-r-16k" 
+LLM_MODEL = "cohere.command-a-03-2025" 
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
