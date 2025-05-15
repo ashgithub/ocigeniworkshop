@@ -15,7 +15,17 @@ import os,json
 SANDBOX_CONFIG_FILE = "sandbox.json"
 
 EMBED_MODEL = "cohere.embed-multilingual-v3.0"
-LLM_MODEL = "cohere.command-r-08-2024" 
+LLM_MODEL = "cohere.command-r-08-2024"
+# cohere.command-a-03-2025
+# cohere.command-r-08-2024
+# cohere.command-r-plus-08-2024
+# meta.llama-3.1-405b-instruct
+# meta.llama-3.3-70b-instruct
+# meta.llama-3.2-90b-vision-instruct
+# meta.llama-4-maverick-17b-128e-instruct-fp8
+# meta.llama-4-scout-17b-16e-instruct
+
+ 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 # here we are starting with samll chunks. Idelaly you will have to parse teh file and chunk it using a library

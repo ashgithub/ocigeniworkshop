@@ -15,7 +15,9 @@ import json, os
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
 SANDBOX_CONFIG_FILE = "sandbox.json"
-LLM_MODEL = "meta.llama-3.2-90b-vision-instruct" 
+#LLM_MODEL = "meta.llama-3.2-90b-vision-instruct" 
+#LLM_MODEL = "meta.llama-4-maverick-17b-128e-instruct-fp8"
+LLM_MODEL = "meta.llama-4-scout-17b-16e-instruct"
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
