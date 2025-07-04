@@ -16,13 +16,15 @@ SANDBOX_CONFIG_FILE = "sandbox.json"
 # available models with tool calling support
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
-#meta.llama-3.3-70b-instruct 
+# meta.llama-3.3-70b-instruct 
+# meta.llama-3.2-90b-vision-instruct
 # meta.llama-4-maverick-17b-128e-instruct-fp8
 # meta.llama-4-scout-17b-16e-instruct
 
 #LLM_MODEL = "meta.llama-3.3-70b-instruct"  # requires oci-2.144 
-#LLM_MODEL = "meta.llama-4-scout-17b-16e-instruct"  # requires oci-2.144 
-LLM_MODEL = "meta.llama-4-maverick-17b-128e-instruct-fp8"  # requires oci-2.144 
+LLM_MODEL = "meta.llama-4-scout-17b-16e-instruct"  # requires oci-2.144 
+#LLM_MODEL = "meta.llama-4-maverick-17b-128e-instruct-fp8"  # requires oci-2.144 
+#LLM_MODEL = "meta.llama-3.2-90b-vision-instruct"  # requires oci-2.144 
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
