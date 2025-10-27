@@ -8,10 +8,10 @@ Funtion calling ability is synonymous to using a tool. Agent can be given a set 
 > Current langchain-oci version 0.1.5 requires past langchain version 0.3.27.
 > This langchain version along with langchain-oci version have some errors when using openai / grok models with multi tool calls over the create_agent method.
 > 
-> To avoid errors, when using multi step flows langchain agents, use the external library ```openai_oci_client``` available in the folder.
+> To avoid errors, when using multi step flows langchain agents, use the library ```openai_oci_client.py``` available in the folder.
 > 
 > Examples of openai / grok models are provided when required inside each code sample.
-> Manual multi step option is also available at ```langchain_multi_manual.py```. This option does not require the ```openai_oci_client``` and supports openai /grok models.
+> Manual multi step option is also available at ```langchain_multi_manual.py```. This option does not require the ```openai_oci_client.py``` and supports openai /grok models.
 >
 > Latest langchain version 1.0.0 has method create_agent which supports better this kind of flows, in this workshop this version is not used.
 
@@ -24,10 +24,10 @@ Remember to set up your `sandbox.json` file per your environment. This module on
 The module covers two different ways to do the tool calls during the flow execution:
 1. **Manual**: build a list of messages (similar to chat history). Requires to manually manage message context, 
 adding the user message, tool call and tool response to the list before the next LLM invokation. Use the langchain-oci 
-library for all the operations, including grok / openai models without need of ```openai_oci_client``` external library.
+library for all the operations, including grok / openai models without need of ```openai_oci_client.py``` file.
 2. **LangChain Agent**: use ```create_agent``` function to build a solid function calling agent. In this option, 
 all the tool calls and reasoning are automatically managed by langchain and the model (langchain-oci only supports cohere models). 
-Best option when having long multi step flows. It requires the use of ```openai_oci_client``` external library to call agents using openai / grok models.
+Best option when having long multi step flows. It requires the use of ```openai_oci_client.py``` library to call agents using openai / grok models (available in folder).
 
 Example code in this module is available both as Jupyter notebook & Python code. They are very similar:
 1. **langchain_step.py, langchain_step_stream.py, singlestep_tool.ipynb**: agent that calls a function
