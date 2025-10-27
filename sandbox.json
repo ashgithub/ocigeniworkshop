@@ -1,8 +1,8 @@
 {
     "oci": {
         "configFile" : "~/.oci/config",
-        "profile" : "API-USER-SHARE",
-        "compartment" : "ocid1.compartment.oc1..aaaaaaaac3cxhzoka75zaaysugzmvhm3ni3keqvikawjxvwpz26mud622owa" 
+        "profile" : "API-USER",
+        "compartment" : "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga" 
     },
     "db": {
         "dsn": "innovationlab_medium",
