@@ -14,7 +14,7 @@ documents = [
 ]
 
 # Loading pdf files
-file_path = "C:/Users/Cristopher Hdz/Desktop/Test/ocigeniworkshop/langChain/rag/Sample1.pdf"
+file_path = " langChain/rag/Sample1.pdf"
 loader = PyPDFLoader(file_path)
 
 docs = loader.load()

@@ -7,7 +7,7 @@ from langchain_oci.chat_models import ChatOCIGenAI
 #####
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "C:/Users/Cristopher Hdz/Desktop/Test/ocigeniworkshop/sandbox.json"
+SANDBOX_CONFIG_FILE = " sandbox.json"
 
 LLM_MODEL = "cohere.command-r-08-2024"
 
