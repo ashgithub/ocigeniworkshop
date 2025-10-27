@@ -5,7 +5,7 @@ Also how to do **structured output** with openai and grok models
 
 Specifically, we will try the following capabilities:
 1. Chat api for conversations & various parameters 
-2. Remembersing past conversations (history + graph checkpointer) 
+2. Remembersing past conversations (history)
 3. Processing the streaming response from LLM
 4. Structured output from LLM response
 5. LangChain asyncronous capacity
@@ -16,7 +16,7 @@ Example code in this module is available both as Jupyter notebook & Python code.
 
 1. **langchain_chat.py**: simple example on how to invoke a LangChain model with OCI API.
 2. **langchain_stream.py**: process LLM response as a streaming using stream chunks and values to reduce user expectation and response latency.
-3. **langchain_history.py**: LLM capable of remembering multiturn conversations and context. Integration with a simple graph from LangGraph library.
+3. **langchain_history.py**: LLM capable of remembering multiturn conversations and context.
 4. **langchain_async.py**: showcase of async method calling using LangChain.
 5. **openai_output_schema.py**: formatted response from JSON schemas and Pydantic classes using openai and grok models.
 6. **langchain_llm.ipynb**: notebook version of all the above modules

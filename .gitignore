@@ -4,3 +4,6 @@ sandbox-inno.json
 llm/llama_output_schema.py
 sandbox_github.json
 sandbox-inno-prod.json
+
+
+__pychache__

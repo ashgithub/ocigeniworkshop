@@ -8,9 +8,9 @@ from openai_oci_client import OciOpenAILangGraphClient
 #####
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = " sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.json"
 
-LLM_MODEL = "openai.gpt-4o" # cohere models does not support structured output
+LLM_MODEL = "openai.gpt-4o" # cohere / meta-llama models does not support structured output
 # available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 # openai.gpt-4.1
 # openai.gpt-4o
@@ -151,7 +151,7 @@ def load_config(config_path):
 # Step 1: Load the config file
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
-# Step 2: Use the custom openai client library to build a new LLM client
+# Step 2: Use the OciOpenAILangGraphClient from openai_oci_client.py to use output models
 llm_client = OciOpenAILangGraphClient(
     profile=scfg['oci']['profile'],
     compartment_id=scfg['oci']['compartment'],

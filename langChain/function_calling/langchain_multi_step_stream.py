@@ -28,16 +28,18 @@ tools = [get_weather,get_projection_bill]
 #####
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = " sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.json"
 
-LLM_MODEL = "xai.grok-3" # meta-llama models are eager to have trouble in multistep invokations
+LLM_MODEL = "cohere.command-a-03-2025" # meta-llama models are eager to have trouble in multistep invokations
 
 # available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 # cohere.command-a-03-2025
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
 
-# Models should be used with extra library since langchain-oci is still behind on latest langchain create_agent methods
+# Models should be used with OciOpenAILangGraphClient from openai_oci_client.py.
+# Example provided bellow the cohere client
+# Langchain-oci (0.1.5) is behind on latest langchain create_agent methods
 # openai.gpt-4.1
 # openai.gpt-4o
 # xai.grok-4
@@ -99,7 +101,7 @@ prompt = ChatPromptTemplate.from_messages(
 # Review langchain_step for create_react_agent example
 agent = create_tool_calling_agent(
     llm=llm_client, # Use with cohere models
-    # llm=openai_llm_client, # Uncomment to use the openai models
+    # llm=openai_llm_client, # Uncomment to use the openai / grok models
     tools=tools,
     prompt=prompt
 )
