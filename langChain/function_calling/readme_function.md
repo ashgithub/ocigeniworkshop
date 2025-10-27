@@ -4,11 +4,15 @@ Funtion calling ability is synonymous to using a tool. Agent can be given a set 
 
 > [!IMPORTANT]  
 > Last update 10/27/2025
-> Current langchain-oci version 0.1.5 requires past langchain version 0.3.27
+> 
+> Current langchain-oci version 0.1.5 requires past langchain version 0.3.27.
 > This langchain version along with langchain-oci version have some errors when using openai / grok models with multi tool calls over the create_agent method.
+> 
 > To avoid errors, when using multi step flows langchain agents, use the external library ```openai_oci_client``` available in the folder.
+> 
 > Examples of openai / grok models are provided when required inside each code sample.
 > Manual multi step option is also available at ```langchain_multi_manual.py```. This option does not require the ```openai_oci_client``` and supports openai /grok models.
+>
 > Latest langchain version 1.0.0 has method create_agent which supports better this kind of flows, in this workshop this version is not used.
 
 In this module we will look at following abilities: 

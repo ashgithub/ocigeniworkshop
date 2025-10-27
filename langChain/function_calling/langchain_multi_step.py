@@ -28,7 +28,7 @@ tools = [get_weather,get_projection_bill]
 #####
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "C:/Users/Cristopher Hdz/Desktop/Test/ocigeniworkshop/sandbox.json"
+SANDBOX_CONFIG_FILE = " sandbox.json"
 
 LLM_MODEL = "xai.grok-3" # meta-llama models are eager to have trouble in multistep invokations
 
