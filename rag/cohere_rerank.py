@@ -15,9 +15,9 @@ import os,json
 #####
 SANDBOX_CONFIG_FILE = "sandbox.json"
 
-RERANK_MODEL ="cohere.rerank-english-v3.1" 
+#RERANK_MODEL ="cohere.rerank-english-v3.1" 
 #RERANK_MODEL ="cohere.rerank-multilingual-v3.0"
-#RERANK_MODEL ="cohere.rerank.3-5"
+RERANK_MODEL ="cohere.rerank-v3.5"
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 llm_client = None
 llm_payload = None
