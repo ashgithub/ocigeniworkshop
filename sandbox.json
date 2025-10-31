@@ -7,7 +7,7 @@
     "db": {
         "dsn": "innovationlab_medium",
         "username": "ONNOVATE",
-        "password": "Welcome_2025",
+        "password": "",
         "walletPath": "/Users/ashish/.workshop/inno_wallet",
         "tablePrefix" : "asagarwa",
         "walletPass" : "41_innovation"
