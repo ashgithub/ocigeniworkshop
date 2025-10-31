@@ -13,16 +13,31 @@ LLM_MODEL = "openai.gpt-4.1"
 #LLM_MODEL = "cohere.command-r-08-2024"
 
 # available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-# AI: remeber the names of models in teh comment list below
-# cohere.command-a-03-2025
-# cohere.command-r-08-2024
-# meta.llama-3.1-405b-instruct
-# meta.llama-3.3-70b-instruct
-# openai.gpt-4.1
-# openai.gpt-4o
-# openai.gpt-5
-# xai.grok-4
-# xai.grok-3
+# All available chat models on OCI as of October 2025:
+# Cohere:
+#   cohere.command-a-03-2025
+#   cohere.command-r-08-2024
+#   cohere.command-r-plus-08-2024
+# Meta:
+#   meta.llama-4-maverick
+#   meta.llama-4-scout
+#   meta.llama-3-3-70b
+#   meta.llama-3-2-90b-vision
+#   meta.llama-3-2-11b-vision
+#   meta.llama-3-1-405b
+#   meta.llama-3-1-70b
+#   meta.llama-3-70b
+# OpenAI (Beta):
+#   openai.gpt-oss-120b
+#   openai.gpt-oss-20b
+# xAI:
+#   xai.grok-code-fast-1
+#   xai.grok-4-fast
+#   xai.grok-4
+#   xai.grok-3
+#   xai.grok-3-mini
+#   xai.grok-3-fast
+#   xai.grok-3-mini-fast
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
@@ -70,11 +85,21 @@ print(f"**************************Chat Result for {llm_client.model_id} ********
 response = llm_client.invoke(MESSAGE)
 print(response.content)
 
-# AI! : change this to loop through all the llms selected .
-llm_client.model_id="xai.grok-4"
-print(f"**************************Chat Result for {llm_client.model_id} **************************") 
-response = llm_client.invoke(MESSAGE)
-print(response.content)
+# Run through selected LLMs and print results
+selected_llms = [
+    "openai.gpt-4.1",
+    "cohere.command-a-03-2025",
+    "cohere.command-r-08-2024",
+    "meta.llama-3-1-405b",
+    "meta.llama-3-3-70b",
+    "xai.grok-4",
+    "xai.grok-3"
+]
+for llm_id in selected_llms:
+    llm_client.model_id = llm_id
+    print(f"**************************Chat Result for {llm_client.model_id} **************************")
+    response = llm_client.invoke(MESSAGE)
+    print(response.content)
 
 print(f"**************************Chat Full LangChain result **************************")
 print(response)
@@ -94,4 +119,12 @@ print(response.additional_kwargs['finish_reason'])
 print(response.content)
 
 #step7: prompt types sytem & human 
-# AI!: code this like otehrs above
+# Demonstrate system (preamble) and human (user content) prompt types
+system_message = {"role": "system", "content": "You are a poetic assistant who responds in exactly four lines."}
+user_message = {"role": "user", "content": "What is the meaning of life?"}
+messages = [system_message, user_message]
+
+llm_client.model_id = "openai.gpt-4.1"
+print(f"**************************Chat Result with system & user prompts for {llm_client.model_id} **************************")
+response = llm_client.invoke(messages)
+print(response.content)
