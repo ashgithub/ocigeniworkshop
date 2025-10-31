@@ -1,8 +1,8 @@
 {
     "oci": {
         "configFile" : "~/.oci/config",
-        "profile" : "API-USER",
-        "compartment" : "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga" 
+        "profile" : "INNOLAB-LEARNING",
+        "compartment" : "ocid1.compartment.oc1..aaaaaaaaboqoghc43bbqvei5y4pmnzia36wuh7fpcxn6fia7pfyelyg4rj7a"
     },
     "db": {
         "dsn": "innovationlab_medium",
