@@ -1,0 +1,31 @@
+# Primary workshop configuration (YAML)
+# ------------------------------------
+# Secrets or values that vary by developer/environment are referenced via
+# environment-variable placeholders like ${VAR_NAME}.  Create a local .env
+# file (or export in your shell) to populate them.
+
+oci:
+  # Path to your OCI CLI config (defaults to ~/.oci/config)
+  configFile: ${OCI_CONFIG_FILE}
+  # Profile inside the OCI config file
+  profile: ${OCI_PROFILE}
+  # Default compartment OCID
+  compartment: ${OCI_COMPARTMENT_OCID}
+
+db:
+  dsn: innovationlab_medium
+  username: ONNOVATE
+  password: ${DB_PASSWORD}        # set in .env
+  walletPath: ${DB_WALLET_PATH}   # set in .env
+  tablePrefix: ${MY_PREFIX}       # set in .env 
+  walletPass: ${DB_WALLET_PASS}   # set. in .env 
+
+agent:
+  session: true
+  endpoint: ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaadoyee3yatdpekkgnpd2xmrqjpkbpjoc6mda6ilsot4rvjn6lkv5
+  no_session_endpoint: cid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaadoyee3yatdpekkgnpd2xmrqjpkbpjoc6mda6ilsot4rvjn6lkv5
+
+bucket:
+  namespace: axaemuxiyife
+  bucketName: AISandbox-Bucket
+  prefix: ${MY_PREFIX}             # set. in .env  
