@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 #https://github.com/oracle/oci-python-sdk/tree/22fd62c8dbbd1aaed6b75754ec1ba8a3c16a4e5a/src/oci/ai_speech
 #https://docs.oracle.com/en-us/iaas/Content/speech/home.htm
 # oci_speech_service_users or #igiu-innovation-lab slack channel
@@ -18,7 +20,8 @@ configurable values begin
 #####
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 compartmentId= None # read from config 
 endpoint = "https://speech.aiservice.us-phoenix-1.oci.oraclecloud.com"
   
@@ -77,56 +80,13 @@ configurable values end
 
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
-       
-def main():
-    # get client for authentication and authorization
-    client = get_client()
-       
-    # create payload object
-    payload = get_payload()
-   
-    # handle response
-    response = client.synthesize_speech(payload)
-    if (response.status != 200):
-        print(f'Request failed with {response.status}')
-    else:
-        save_response(response.data)
-          
-   
-def get_client():
-    global compartmentId
-    #set up the oci gen ai client based on config 
-    scfg = load_config(SANDBOX_CONFIG_FILE)
-    config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
-    private_key = load_private_key_from_file(config['key_file'])
-    compartmentId = scfg["oci"]["compartment"]
-
-    return AIServiceSpeechClient(config=config,signer= oci.signer.Signer(
-        tenancy=config["tenancy"],
-        user=config["user"],
-        fingerprint=config["fingerprint"],
-        private_key_file_location=config["key_file"]
-        ),
-        service_endpoint=endpoint)
-    
-        
-def get_payload():
-    return SynthesizeSpeechDetails(
-        text = text,
-        is_stream_enabled=isStreamEnabled,
-        compartment_id = compartmentId,
-        configuration = TtsOracleConfiguration(
-            model_details = TtsOracleTts1StandardModelDetails (
 #            model_details = TtsOracleTts2NaturalModelDetails (    # swap with line above for natural voice 
                 voice_id=voiceId
             ),
