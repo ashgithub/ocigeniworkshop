@@ -69,8 +69,20 @@ dmypy.json
 # macOS
 .DS_Store
 
+# OS trash / thumbnails
+.Thumbs.db
+.Trash-*
+
 # Logs
 *.log
+# Lock files
+*.lock
+poetry.lock
+Pipfile.lock
+
+# Large sample assets
+vision/*.mp4
+vision/*.jpg
 
 # Environment / secret files
 .env
