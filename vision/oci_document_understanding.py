@@ -1,5 +1,6 @@
 # Documentation: https://docs.oracle.com/en-us/iaas/Content/document-understanding/using/home.htm
 # GitHub SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_document
+# Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/28z4h20/document-understanding-api
 # Slack channels: #oci_ai_document_service_users or #igiu-innovation-lab
 # If you have errors running sample code, reach out for help in #igiu-ai-learning
 
@@ -134,8 +135,17 @@ def main(file_path=FILE_TO_ANALYZE):
     """Main function to run OCI Document Understanding on the given file."""
     # Load config
     scfg = load_config(SANDBOX_CONFIG_FILE)
-    if scfg is None:
-        print("Failed to load config. Exiting.")
+    if scfg is None or 'oci' not in scfg or 'bucket' not in scfg:
+        print("Error: Invalid configuration.")
+        return
+    
+    # Validate required sections
+    if 'configFile' not in scfg['oci'] or 'profile' not in scfg['oci'] or 'compartment' not in scfg['oci']:
+        print("Error: Missing required OCI configuration.")
+        return
+
+    if 'namespace' not in scfg['bucket'] or 'bucketName' not in scfg['bucket']:
+        print("Error: Missing required bucket configuration.")
         return
 
     # Validate required sections
@@ -168,6 +178,7 @@ def main(file_path=FILE_TO_ANALYZE):
         oci.ai_document.models.DocumentTextExtractionFeature()
     ]
 
+    processor_job = None
     try:
         # Create and wait for processor job
         processor = dus_client.create_processor_job_and_wait_for_state(
@@ -176,32 +187,44 @@ def main(file_path=FILE_TO_ANALYZE):
             waiter_kwargs={"wait_callback": create_processor_job_callback}
         )
 
-        if (processor and hasattr(processor, 'data') and 
-            processor.data.lifecycle_state == oci.ai_document.models.ProcessorJob.LIFECYCLE_STATE_SUCCEEDED):
-            print(f"Processor job succeeded with lifecycle state: {processor.data.lifecycle_state} and request ID: {processor.request_id}.")
-            processor_job = processor.data
+        if processor and processor is not oci.util.Sentinel:
+            data = getattr(processor, 'data', None)
+            request_id = getattr(processor, 'request_id', None)
+            if (data is not None and data is not oci.util.Sentinel and
+                hasattr(data, 'lifecycle_state') and
+                data.lifecycle_state == oci.ai_document.models.ProcessorJob.LIFECYCLE_STATE_SUCCEEDED):
+                processor_job = data
+                print(f"Processor job succeeded with lifecycle state: {processor_job.lifecycle_state} and request ID: {request_id}.")
+            else:
+                print("Processor job did not succeed.")
         else:
-            print("Processor job failed or timed out.")
-            return
+            print("Processor job creation failed or timed out.")
     except Exception as e:
         print(f"Error creating/running processor job: {e}")
+
+    if processor_job is None:
         return
 
     # Get results from Object Storage
     print(f"Getting results JSON from output location {processor_job.id}")
     object_storage_client = oci.object_storage.ObjectStorageClient(config=oci_cfg)
-    response = object_storage_client.get_object(
-        namespace_name=namespace,
-        bucket_name=bucket_name,
-        object_name=f"{prefix}/{processor_job.id}/{namespace}_{bucket_name}/results/{prefix}/{file_path.name}.json"
-    )
+    if processor_job is not None and hasattr(processor_job, 'id'):
+        response = object_storage_client.get_object(
+            namespace_name=namespace,
+            bucket_name=bucket_name,
+            object_name=f"{prefix}/{processor_job.id}/{namespace}_{bucket_name}/results/{prefix}/{file_path.name}.json"
+        )
 
-    if response.status == 200:
-        json_data = json.loads(response.data.content.decode('utf-8'))
-        parse_response(json_data)
+        if response is not None and hasattr(response, 'status') and response.status == 200:
+            if hasattr(response, 'data') and hasattr(response.data, 'content'):
+                json_data = json.loads(response.data.content.decode('utf-8'))
+                parse_response(json_data)
+            else:
+                print("Error: Invalid response data.")
+        else:
+            print(f"Failed to get results: HTTP {getattr(response, 'status', 'Unknown')}")
     else:
-        print(f"Failed to get results: HTTP {response.status}")
-        return
+        print("Error: Invalid processor job.")
 
 
 if __name__ == "__main__":
