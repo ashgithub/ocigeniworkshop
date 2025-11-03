@@ -1,5 +1,6 @@
 # Documentation: https://docs.oracle.com/en-us/iaas/Content/vision/using/home.htm
 # GitHub SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_vision
+# Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/061avdq/vision-api
 # Slack channels: #oci_ai_vision_support or #igiu-innovation-lab
 # If you have errors running sample code, reach out for help in #igiu-ai-learning
 
@@ -145,10 +146,13 @@ def main(file_path=DEFAULT_FILE):
             get_analyze_image_details(features, compartment_id, bucket_cfg, file_path.name)
         )
         
-        if response.status == 200:
-            parse_vision_response(response.data)
+        if response is not None and hasattr(response, 'status') and response.status == 200:
+            if hasattr(response, 'data'):
+                parse_vision_response(response.data)
+            else:
+                print("Error: Response data is missing.")
         else:
-            print(f"Analysis failed: HTTP {response.status}")
+            print(f"Analysis failed: HTTP {getattr(response, 'status', 'Unknown')}")
     except Exception as e:
         print(f"Error during analysis: {e}")
 
