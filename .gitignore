@@ -81,8 +81,6 @@ poetry.lock
 Pipfile.lock
 
 # Large sample assets
-vision/*.mp4
-vision/*.jpg
 
 # Environment / secret files
 .env
