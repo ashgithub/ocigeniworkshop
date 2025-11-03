@@ -18,12 +18,9 @@ Example code in this module is available both as Jupyter notebook and Python cod
 
 
 Here are some ideas for projects you can do (see notebook files for details):
-- Create an API with a few parameters (e.g., city and days ahead). Try asking a question and see if LLM calls the API using the right values.
-    - Sample question: "Next week in Seattle."
-    - Sample question: "Weather tomorrow for capital of Colorado."
-- Have a set of tools and provide agents with a subset of those tools based on the classification.
-    - e.g., categories: billing, outage, rebates.
-    - tools: get bills, get account number for name, outage for zip code, zip code of city, rebates for appliance, is appliance efficient.
+- Convert an image of a business card to vCard file
+- Convert an image of an agenda to calendar (iCal) file
+- Create a customer record from driver's license
 
 
 Here are a few links to help you:
