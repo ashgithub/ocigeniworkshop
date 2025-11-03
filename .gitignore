@@ -94,3 +94,7 @@ sandbox-inno-prod.json
 llm/llama_output_schema.py
 .aider*
 langChain/llm/openai_personal.py
+speech/text*.mp3
+speech/voice*.srt 
+speech/voice*.json
+
