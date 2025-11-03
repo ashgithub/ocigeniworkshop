@@ -1,5 +1,6 @@
 # Documentation: https://docs.oracle.com/en-us/iaas/Content/vision/using/stored_video_analysis.htm#pretrained_image_analysis_video
 # GitHub SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_vision
+# Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/061avdq/vision-api
 # Slack channels: #oci_ai_vision_support or #igiu-innovation-lab
 # If you have errors running sample code, reach out for help in #igiu-ai-learning
 
@@ -7,7 +8,16 @@ from dotenv import load_dotenv
 from envyaml import EnvYAML
 from pathlib import Path
 from oci.object_storage import ObjectStorageClient
-from oci.ai_vision.models import *
+from oci.ai_vision.models import (
+    ObjectLocation,
+    ObjectListInlineInputLocation,
+    OutputLocation,
+    CreateVideoJobDetails,
+    VideoObjectDetectionFeature,
+    VideoFaceDetectionFeature,
+    VideoLabelDetectionFeature,
+    VideoTextDetectionFeature
+)
 from time import sleep
 import argparse
 import json
@@ -145,8 +155,17 @@ def main(file_path=FILE_TO_ANALYZE):
     file_path = Path(file_path)
     # Load config
     scfg = load_config(SANDBOX_CONFIG_FILE)
-    if scfg is None:
-        print("Failed to load config. Exiting.")
+    if scfg is None or 'oci' not in scfg or 'bucket' not in scfg:
+        print("Error: Invalid configuration.")
+        return
+    
+    # Validate required sections
+    if 'configFile' not in scfg['oci'] or 'profile' not in scfg['oci'] or 'compartment' not in scfg['oci']:
+        print("Error: Missing required OCI configuration.")
+        return
+
+    if 'namespace' not in scfg['bucket'] or 'bucketName' not in scfg['bucket'] or 'prefix' not in scfg['bucket']:
+        print("Error: Missing required bucket configuration.")
         return
 
     # Validate required sections
@@ -185,33 +204,41 @@ def main(file_path=FILE_TO_ANALYZE):
 
         res = ai_service_vision_client.create_video_job(create_video_job_details=create_video_job_details)
 
-        job_id = res.data.id
-        print(f"Job {job_id} is in {res.data.lifecycle_state} state.")
+        if res is not None and hasattr(res, 'data') and hasattr(res.data, 'id') and hasattr(res.data, 'lifecycle_state'):
+            job_id = res.data.id
+            print(f"Job {job_id} is in {res.data.lifecycle_state} state.")
 
-        # Poll for completion
-        seconds = 0
-        while res.data.lifecycle_state in ["IN_PROGRESS", "ACCEPTED"]:
-            print(f"Job {job_id} is IN_PROGRESS for {seconds} seconds, progress: {res.data.percent_complete}%")
-            sleep(5)
-            seconds += 5
-            res = ai_service_vision_client.get_video_job(video_job_id=job_id)
+            # Poll for completion
+            seconds = 0
+            while res is not None and hasattr(res, 'data') and hasattr(res.data, 'lifecycle_state') and res.data.lifecycle_state in ["IN_PROGRESS", "ACCEPTED"]:
+                if hasattr(res.data, 'percent_complete'):
+                    print(f"Job {job_id} is IN_PROGRESS for {seconds} seconds, progress: {res.data.percent_complete}%")
+                sleep(5)
+                seconds += 5
+                res = ai_service_vision_client.get_video_job(video_job_id=job_id)
 
-        if res.data.lifecycle_state == "SUCCEEDED":
-            print(f"Job {job_id} succeeded.")
+            if res is not None and hasattr(res, 'data') and hasattr(res.data, 'lifecycle_state'):
+                if res.data.lifecycle_state == "SUCCEEDED":
+                    print(f"Job {job_id} succeeded.")
 
-            # Get results from Object Storage
-            object_storage_client = oci.object_storage.ObjectStorageClient(oci_cfg)
-            object_name = f"{prefix}/{job_id}/{prefix}/{file_path.name}.json"
+                    # Get results from Object Storage
+                    object_storage_client = oci.object_storage.ObjectStorageClient(oci_cfg)
+                    object_name = f"{prefix}/{job_id}/{prefix}/{file_path.name}.json"
 
-            response = object_storage_client.get_object(namespace, bucket_name, object_name)
+                    response = object_storage_client.get_object(namespace, bucket_name, object_name)
 
-            if response.status == 200:
-                json_data = json.loads(response.data.content.decode('utf-8'))
-                parse_video_response(json_data)
+                    if response is not None and hasattr(response, 'status') and response.status == 200:
+                        if hasattr(response, 'data') and hasattr(response.data, 'content'):
+                            json_data = json.loads(response.data.content.decode('utf-8'))
+                            parse_video_response(json_data)
+                        else:
+                            print("Error: Invalid response data.")
+                    else:
+                        print(f"Failed to get results: HTTP {getattr(response, 'status', 'Unknown')}")
+                else:
+                    print(f"Job {job_id} failed with state: {getattr(res.data, 'lifecycle_state', 'Unknown')}")
             else:
-                print(f"Failed to get results: HTTP {response.status}")
-        else:
-            print(f"Job {job_id} failed with state: {res.data.lifecycle_state}")
+                print("Error: Invalid response from video job.")
     except Exception as e:
         print(f"Error during video job: {e}")
 
