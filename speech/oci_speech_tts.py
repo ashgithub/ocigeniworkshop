@@ -101,15 +101,21 @@ def detect_language(text: str, cfg: dict, compartment: str) -> str:
     )
     res = client.batch_detect_dominant_language(req)
 
-    if (
-        getattr(res, "status", None) == 200
-        and res.data.documents
-        and res.data.documents[0].languages
-    ):
-        top = res.data.documents[0].languages[0]
-        lang_code = top.code.lower()
-        log.info("Detected language %s (confidence %.2f)", lang_code, top.score)
-        return lang_code
+    try:
+        status = getattr(res, "status", None)
+        data = getattr(res, "data", None)
+        documents = getattr(data, "documents", None)
+        if (
+            status == 200
+            and documents
+            and documents[0].languages
+        ):
+            top = documents[0].languages[0]
+            lang_code = getattr(top, "code", "en").lower()
+            log.info("Detected language %s (confidence %.2f)", lang_code, getattr(top, "score", 0.0))
+            return lang_code
+    except Exception as exc:
+        log.warning("Language detection failed with exception: %s", exc)
 
     log.warning("Language detection failed; defaulting to 'en'")
     return "en"
@@ -155,11 +161,16 @@ def synthesize_mp3(
     )
 
     res = client.synthesize_speech(details)
-    if res.status != 200:
-        raise RuntimeError(f"TTS failed HTTP {res.status}")
+    status = getattr(res, "status", None)
+    data = getattr(res, "data", None)
+    if status != 200:
+        raise RuntimeError(f"TTS failed HTTP {status}")
+
+    if not hasattr(data, "iter_content"):
+        raise RuntimeError("Missing `iter_content` in TTS response data object!")
 
     with outfile.open("wb") as fh:
-        for chunk in res.data.iter_content():
+        for chunk in data.iter_content():
             fh.write(chunk)
     log.info("MP3 saved → %s", outfile.resolve())
 
