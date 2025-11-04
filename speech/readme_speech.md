@@ -1,43 +1,71 @@
+## Welcome to the Speech Module
 
-## Welcome to the Speech Module.
-In this module, we will experiment with the OCI Speech's Text to Speech (TTS) & Speech to Text (STT) capability
+In this module you will experiment with Oracle Cloud Infrastructure (OCI) Speech services for **Text-to-Speech (TTS)** and **Speech-to-Text (STT)**.
 
-Specifically, we will try the following capabilities:
-1. Text to Speech: We will look at voice models & Speech markup language(SML) supported by the Aai 
-2. Speech to Text: We will look at the the batch transcription capability using oci & wisper model. 
+### What you will try
 
-Note: Oracle Speech does support realtime voice transcription capability, but it is not covered in this module.
+1. **Text-to-Speech (TTS)** – Explore available voice models and the Speech Synthesis Markup Language (SSML) features supported by OCI.
+2. **Speech-to-Text (STT)** – Use the batch transcription capability with both OCI Speech and Whisper models.
 
-When using STT, we will be uploading the documents to an object bucket:
-- Please use the PHX tenancy to work with your object bucket. The Chicago tenancy is a read-only replica.
-- As you are working in a shared sandbox, use a unique prefix (prefix is analogous to a subfolder) (e.g., your Oracle ID).
-- Remember to  bucket section of sandbox.config details of your bucket (NAMESPACE, BUCKET_NAME, FILE_NAME, PREFIX)
-- Remember to update the FILE_TO_ANALYZE variable in code to the local file you want to analyze
+> **Note**  
+> OCI Speech also supports real-time transcription, but that feature is not covered in this module.
 
-When using TTS: 
-- Remeber to update the filename variable to the path of teh file where you want the audio file to be stored 
-- Try adding different SAML tags to improve the quality of your response 
+---
 
-Remember to set up your sandbox.json file per your environment. This module  uses the "oci" & "bucket" section
+### Working with STT
 
-Example code in this module is available both as Jupyter notebook & Python code. They are very similar:
+Audio files must be uploaded to an Object Storage bucket before they can be transcribed.
 
-1. **oci_speech_stt.py / stt.ipynb**: upload audio recording to object bucket & transcribe it 
-2. **oci_speech_tts.py / tts.ipynb** : transcribe a given audio recording 
+* Use the **PHX** tenancy for your bucket. The **Chicago** tenancy is a read-only replica.  
+* Because you are working in a shared sandbox, use a unique **prefix** (analogous to a sub-folder), for example your Oracle ID.  
+* Fill in the *bucket* section of **sandbox.config** with the details of your bucket (`NAMESPACE`, `BUCKET_NAME`, `FILE_NAME`, `PREFIX`).  
+* Update the `DEFAULT_AUDIO_FILE` variable in the code so that it points to the local file you want to transcribe.
 
-There are a few audio files ofr you to get started. Make sure to move them to the appropriate directory before you upload using code, or upload them manually to the correct bucket.
+---
 
-Here are some ideas of projects you can do (See notebook files for details):
-- Upload your video recoding from a zoom call, transcribe (Ai speech) & summarize it (Gen-AI)
-- Try transcription on different langaues, mixed langauges etc. Compafre oracle vs whisper models. 
-- Create a audio conversation between two people
-    - Ask ai to generate the transcript (Gen AI)
-    - Use oci speech to convert reach dialog into audio, use different voice for each person
-    - Combine them into a single audio file
+### Working with TTS
 
-Here are few links to help you: 
-- **#igiu-innovation-lab** for project ideas
-- **#igiu-ai-learning**  for any issues with code or environment 
-- **#oci_speech_service_usersi** for quiestions on OCI speech APIs
+* Try the files with different languages 
+* Experiment with different **SSML** tags to improve the quality of the synthesized speech.
 
-https://docs.oracle.com/en-us/iaas/Content/speech/home.htm
+---
+
+### Environment setup
+
+Ensure your **sandbox.json** file is configured for your environment.  
+This module uses the `oci` and `bucket` sections.
+
+---
+
+### Example code
+
+Both Jupyter notebooks and equivalent Python scripts are provided:
+
+| Task | Python Script | Notebook |
+|------|---------------|----------|
+| Upload an audio recording to Object Storage and transcribe it using oracle whisper models | `oci_speech_stt_oracle.py or oci_speech_stt_whisper ` | `oci_speech_stt.ipynb` |
+| Convert text into speech and save the resulting audio file | `oci_speech_tts.py` | `oci_speech_tts.ipynb` |
+
+Several sample audio files are included to get you started.  
+Move them to the appropriate directory before running the code, or upload them manually to your bucket.
+
+---
+
+### Project ideas
+
+* Upload a Zoom recording, transcribe it with OCI Speech, then summarize it with GenAI.  
+* Transcribe content in different or mixed languages, and compare results between OCI Speech and Whisper models.  
+* Create an audio conversation between two people:  
+  1. Use GenAI to generate the transcript.  
+  2. Use OCI Speech to convert each line to audio, selecting different voices for each speaker.  
+  3. Combine the clips into a single audio file.
+
+---
+
+### Helpful links
+
+* Slack **#igiu-innovation-lab** – project ideas  
+* Slack **#igiu-ai-learning** – help with code or environment issues  
+* Slack **#oci_speech_service_users** – questions about OCI Speech APIs  
+
+Documentation: <https://docs.oracle.com/en-us/iaas/Content/speech/home.htm>
