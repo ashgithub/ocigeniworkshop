@@ -1,9 +1,88 @@
+# ----------- Python & General -----------
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+share/python-wheels/
+wheelhouse/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+.ENV/
+ENV.bak/
+venv.bak/
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Type checker caches
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE / editor settings
+.vscode/
+.idea/
+
+# macOS
 .DS_Store
+
+# Logs
+*.log
+
+# Environment / secret files
+.env
+.env.*
+
+# ----------- Project-specific exclusions -----------
 sandbox-play.json
 sandbox-inno.json
-llm/llama_output_schema.py
 sandbox_github.json
 sandbox-inno-prod.json
+llm/llama_output_schema.py
+.aider*
+langChain/llm/openai_personal.py
+uv.lock
 
-
-__pychache__

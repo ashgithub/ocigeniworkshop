@@ -192,32 +192,30 @@ class OciOpenAILangChainClient(ChatOpenAI):
         description="OCI profile name to use for authentication"
     )
 
-    region: str = Field(
-        description="OCI region where the model is deployed"
-    )
 
     compartment_id: str = Field(
         description="OCI compartment ID where the model is deployed"
     )
 
-    model_name: str = Field(
-        description="Name of the OCI OpenAI model to use"
+    service_endpoint: str = Field(
+        description="OCI Gen AI service endpoint to use"
     )
+
     @model_validator(mode="after")
     def validate_environment(self) -> Self:
         """Initialize OCI clients after validation."""
         if not self.client:
             self.client = OciOpenAI(
-                service_endpoint=endpoint,
-                auth=OCIUserPrincipleAuth(profile_name=profile),
-                compartment_id=compartment_id
+                service_endpoint=self.service_endpoint,
+                auth=OCIUserPrincipleAuth(profile_name=self.profile),
+                compartment_id=self.compartment_id
             ).chat.completions
 
         if not self.async_client:
             self.async_client = AsyncOciOpenAI(
-                service_endpoint=endpoint,
-                auth=OCIUserPrincipleAuth(profile_name=profile),
-                compartment_id=compartment_id
+                service_endpoint=self.service_endpoint,
+                auth=OCIUserPrincipleAuth(profile_name=self.profile),
+                compartment_id=self.compartment_id
             ).chat.completions
         return self
 

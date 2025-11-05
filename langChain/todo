@@ -1,0 +1,83 @@
+Intro
+   - types of llms librray
+   - SLM - language
+   - LLM maturity
+   - tour 
+- 
+
+----
+llm- 
+chat.py
+1. system prompt
+2. multiple models
+3. batch
+4. max token
+
+history.py 
+
+stream.py 
+4. streaming 
+
+async.py
+
+structured 
+3. structred output
+
+
+
+
+-----
+
+tool calling
+   - single step
+   - multi step
+   - automatic call 
+    - react 
+   - mcp
+  
+Agents
+   - langchain
+   - oci agents (optional)
+   - wayflow (optional)
+   - langgraph
+   - langfuse
+   - a2a
+  
+rag
+   - chunking
+   - embedding
+   - proximity search
+   - reranking
+   - 
+  
+  database: 
+    - select ai
+    - NL2SQL
+    - clsql mcp server 
+
+
+
+speech
+    - tts
+      - englihs
+      - otehr
+      - real  demo in portl 
+      - batch
+    - stt
+      - english
+      - other
+  
+vision
+    - document understanding
+    - vision
+    - multi model
+  
+cline
+  - memory bank
+  - rules
+  - ider
+  - workflow
+
+demos
+  - ai world demos
+  - current projects
