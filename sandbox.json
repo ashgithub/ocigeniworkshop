@@ -9,7 +9,7 @@
         "username": "ONNOVATE",
         "password": "Welcome_2025",
         "walletPath": "/Users/ashish/.workshop/inno_wallet",
-        "tablePrefix" : "asagarwa",
+        "tablePrefix" : "asagarwa (add unique prefix)", 
         "walletPass" : "41_innovation"
     },
     
