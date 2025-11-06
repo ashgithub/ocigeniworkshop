@@ -1,0 +1,106 @@
+Yes, here's a python code snippet:
+payload = {
+            "pipelineId": "my_pipeline_v1",
+            "appId": app_id,
+            "modelId": model_id,
+            "data": {
+                "query": "What is the capital city of the United States of America?",
+                "documents": [
+                    "Washington, D.C. is the capital of the United States. It serves as the seat of the federal government and is located on the Potomac River.",
+                    "Title: Facts about Carson City\nContent: |\n Carson City is the capital city of the American state of Nevada. At the 2010 United States Census, Carson City had a population of 55,274.\n",
+                    "Title: The Commonwealth of Northern Mariana Islands\nContent: |\n The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean that are a political division controlled by the United States. Its capital is Saipan.\n",
+                    "The capital of the US is washington",
+                    "New York City is often referred to as the economic capital of the world, but it is not the political capital of the United States.",
+                    "Paris is the capital of France, known for its art, fashion, and culture.",
+                    "The United States has 50 states, and each state has its own capital city, such as Austin for Texas or Sacramento for California.",
+                ],
+                "topN": 3,
+                "maxChunksPerDocument": 1,
+                "isEcho": True,
+            },
+        }
+
+resp = requests.post(url, json=payload, timeout=120)
+here's a POSTMAN example as well:
+POST | https://puo3dsaj7csiorw4sylcndmjbe.apigateway.us-phoenix-1.oci.customer-oci.com/api/v1/aia/eceu/dac/reranker
+{
+  "appId": "textura",
+  "pipelineId": "my_pipeline_v1",
+  "modelId": "cohere.rerank-v3.5",
+  "data": {
+    "query": "What is the capital of the United States?",
+    "documents": [
+        "Title: History of U.S. Capitals\nContent: |\n  Since 1800, Washington, D.C. has served as the permanent capital of the United States. Before that, several cities including Philadelphia and New York City temporarily held the role.",
+    "Title: Overview of Washington, D.C.\nContent: |\n  Washington, D.C. is the seat of the U.S. federal government and home to major national landmarks such as the Capitol, the White House, and the Supreme Court.",
+    "Title: U.S. Geography Summary\nContent: |\n  The United States spans 50 states and one federal district. The national capital, Washington, D.C., is located along the Potomac River between Maryland and Virginia."
+    ],
+    "topN": 2,
+    "maxChunksPerDocument": 1,
+    "isEcho": "true"
+  }
+}
+you can also refer to this documentation: https://gbuconfluence.oraclecorp.com/pages/viewpage.action?spaceKey=AIAcc&title=Technical+Design+-+AIA+Services+APIs
+
+
+
+
+
+
+did you receive your credentials?
+Instructions
+Token generation
+OAuth 2.0 steps for token generation - (Ref: Above medium article link and https://www.oracle.com/webfolder/technetwork/tutorials/obe/cloud/idcs/idcs_rest_postman_obe/rest_postman.html)
+AI Accelerator will provide - clientID, secret, scope, token url required to generate token for both access for different environments to Application team
+Using the above details the generated token. Remember to use the correct access credentials and scope!
+Use the token and send a request to APIs.
+Sample request for token generation
+Curl Command
+
+curl -i 
+-H 'Authorization: Basic base_cod64(client_id:client_secret)' 
+-H 'Content-Type: application/x-www-form-urlencoded; charset=utf-8' 
+--request POST 'https://idcs-20b69708c6f440d9b60cde3c65a0e648.identity.oraclecloud.com/oauth2/v1/token' 
+-d 'grant_type=client_credentials&scope=https://puo3dsaj7csiorw4sylcndmjbe.apigateway.us-phoenix-1.oci.customer-oci.com/api/config' -k
+
+Postman
+Go to the Auth tab, and then to the Configure New Token section. Fill the fields as follows:
+Token Name: <string>
+Grant Type: Client Credentials
+Access Token URL: https://idcs-20b69708c6f440d9b60cde3c65a0e648.identity.oraclecloud.com/oauth2/v1/token
+Client ID: <your-client-id>
+Client Secret: <your-client-secret>
+Scope: https://puo3dsaj7csiorw4sylcndmjbe.apigateway.us-phoenix-1.oci.customer-oci.com/api/config
+Client Authentication: Send as Basic Auth Header
+Then click on the orange Get New Access Token button -> Proceed -> Use Token
+
+
+Sample Response
+
+{"access_token":"xxxxxx","token_type":"Bearer","expires_in":3600}
+oracle.comoracle.com
+Using the Oracle Identity Cloud Service REST APIs with Postman
+Learn how to make REST API calls to Oracle Identity Cloud Service using Postman.
+
+https://artifactory.oci.oraclecorp.com/igiu-aia-dev-pypi-local/aia-common-sdk/
+
+ai first client secret: idcscs-01107f95-6c0c-4591-b5d9-e42296e206f2
+The Reranker DAC endpoint is ready to use now. The credential I shared in the email can be used to access the endpoint. Endpoint details can be found here: https://gbuconfluence.oraclecorp.com/display/AIAcc/Technical+Design+-+AIA+Services+APIs#:~:text=%7D-,AIA%20Service%20Endpoints%20Details,-Service
+ 
+Hi Abhijeet,
+Thanks for your interest in the Evaluation Service!
+Here are a few details to help you get connected:
+Client id: 82cb0d931d9e4a4da5a43f992ee02afa
+Service URL: https://puo3dsaj7csiorw4sylcndmjbe.apigateway.us-phoenix-1.oci.customer-oci.com/api/v1/aia/eceu/evaluation
+Scope: https://puo3dsaj7csiorw4sylcndmjbe.apigateway.us-phoenix-1.oci.customer-oci.com/api/regular:ai-first
+Access token url: https://idcs-20b69708c6f440d9b60cde3c65a0e648.identity.oraclecloud.com/oauth2/v1/
+Client Secret: Please let me know the right person to receive it directly — I’ll share it privately rather than over email.
+How to use above info to access services: https://gbuconfluence.oraclecorp.com/display/AIAcc/Technical+Design+-+AIA+Services+APIs#TechnicalDesignAIAServicesAPIs-AIAServiceEndpointsDetails:~:text=POST-,Authentication%20%26%20Authorization,-High%2Dlevel%20Design
+Access to AIA Environment: To better support your tryout, I’ve requested “collaboration development” 6-month access for everyone in the AI First Self-Service team. This request is still pending manager approvals — you can track it here: Batch Request Link.
+Once approved, team members will be able to log in to the AIA Dev tenancy via the console(access link), upload data, and run tests.
+A quick reminder:
+Please use the Sandbox compartment for experiments.
+Avoid using the AI-Accelerator-1 and AI-Accelerator-Test compartments.
+Do not create new resources (such as Dedicated AI Clusters, Database) directly without prior coordination.
+Thanks, and let me know if you need any additional details!
+Best,
+Jessica
