@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 #!/Users/ashish/anaconda3/bin/python
 # Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
 # if you have errors running sample code reach out for help in #igiu-ai-learnin
@@ -9,9 +11,10 @@ import oci
 import json,os
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
 # available models with tool calling support
 # cohere.command-r-08-2024
@@ -31,19 +34,13 @@ llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oracleclo
 
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
-    
-
-#set up the oci gen ai client based on config 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])    
 
@@ -104,10 +101,10 @@ chat_request = oci.generative_ai_inference.models.GenericChatRequest()
 chat_request.messages = [ system_msg, user_msg]
 chat_request.max_tokens = 600
 chat_request.api_format = oci.generative_ai_inference.models.BaseChatRequest.API_FORMAT_GENERIC
-chat_request.is_stream = False
-#chat_request.is_force_single_step = False
+#chat_request.is_stream = False
+chat_request.is_force_single_step = True
 chat_request.tools = [ report_tool, calculator_tool ]
-chat_request.tool_choice = oci.generative_ai_inference.models.ToolChoiceAuto()
+#chat_request.tool_choice = oci.generative_ai_inference.models.ToolChoiceAuto()
 
 chat_detail = oci.generative_ai_inference.models.ChatDetails()
 chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id=LLM_MODEL)

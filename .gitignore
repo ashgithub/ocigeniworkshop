@@ -69,8 +69,18 @@ dmypy.json
 # macOS
 .DS_Store
 
+# OS trash / thumbnails
+.Thumbs.db
+.Trash-*
+
 # Logs
 *.log
+# Lock files
+*.lock
+poetry.lock
+Pipfile.lock
+
+# Large sample assets
 
 # Environment / secret files
 .env
@@ -85,4 +95,10 @@ llm/llama_output_schema.py
 .aider*
 langChain/llm/openai_personal.py
 uv.lock
+speech/text*.mp3
+speech/voice*.srt 
+speech/voice*.json
 
+# sqlcl
+sqlcl-latest.zip
+sqlcl/*
