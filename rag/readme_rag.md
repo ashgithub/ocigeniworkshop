@@ -21,7 +21,7 @@ Oracle 23ai database is used in this module; refer to [this page](https://conflu
 
 Example code in this module is available both as Jupyter notebook and Python code. They are very similar:
 
-1. **cohere_chat_citation.py, RAG-documents.ipynb**: Use of `documents` to pass non-public text to LLM and see a response with citations based on it.
+1. **cohere_chat_citation.py, RAG-chat-citations.ipynb**: Use of `documents` to pass non-public text to LLM and see a response with citations based on it.
 2. **oci_rag_agents.py, RAG-agents.ipynb**: Leverage OCI GenAI Agent service for an out-of-the-box agent (see rag_agents.md for setup).
 3. **cohere_rag_23ai.py, RAG-full.ipynb**: Full home-grown RAG implementation using 23ai.
 4. **select_ai.sql**: SQL script to demonstrate SelectAI capability.
