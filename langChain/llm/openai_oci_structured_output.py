@@ -1,14 +1,27 @@
-import json
+import sys
+import os
 from pydantic import BaseModel,Field
 from typing import List
-from openai_oci_client import OciOpenAILangGraphClient
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from openai_oci_client import OciOpenAILangChainClient, OciOpenAILangGraphClient
+
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 # SOURCE: https://python.langchain.com/docs/how_to/structured_output/#the-with_structured_output-method
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#
+#
+#  OCI's langchain client supports all oci models, but it doesnt support all the features requires for robust agents (output schema, function calling etc)
+#  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
+#  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
+#  if you have errors running sample code reach out for help in #igiu-ai-learning
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
 LLM_MODEL = "openai.gpt-4o" # cohere / meta-llama models does not support structured output
 # available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
@@ -137,27 +150,24 @@ library_event_schema = {
 }
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
-    
-# Step 1: Load the config file
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: Use the OciOpenAILangGraphClient from openai_oci_client.py to use output models
-llm_client = OciOpenAILangGraphClient(
-    profile=scfg['oci']['profile'],
-    compartment_id=scfg['oci']['compartment'],
-    model_name=LLM_MODEL,
-    service_endpoint= llm_service_endpoint
-)
+llm_client = OciOpenAILangChainClient(
+#llm_client = OciOpenAILangGraphClient(
+        profile=scfg['oci']['profile'],
+        compartment_id=scfg['oci']['compartment'],
+        model=LLM_MODEL,
+        service_endpoint=llm_service_endpoint
+    )
+
 
 MESSAGE = """
   Give me the information about the current science fiction books.

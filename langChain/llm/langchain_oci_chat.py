@@ -1,43 +1,28 @@
 import json
 from langchain_oci.chat_models import ChatOCIGenAI
 
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 # Library specification:
 # https://python.langchain.com/docs/integrations/providers/oci/
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#
+#
+#  OCI's langchain client supports all oci models, but it doesnt support all the features requires for robust agents (output schema, function calling etc)
+#  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
+#  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
+#  if you have errors running sample code reach out for help in #igiu-ai-learning
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
 LLM_MODEL = "openai.gpt-4.1"
 #LLM_MODEL = "cohere.command-r-08-2024"
 
 # available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-# All available chat models on OCI as of October 2025:
-# Cohere:
-#   cohere.command-a-03-2025
-#   cohere.command-r-08-2024
-#   cohere.command-r-plus-08-2024
-# Meta:
-#   meta.llama-4-maverick
-#   meta.llama-4-scout
-#   meta.llama-3-3-70b
-#   meta.llama-3-2-90b-vision
-#   meta.llama-3-2-11b-vision
-#   meta.llama-3-1-405b
-#   meta.llama-3-1-70b
-#   meta.llama-3-70b
-# OpenAI (Beta):
-#   openai.gpt-oss-120b
-#   openai.gpt-oss-20b
-# xAI:
-#   xai.grok-code-fast-1
-#   xai.grok-4-fast
-#   xai.grok-4
-#   xai.grok-3
-#   xai.grok-3-mini
-#   xai.grok-3-fast
-#   xai.grok-3-mini-fast
+
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
@@ -46,22 +31,17 @@ PREAMBLE = """
 """
 
 MESSAGE = """ 
-    why is the sky blue?
+    why is the sky blue? expalin in 2 sentenses like i am 5
 """
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
-
-# Step 1: Load the config file
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: create a LLM client using the credentials and optional parameters
@@ -81,50 +61,56 @@ llm_client = ChatOCIGenAI(
 )
 
 # Step 3: Call Single LLM
-print(f"**************************Chat Result for {llm_client.model_id} **************************") 
+print(f"\n\n**************************Chat Result for {llm_client.model_id} **************************") 
 response = llm_client.invoke(MESSAGE)
 print(response.content)
+
+import time  # Added for timing
 
 # Run through selected LLMs and print results
 selected_llms = [
     "openai.gpt-4.1",
+    "openai.gpt-5",
     "cohere.command-a-03-2025",
     "cohere.command-r-08-2024",
-    "meta.llama-3-1-405b",
-    "meta.llama-3-3-70b",
+    "meta.llama-4-maverick-17b-128e-instruct-fp8",
+    "meta.llama-4-scout-17b-16e-instruct",
     "xai.grok-4",
-    "xai.grok-3"
+    "xai.grok-4-fast-non-reasoning"
 ]
+
 for llm_id in selected_llms:
     llm_client.model_id = llm_id
-    print(f"**************************Chat Result for {llm_client.model_id} **************************")
+    print(f"\n\n**************************Chat Result for {llm_client.model_id} **************************")
+    start_time = time.time()
     response = llm_client.invoke(MESSAGE)
+    end_time = time.time()
     print(response.content)
+    print(f"\n Time taken for {llm_client.model_id}: {end_time - start_time:.2f} seconds\n\n")
 
-print(f"**************************Chat Full LangChain result **************************")
+print(f"\n\n**************************Chat Full LangChain result for {llm_client.model_id} **************************")
 print(response)
 
 
 #step4:  batch
-print(f"**************************Chat Result With batch **************************") 
+print(f"\n\n**************************Chat Result With batch for {llm_client.model_id} **************************") 
 response = llm_client.batch(["why is sky blue","why is it dark at night"])
 #print(response.additional_kwargs['finish_reason']) # extra parameters contained in response
 print(response) # main content parameter that has the string readable response from the model
 
 #step6:  max token
 llm_client.model_kwargs['max_tokens'] = 10
-print(f"**************************Chat Result With max_tokens {llm_client.model_kwargs['max_tokens']} **************************")
+print(f"\n\n**************************Chat Result With max_tokens {llm_client.model_kwargs['max_tokens']} for {llm_client.model_id}**************************")
 response = llm_client.invoke(MESSAGE) # Notice this response is using the same modified seed from previous iteration
 print(response.additional_kwargs['finish_reason'])
 print(response.content)
 
 #step7: prompt types sytem & human 
 # Demonstrate system (preamble) and human (user content) prompt types
+print(f"\n\n**************************Chat Result with system & user prompts for {llm_client.model_id} **************************")
 system_message = {"role": "system", "content": "You are a poetic assistant who responds in exactly four lines."}
 user_message = {"role": "user", "content": "What is the meaning of life?"}
 messages = [system_message, user_message]
 
-llm_client.model_id = "openai.gpt-4.1"
-print(f"**************************Chat Result with system & user prompts for {llm_client.model_id} **************************")
 response = llm_client.invoke(messages)
 print(response.content)
