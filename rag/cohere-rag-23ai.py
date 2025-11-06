@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 #!/Users/ashish/anaconda3/bin/python
 
 # Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
@@ -12,18 +14,15 @@ import os,json
 #####
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
 EMBED_MODEL = "cohere.embed-multilingual-v3.0"
-LLM_MODEL = "cohere.command-r-08-2024"
+LLM_MODEL = "cohere.command-a-03-2025"
 # cohere.command-a-03-2025
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
-# meta.llama-3.1-405b-instruct
-# meta.llama-3.3-70b-instruct
-# meta.llama-3.2-90b-vision-instruct
-# meta.llama-4-maverick-17b-128e-instruct-fp8
-# meta.llama-4-scout-17b-16e-instruct
+
 
  
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
@@ -55,18 +54,15 @@ compartmentId = None
 
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
- 
+
 def create_table(cursor):
 	sql = [
 		f"""drop table if exists {tablename_prefix}_embedding purge"""	,
@@ -116,7 +112,7 @@ def search_data(cursor, vec,):
 
 	return rows
 
-#boilerplate text for embeddings
+  
 def get_embed_payload(chunks, embed_type):
 	embed_text_detail = EmbedTextDetails()
 	embed_text_detail.serving_mode = OnDemandServingMode(model_id=EMBED_MODEL)
