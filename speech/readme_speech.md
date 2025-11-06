@@ -32,7 +32,7 @@ Audio files must be uploaded to an Object Storage bucket before they can be tran
 
 ### Environment setup
 
-Ensure your **sandbox.json** file is configured for your environment.  
+Ensure your **sandbox.yanl** and **.env** file is configured for your environment.  
 This module uses the `oci` and `bucket` sections.
 
 ---
