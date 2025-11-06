@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 #!/Users/ashish/anaconda3/bin/python
 
 # Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
@@ -11,9 +13,10 @@ import oci
 import os, json
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
 EMBED_MODEL = "cohere.embed-multilingual-v3.0"
 
@@ -81,19 +84,15 @@ tablename_prefix = None
 compartmentId = None
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
 
- 
 def create_table(cursor):
 	sql = [
 		f"""drop table if exists {tablename_prefix}_semantic_cache purge"""	,
@@ -122,8 +121,7 @@ def read_data(cursor):
 	cursor.execute(f"select id,question,answer from {tablename_prefix}_semantic_cache")
 	for row in cursor:
 		print(f"{row[0]}:{row[1]}:{[row[2]]}")
-
- # COSINE, DOT, EUCLIDEAN
+      
 def search_data(cursor, vec,):
 # try adding the constraint the distance of < 0.5 is something we will need to finetune based on data
 	cursor.execute(f"""

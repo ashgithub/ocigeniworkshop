@@ -31,7 +31,7 @@ DBMS_CLOUD_AI.CREATE_PROFILE (
         attributes => '{
             "provider": "oci",
              "credential_name": "OCI_GENAI_CRED",
-            "model":"meta.llama-3.1-70b-instruct",
+            "model":"meta.llama-4-scout-17b-16e-instruct",
             "comments":"true",            
             "object_list": [{"owner": "SH"}]
             }'

@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 #!/Users/ashish/anaconda3/bin/python
 
 # Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
@@ -10,19 +12,16 @@ import oci
 import json, os 
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
 # available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 # cohere.command-a-03-2025
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
-# meta.llama-3.1-405b-instruct
-# meta.llama-3.3-70b-instruct
-# meta.llama-3.2-90b-vision-instruct
-# meta.llama-4-maverick-17b-128e-instruct-fp8
-# meta.llama-4-scout-17b-16e-instruct
+
 
 LLM_MODEL = "cohere.command-r-08-2024" 
 
@@ -39,15 +38,12 @@ MESSAGE = """
 
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
-        return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
         return None
 
 def get_chat_request():
@@ -73,7 +69,6 @@ def get_chat_detail (llm_request,compartmentId):
 
         return chat_detail
 
-#set up the oci gen ai client based on config 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
 
