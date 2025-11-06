@@ -3,8 +3,8 @@ import oci
 import oracledb
 import sys 
 
-print ("AI Sandbox Environment chec ")
-print(f"python version (tested will 3.11.5): {sys.version}")
-print(f"oci sdk version (> 2.139.0): {oci.version.__version__}")
-print(f"oraceldb client sdk version( > 2.5.0): {oracledb.version}")
+print ("AI Sandbox Environment check")
+print(f"python version (tested with 3.13.4): {sys.version}")
+print(f"oci sdk version (>= 2.161.1): {oci.version.__version__}")
+print(f"oraceldb client sdk version( >= 3.4.0): {oracledb.version}")
 
