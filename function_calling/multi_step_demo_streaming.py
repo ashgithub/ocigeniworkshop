@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from envyaml import EnvYAML
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
