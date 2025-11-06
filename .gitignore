@@ -98,3 +98,6 @@ speech/text*.mp3
 speech/voice*.srt 
 speech/voice*.json
 
+# sqlcl
+sqlcl-latest.zip
+sqlcl/*
