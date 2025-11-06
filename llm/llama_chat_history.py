@@ -1,34 +1,42 @@
 import oci, json,os
 
 
-SANDBOX_CONFIG_FILE = "sandbox.json"
+from dotenv import load_dotenv
+from envyaml import EnvYAML
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 LLM_MODEL = "meta.llama-3.3-70b-instruct" 
 LLM_URL= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 
-# cohere.command-a-03-2025
-# cohere.command-r-08-2024
-# cohere.command-r-plus-08-2024
+# openai.gpt-4.1
+# openai.gpt-4.1-mini
+# openai.gpt-4.1-nano
+# openai.gpt-o1
+# openai.gpt-o3
+# openai.gpt-4o
+# openai.gpt-4o-mini
+# openai.gpt-5
+# openai.gpt-5-mini
+# openai.gpt-5-nano
+# xai.grok-3
+# xai.grok-4
+# xai.grok-4-fast-reasoning
+# xai.grok-4-fast-non-reasoning
 # meta.llama-3.1-405b-instruct
 # meta.llama-3.3-70b-instruct
 # meta.llama-3.2-90b-vision-instruct
-# meta.llama-4-maverick-17b-128e-instruct-fp8
-# meta.llama-4-scout-17b-16e-instruct
+
 
 message_history=[]
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
-
-
 
 def get_system_text_message(prompt):
         content = oci.generative_ai_inference.models.TextContent()
@@ -78,7 +86,7 @@ def chat(text):
 
     message_history.append(get_user_text_message(text))
     chat_detail.chat_request.messages = message_history
-    llm_response = llm_client.chat(chat_detail)    
+    llm_response = llm_client.chat(chat_detail)   
 #    output = ""
 #    for event in llm_response.data.events():
 #            output +=  json.loads(event.data)['message']['content'][0]["text"]
@@ -104,6 +112,6 @@ llm_request = get_chat_request()
 chat_detail = get_chat_detail(llm_request,scfg["oci"]["compartment"])
 message_history.append(get_system_text_message("provide a brief answer in 2-3sentences"))
 
-print(chat("tell me two things about India"))
+print(chat("tell me two things about Indiai in bullets"))
 print("-----")
 print(chat("tell me more about second thing"))

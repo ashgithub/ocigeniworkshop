@@ -1,0 +1,7 @@
+{
+  // Keep basic type-checking but silence Optional/None warnings
+  "typeCheckingMode": "basic",
+  "reportOptionalCall": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportOptionalSubscript": "none"
+}

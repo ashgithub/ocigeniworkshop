@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 #!/Users/ashish/anaconda3/bin/python
 
 # Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
@@ -10,21 +12,35 @@ import oci
 import json, os 
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
-#LLM_MODEL = "openai.gpt-4.1"
-LLM_MODEL= "meta.llama-4-scout-17b-16e-instruct"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
+
 
 
 # openai.gpt-4.1
 # openai.gpt-4.1-mini
 # openai.gpt-4.1-nano
+# openai.gpt-o1
+# openai.gpt-o3
 # openai.gpt-4o
-# openai.gpt-4o-2024-08-06
-# openai.gpt-4o-2024-11-20
 # openai.gpt-4o-mini
-# openai.gpt-4o-mini-2024-07-18
+# openai.gpt-5
+# openai.gpt-5-mini
+# openai.gpt-5-nano
+# xai.grok-3
+# xai.grok-4
+# xai.grok-4-fast-reasoning
+# xai.grok-4-fast-non-reasoning
+# meta.llama-3.1-405b-instruct
+# meta.llama-3.3-70b-instruct
+# meta.llama-3.2-90b-vision-instruct
+
+
+LLM_MODEL = "xai.grok-4-fast-non-reasoning"
+#LLM_MODEL = "openai.gpt-4.1"
+#LLM_MODEL= "meta.llama-4-scout-17b-16e-instruct"
 
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
@@ -38,18 +54,14 @@ llm_payload = None
 
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
-
-
+    
 
 def get_message(prompt):
         content = oci.generative_ai_inference.models.TextContent()
@@ -70,7 +82,7 @@ def get_chat_request():
         chat_request.temperature = 0.75
         chat_request.top_p = 0.7
         chat_request.top_k = -1 
-        chat_request.frequency_penalty = 1.0
+#        chat_request.frequency_penalty = 1.0 not all models support these
 
         return chat_request
 
@@ -79,12 +91,9 @@ def get_chat_detail (llm_request,compartmentId):
         chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id=LLM_MODEL)
         chat_detail.compartment_id = compartmentId
         chat_detail.chat_request = llm_request
-
+        
         return chat_detail
 
-
-
-#set up the oci gen ai client based on config 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
 
