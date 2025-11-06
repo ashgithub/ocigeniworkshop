@@ -5,12 +5,15 @@
 
 from oci.generative_ai_inference import GenerativeAiInferenceClient
 from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
-import oci, json, os 
+import oci, os
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
 # cohere.command-a-03-2025
 # cohere.command-r-08-2024
@@ -30,15 +33,11 @@ llm_payload = None
 
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-                return json.load(f)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
-        return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
         return None
 
 def get_chat_request():
