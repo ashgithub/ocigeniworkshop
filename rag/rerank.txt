@@ -83,7 +83,7 @@ Learn how to make REST API calls to Oracle Identity Cloud Service using Postman.
 
 https://artifactory.oci.oraclecorp.com/igiu-aia-dev-pypi-local/aia-common-sdk/
 
-ai first client secret: idcscs-01107f95-6c0c-4591-b5d9-e42296e206f2
+ai first client secret: idcscs----
 The Reranker DAC endpoint is ready to use now. The credential I shared in the email can be used to access the endpoint. Endpoint details can be found here: https://gbuconfluence.oraclecorp.com/display/AIAcc/Technical+Design+-+AIA+Services+APIs#:~:text=%7D-,AIA%20Service%20Endpoints%20Details,-Service
  
 Hi Abhijeet,
