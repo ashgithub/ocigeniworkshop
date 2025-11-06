@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+from envyaml import EnvYAML
 #!/Users/ashish/anaconda3/bin/python
 
 # Questions use #generative-ai-agent-users or #igiu-innovation-lab slack channel
@@ -11,23 +13,21 @@ import os,json
 #####
 #make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
 GENAI_URL = "https://agent-runtime.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+                return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
-    
+
 def inference_api(message, session_id, endpoint,preamble=""):
     chat_detail = oci.generative_ai_agent_runtime.models.ChatDetails()
     chat_detail.user_message = preamble + " " + message
@@ -44,8 +44,6 @@ def get_genai_client(config):
         timeout=(10, 240),
     )
 
-
-#set up the oci gen ai client based on config 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
 session_endpoint = scfg["agent"]["endpoint"] 
