@@ -17,8 +17,11 @@ Example code in this module is available both as Jupyter notebook and Python cod
 2. **cohere_chat_stream.py**: Looking at how to process LLM as a stream to reduce response latency.
 3. **cohere_chat_history.py**: How to remember past conversation so LLM can respond within the conversation context.
 4. **cohere_output_schema.py**: Specifying JSON schema to force output to be a specified format.
-5. **llm.ipynb**: Jupyter notebook version of the above.
-6. **oci_language.py, oci-language.ipynb**: LLMs are slow and expensive; SLMs like OCI Language can be useful. Simple examples on how to use the OCI Language service for simple language tasks.
+5. **openai_xai_llama_chat.py**: Simple example using Llama 3-based XAI model in OCI GenAI.
+6. **openai_xai_llama_chat_stream.py**: Streaming Llama-based responses via OCI GenAI.
+7. **openai_xai_llama_chat_history.py**: Maintains conversation history with Llama XAI model.
+8. **llm.ipynb**: Jupyter notebook version of the above.
+9. **oci_language.py, oci-language.ipynb**: LLMs are slow and expensive; SLMs like OCI Language can be useful. Simple examples on how to use the OCI Language service for simple language tasks.
 
 Here are some ideas for projects you can do (see notebook files for details):
 - Create a bot that remembers the conversation.

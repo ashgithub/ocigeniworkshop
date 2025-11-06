@@ -73,8 +73,18 @@ dmypy.json
 .Thumbs.db
 .Trash-*
 
+# OS trash / thumbnails
+.Thumbs.db
+.Trash-*
+
 # Logs
 *.log
+# Lock files
+*.lock
+poetry.lock
+Pipfile.lock
+
+# Large sample assets
 # Lock files
 *.lock
 poetry.lock
