@@ -27,9 +27,7 @@ In this module you’ll explore how Oracle Autonomous Database (23ai) and **Sele
 | NL2SQL demo with Select AI | `nl2sql_demo.py` |
 | Pure Select AI examples (inline SQL) | `selectai.sql` |
 | Full RAG in 23ai (embeddings, similarity search, citations) | `rag.sql` |
-
-Run SQL files with SQLcl or SQL Developer.  
-Run Python with `python database/nl2sql_demo.py`.
+| Ability to cache answers and retrieve them based on similar questions | `llm_semantic_cache.py, semantic_cache.ipynb` |
 
 ---
 
