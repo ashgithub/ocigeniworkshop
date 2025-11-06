@@ -13,8 +13,8 @@ oci:
   compartment: ${OCI_COMPARTMENT_OCID}
 
 db:
-  dsn: innovationlab_medium
-  username: ONNOVATE
+  dsn: aisandboxadw_medium
+  username: aisandboxuser
   password: ${DB_PASSWORD}        # set in .env
   walletPath: ${DB_WALLET_PATH}   # set in .env
   tablePrefix: ${MY_PREFIX}       # set in .env 
@@ -22,8 +22,8 @@ db:
 
 agent:
   session: true
-  endpoint: ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaadoyee3yatdpekkgnpd2xmrqjpkbpjoc6mda6ilsot4rvjn6lkv5
-  no_session_endpoint: cid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaadoyee3yatdpekkgnpd2xmrqjpkbpjoc6mda6ilsot4rvjn6lkv5
+  endpoint: ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaaia3thjll3krauj6ouha224yczth46ui4tof7daqh6nmq
+  no_session_endpoint: ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaa5gokxqx5ytspf5ijxvtvnwxfej6pywy4tdc3uwkun6kq
 
 bucket:
   namespace: axaemuxiyife
