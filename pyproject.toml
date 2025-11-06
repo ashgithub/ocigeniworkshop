@@ -10,5 +10,6 @@ dependencies = [
     "langchain-oci>=0.1.5",
     "langchain-openai>=0.3.35",
     "oci>=2.150.2",
+    "oracledb>=3.4.0",
     "pypdf>=6.1.3",
 ]

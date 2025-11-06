@@ -10,9 +10,8 @@ In this module, we will look at the following abilities:
 4. Introduction to Select AI.
 5. Select AI with RAG.
 
-[link](https://)
 
-Remember to set up your `sandbox.yaml` file per your environment. This module only uses the "oci" and "db" sections.
+Remember to set up your `sandbox.yaml` and `.nev` file per your environment. This module only uses the "oci" and "db" sections.
 
 Oracle 23ai database is used in this module; refer to [this page](https://confluence.oraclecorp.com/confluence/display/D2OPS/AISandbox#AISandbox-ToAccessADW).
 - The database requires the wallet to be downloaded.
@@ -24,8 +23,7 @@ Example code in this module is available both as Jupyter notebook and Python cod
 1. **cohere_chat_citation.py, RAG-chat-citations.ipynb**: Use of `documents` to pass non-public text to LLM and see a response with citations based on it.
 2. **oci_rag_agents.py, RAG-agents.ipynb**: Leverage OCI GenAI Agent service for an out-of-the-box agent (see rag_agents.md for setup).
 3. **cohere_rag_23ai.py, RAG-full.ipynb**: Full home-grown RAG implementation using 23ai.
-4. **select_ai.sql**: SQL script to demonstrate SelectAI capability.
-5. **rag.sql**: SQL script for doing full RAG in database.
+
 
 
 
@@ -44,13 +42,3 @@ Here are a few Slack channels to help you:
 - **#igiu-ai-learning**: If you have issues with environment or can't get your code to work.
 - **#generative-ai-users**: Questions about OCI GenAI.
 - **#adb-select-ai-users**: Questions about Oracle 23ai Select AI.
-
-## Environment Variables
-Create a `.env` file at the project root for sensitive values referenced in `sandbox.yaml`.
-
-Example `.env`:
-```
-MY_PREFIX=your_oracle_id
-DB_PASSWORD=your_db_password
-```
-Load with `python-dotenv` if needed: `pip install python-dotenv` and `from dotenv import load_dotenv; load_dotenv()`.
