@@ -5,12 +5,12 @@
 # file (or export in your shell) to populate them.
 
 oci:
-  # Path to your OCI CLI config (defaults to ~/.oci/config)
-  configFile: ${OCI_CONFIG_FILE}
+  # Path to your OCI CLI config (typically is ~/.oci/config)
+  configFile: ${OCI_CONFIG_FILE}  # set in .env
   # Profile inside the OCI config file
-  profile: ${OCI_PROFILE}
+  profile: ${OCI_PROFILE}       # set in .env
   # Default compartment OCID
-  compartment: ${OCI_COMPARTMENT_OCID}
+  compartment: ${OCI_COMPARTMENT_OCID} # set in .env
 
 db:
   dsn: aisandboxadw_medium
