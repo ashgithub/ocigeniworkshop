@@ -160,8 +160,8 @@ def load_config(config_path):
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: Use the OciOpenAILangGraphClient from openai_oci_client.py to use output models
-llm_client = OciOpenAILangChainClient(
-#llm_client = OciOpenAILangGraphClient(
+#llm_client = OciOpenAILangChainClient(
+llm_client = OciOpenAILangGraphClient(
         profile=scfg['oci']['profile'],
         compartment_id=scfg['oci']['compartment'],
         model=LLM_MODEL,
