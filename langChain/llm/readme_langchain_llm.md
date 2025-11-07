@@ -29,6 +29,7 @@ This module shows how to use OpenAI-compatible LLM models (via OCI) in Python, i
 | `openai_oci_history.py`           | Multi-turn chat conversations and context maintenance.       |
 | `openai_oci_async.py`             | Asynchronous (async/await) completions.                     |
 | `openai_oci_structured_output.py` | Structured/JSON output and schema enforcement.              |
+| `openai_oci_reasoning.py`            | Showing reasoning details via openai responses api       |
 | `openai_oci_llm.ipynb`            | Jupyter notebook walk-through for all features above.       |
 
 ---

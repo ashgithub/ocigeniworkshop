@@ -6,14 +6,15 @@ from dotenv import load_dotenv
 from envyaml import EnvYAML
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from openai_oci_client import OciOpenAILangChainClient
-
+from oci_openai_helper import OCIOpenAIHelper
 #####
 #make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #
 #
 #  OCI's langchain client supports all oci models, but it doesnt support all the features requires for robust agents (output schema, function calling etc)
 #  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
+#
+# ***** NOte this examples use OpenAI native client as async with lang-chain is not working using oci clients
 #  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
 #  if you have errors running sample code reach out for help in #igiu-ai-learning
 #####
@@ -22,7 +23,6 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 LLM_MODEL = "openai.gpt-4.1"
-llm_service_endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 MESSAGE = """
     why is the sky blue? explain in 2 sentences like I am 5
@@ -44,42 +44,37 @@ selected_llms = [
     "openai.gpt-5",
 #    "cohere.command-a-03-2025",      # cohere doesnt support openAi compaitable APIs yet 
 #    "cohere.command-r-08-2024",      # cohere doesnt support openAi compaitable APIs yet 
-    "meta.llama-4-maverick-17b-128e-instruct-fp8",
-    "meta.llama-4-scout-17b-16e-instruct",
+#    "meta.llama-4-maverick-17b-128e-instruct-fp8",
+#    "meta.llama-4-scout-17b-16e-instruct",
     "xai.grok-4",
     "xai.grok-4-fast-non-reasoning"
 ]
 
-def make_client(model_id):
-    return OciOpenAILangChainClient(
-        profile=scfg['oci']['profile'],
-        compartment_id=scfg['oci']['compartment'],
-        model=model_id,
-        service_endpoint=llm_service_endpoint
-    )
+
 
 async def call_ainvoke(client, model_id, message):
     start = time.perf_counter()
-    response = await client.ainvoke(message)
+    response = await client.responses.create(model=model_id, input=message)
     print(f"\n**************************Async Chat Result (ainvoke) for {model_id} **************************")
-    print(response)
+    print(response.output_text)
     print(f"ainvoke done in {time.perf_counter() - start:.2f}s")
-    return response
+    return response.output_text
 
 async def call_astream(client, model_id, message):
     start = time.perf_counter()
     print(f"\n**************************Async Chat Stream (astream) for {model_id} **************************")
-    async for chunk in client.astream(message):
-        if hasattr(chunk, 'additional_kwargs') and 'finish_reason' in chunk.additional_kwargs:
-            print(f"\nFinish Reason: {chunk.additional_kwargs['finish_reason']}")
-            break
-        print(getattr(chunk, 'content', ''), end='', flush=True)
+    async for event in  await client.responses.create(model=model_id, input=message, stream=True):
+        if event.type ==  "response.output_text.delta":
+            print(f"{event.delta}",end="",flush=True)
+        elif event.type == "response.error":
+           print(f"\nError occurred: {event.error}")
+            
     print(f"\nastream done in {time.perf_counter() - start:.2f}s")
 
 async def sequential_run():
     print(f"\n\n*************** Sequential Run ***************\n")
     for llm_id in selected_llms:
-        client = make_client(llm_id)
+        client = OCIOpenAIHelper.get_async_native_client(config=scfg)
         await call_ainvoke(client, llm_id, MESSAGE)
         await call_astream(client, llm_id, MESSAGE)
 
@@ -87,7 +82,7 @@ async def gather_run():
     print(f"\n\n*************** Gather Run (Concurrent) ***************\n")
     tasks = []
     for llm_id in selected_llms:
-        client = make_client(llm_id)
+        client = OCIOpenAIHelper.get_async_native_client(config=scfg)
         tasks.append(call_ainvoke(client, llm_id, MESSAGE))
         tasks.append(call_astream(client, llm_id, MESSAGE))
     await asyncio.gather(*tasks)

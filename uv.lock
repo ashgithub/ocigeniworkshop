@@ -823,6 +823,21 @@ wheels = [
 ]
 
 [[package]]
+name = "oci-openai"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "oci" },
+    { name = "openai" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a8/a9/ca99226f82ddc6a22fcb3820b9b9a6bee0e62605739882e3af544a2e9ac9/oci_openai-0.2.1.tar.gz", hash = "sha256:19ad4cfdedc3bf16f842b13b7a58c16baa2e041e55161a09b604b921eaf7c8f4", size = 143369, upload-time = "2025-11-04T19:56:06.215Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/37/be8140577261c0b79d496963452f2e61805d16916abbde086e041b6e8d16/oci_openai-0.2.1-py3-none-any.whl", hash = "sha256:4311dae5531fbe6d3d3d79421a76e9e8ca1089f35d5fe6a59539e53c591fa6c7", size = 6449, upload-time = "2025-11-04T19:56:04.821Z" },
+]
+
+[[package]]
 name = "openai"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1397,6 +1412,7 @@ dependencies = [
     { name = "langchain-oci" },
     { name = "langchain-openai" },
     { name = "oci" },
+    { name = "oci-openai" },
     { name = "oracledb" },
     { name = "pypdf" },
 ]
@@ -1408,6 +1424,7 @@ requires-dist = [
     { name = "langchain-oci", specifier = ">=0.1.5" },
     { name = "langchain-openai", specifier = ">=0.3.35" },
     { name = "oci", specifier = ">=2.150.2" },
+    { name = "oci-openai", specifier = ">=0.2.1" },
     { name = "oracledb", specifier = ">=3.4.0" },
     { name = "pypdf", specifier = ">=6.1.3" },
 ]
