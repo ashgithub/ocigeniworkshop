@@ -15,8 +15,7 @@ import base64
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from openai_oci_client import OciOpenAILangChainClient
-
+from oci_openai_helper import OCIOpenAIHelper  
 
 
 #####
@@ -30,8 +29,6 @@ MODEL_LIST = [
     "openai.gpt-4.1",
     "xai.grok-4"
 ]
-
-llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 MESSAGE = "tell me this image"
 FILE_TO_ANALYZE = "./vision/dussera-b.jpg"
@@ -62,12 +59,10 @@ for model_id in MODEL_LIST:
     print(f"\n{banner}\nRESULTS FOR MODEL: {model_id}\n{banner}")
     start_time = time.time()
 
-    llm_client = OciOpenAILangChainClient(
-        profile=profile,
-        compartment_id=compartment_id,
-        model=model_id,
-        service_endpoint=llm_service_endpoint
-    )
+    llm_client = OCIOpenAIHelper.get_client(
+        model_name=model_id,
+        config=scfg
+        )
 
     message = {
         "role": "user",
