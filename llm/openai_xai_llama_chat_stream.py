@@ -22,9 +22,8 @@ LLM_URL= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 # xai.grok-4
 # xai.grok-4-fast-reasoning
 # xai.grok-4-fast-non-reasoning
-# meta.llama-3.1-405b-instruct
-# meta.llama-3.3-70b-instruct
-# meta.llama-3.2-90b-vision-instruct
+# meta.llama-4-maverick-17b-128e-instruct-fp8
+# meta.llama-4-scout-17b-16e-instruct
 
 def load_config(config_path):
     """Load configuration from a YAML file."""
