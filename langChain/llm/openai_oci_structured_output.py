@@ -4,7 +4,7 @@ from pydantic import BaseModel,Field
 from typing import List
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from openai_oci_client import OciOpenAILangChainClient, OciOpenAILangGraphClient
+from oci_openai_helper import OCIOpenAIHelper
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
@@ -32,7 +32,6 @@ LLM_MODEL = "openai.gpt-4o" # cohere / meta-llama models does not support struct
 # meta.llama-3.1-405b-instruct
 # meta.llama-3.3-70b-instruct
 
-llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 # In the following section, different output schemas are declared to be used with the models
 
@@ -160,13 +159,11 @@ def load_config(config_path):
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: Use the OciOpenAILangGraphClient from openai_oci_client.py to use output models
-#llm_client = OciOpenAILangChainClient(
-llm_client = OciOpenAILangGraphClient(
-        profile=scfg['oci']['profile'],
-        compartment_id=scfg['oci']['compartment'],
-        model=LLM_MODEL,
-        service_endpoint=llm_service_endpoint
-    )
+
+llm_client = OCIOpenAIHelper.get_client(
+    model_name=LLM_MODEL,
+    config=scfg
+)
 
 
 MESSAGE = """

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from envyaml import EnvYAML
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from openai_oci_client import OciOpenAILangChainClient
+from oci_openai_helper import OCIOpenAIHelper
 
 #####
 #make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
@@ -24,9 +24,6 @@ load_dotenv()
 LLM_MODEL = "openai.gpt-4.1"
 # LLM_MODEL = "openai.gpt-5"
 # available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-
-llm_service_endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
-
 
 
 MESSAGE = """
@@ -48,11 +45,9 @@ scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: create the OpenAI LLM client using credentials and optional parameters
 
-llm_client = OciOpenAILangChainClient(
-    profile=scfg['oci']['profile'],
-    compartment_id=scfg['oci']['compartment'],
-    model=LLM_MODEL,
-    service_endpoint=llm_service_endpoint,
+llm_client = OCIOpenAIHelper.get_client(
+    model_name=LLM_MODEL,
+    config=scfg
 )
 
 # Step 3: Call Single LLM
@@ -75,14 +70,9 @@ selected_llms = [
 # Reinitialize client for each model (since .model assignment isn't supported)
 for llm_id in selected_llms:
     print(f"\n\n**************************Chat Result for {llm_id} **************************")
-    temp_client = OciOpenAILangChainClient(
-        profile=scfg['oci']['profile'],
-        compartment_id=scfg['oci']['compartment'],
-        model=llm_id,
-        service_endpoint=llm_service_endpoint
-    )
+    llm_client.model_name = llm_id 
     start_time = time.time()
-    response = temp_client.invoke(MESSAGE)
+    response = llm_client.invoke(MESSAGE)
     end_time = time.time()
     print(response)
     print(f"\n Time taken for {llm_id}: {end_time - start_time:.2f} seconds\n\n")
