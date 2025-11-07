@@ -4,13 +4,11 @@ from dotenv import load_dotenv
 from envyaml import EnvYAML
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from openai_oci_client import OciOpenAILangChainClient
+from oci_openai_helper import OCIOpenAIHelper
 from langchain_core.messages import HumanMessage
 
 #####
 # List of available models (uncomment/change LLM_MODEL as needed)
-# cohere.command-a-03-2025
-# cohere.command-r-08-2024
 # meta.llama-3.1-405b-instruct
 # meta.llama-3.3-70b-instruct
 # openai.gpt-4.1
@@ -47,13 +45,7 @@ def load_config(config_path):
 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
-def make_client():
-    return OciOpenAILangChainClient(
-        profile=scfg['oci']['profile'],
-        compartment_id=scfg['oci']['compartment'],
-        model=LLM_MODEL,
-        service_endpoint=llm_service_endpoint
-    )
+
 
 questions = [
     "Tell me something about Oracle",
@@ -62,7 +54,10 @@ questions = [
 ]
 
 if __name__ == "__main__":
-    client = make_client()
+    client = OCIOpenAIHelper.get_client(
+    model_name=LLM_MODEL,
+    config=scfg
+    )
 
     print("\n====== WITHOUT History (Stateless each turn) ======")
     for idx, q in enumerate(questions):

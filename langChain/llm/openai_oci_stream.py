@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from envyaml import EnvYAML
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from openai_oci_client import OciOpenAILangChainClient
+from oci_openai_helper import OCIOpenAIHelper
 
 #####
 #make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
@@ -21,7 +21,7 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 LLM_MODEL = "openai.gpt-4.1"
-llm_service_endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+
 
 MESSAGE = """
     why is the sky blue? explain in 2 sentences like I am 5
@@ -49,17 +49,14 @@ selected_llms = [
     "xai.grok-4-fast-non-reasoning"
 ]
 
-def make_client(model_id):
-    return OciOpenAILangChainClient(
-        profile=scfg['oci']['profile'],
-        compartment_id=scfg['oci']['compartment'],
-        model=model_id,
-        service_endpoint=llm_service_endpoint
-    )
+
 
 if __name__ == "__main__":
     for model_id in selected_llms:
-        client = make_client(model_id)
+        client = OCIOpenAIHelper.get_client(
+            model_name=model_id,
+            config=scfg
+            )
 
         print(f"\n**************************Chat Result (invoke) for {model_id} **************************")
         start = time.perf_counter()
