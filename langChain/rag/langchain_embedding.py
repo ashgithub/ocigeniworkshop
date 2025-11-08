@@ -1,10 +1,38 @@
-""" Sample file to perform embedding using langchain_oci methods and traditional GenAI connections """
+"""
+What this file does:
+Demonstrates embedding generation using OCI Generative AI for chunks from a PDF document.
+
+Documentation to reference:
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- LangChain: https://docs.langchain.com/oss/python/langchain/overview
+- OCI langchain SDK: https://github.com/oracle-devrel/langchain-oci-genai  note: as of Nov 2025 it is not compatible with langchain v1.0. supports all OCI models including Cohere
+- OCI GenAI SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
+
+Relevant slack channels:
+ - #generative-ai-users: for questions on OCI Gen AI 
+ - #igiu-innovation-lab: general discussions on your project 
+ - #igiu-ai-learning: help with sandbox environment or help with running this code 
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run langChain/rag/langchain_embedding.py
+
+Comments to important sections of file:
+- Step 1: Load config and initialize clients.
+- Step 2: Load and chunk the PDF document.
+- Step 3: Generate embeddings for chunks.
+- Step 4: Display results.
+"""
+
 import os
 import json
 import oci
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-# from langchain_oci.embeddings import OCIGenAIEmbeddings  requirexs langchain 0.3x, doesnt work with 1.0.0 yet
+# from langchain_oci.embeddings import OCIGenAIEmbeddings  requires langchain 0.3x, doesn't work with 1.0.0 yet
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
@@ -18,7 +46,7 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 EMBED_MODEL = "cohere.embed-english-light-v3.0"
-# Availble embedding models https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm#embed-models
+# Available embedding models https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm#embed-models
 
 # cohere.embed-v4.0
 # cohere.embed-multilingual-v3.0
@@ -28,7 +56,17 @@ EMBED_MODEL = "cohere.embed-english-light-v3.0"
 
 OCI_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-# Step 1: load the config files
+def get_embed_payload(chunks, embed_type):
+    """Build embedding payload for OCI Generative AI."""
+    embed_text_detail = EmbedTextDetails()
+    embed_text_detail.serving_mode = OnDemandServingMode(model_id=EMBED_MODEL)
+    embed_text_detail.truncate = embed_text_detail.TRUNCATE_END
+    embed_text_detail.input_type = embed_type
+    embed_text_detail.compartment_id = compartment_id
+    embed_text_detail.inputs = chunks
+    return embed_text_detail
+
+# Step 1: Load config and initialize clients
 def load_config(config_path):
     """Load configuration from a YAML file."""
     try:
@@ -46,8 +84,14 @@ config = oci.config.from_file(
 )
 compartment_id = scfg["oci"]["compartment"]
 
-""" Load document and chunk, details on langchain_chunks.py """
+embed_client = GenerativeAiInferenceClient(
+     config=config,
+     service_endpoint=OCI_ENDPOINT,
+     retry_strategy=oci.retry.NoneRetryStrategy(),
+     timeout=(10, 240),
+ )
 
+# Step 2: Load and chunk the PDF document
 pdf_path = "./langChain/rag/Sample1.pdf"
 loader = PyPDFLoader(pdf_path)
 docs = loader.load()
@@ -57,51 +101,28 @@ text_splitter = RecursiveCharacterTextSplitter(
     add_start_index=True
 )
 splits = text_splitter.split_documents(docs)
-
-# Extract the content from the chunks
 texts = [chunk.page_content for chunk in splits]
 
-""" Start the embedding phase """
+print(f"Created {len(splits)} text chunks for embedding.")
 
-# Langchain mode ; requires langchain < 1.0.0
+# Step 3: Generate embeddings for chunks
+# Uncomment below for LangChain mode (requires langchain 0.3x, doesn't work with 1.0.0 yet)
+# llm_embed_client = OCIGenAIEmbeddings(
+#     model_id=EMBED_MODEL,
+#     service_endpoint=OCI_ENDPOINT,
+#     compartment_id=compartment_id
+# )
+# embeddings = llm_embed_client.embed_documents(texts)
 
-#llm_embed_client = OCIGenAIEmbeddings(
-#    model_id=EMBED_MODEL,
-#    service_endpoint=LLM_ENDPOINT,
-#    compartment_id=compartment_id
-#)
 
-
-# Step 2: Use the common langchain_oci library to perform embedding
-# Use the OCI langchain client to perform the embeddings
-#embeddings = llm_embed_client.embed_documents(texts)
-
-# Traditional mode: Use the oci_gen_ai service instances
-
-llm_client = GenerativeAiInferenceClient(
-     config=config,
-     service_endpoint=OCI_ENDPOINT,
-     retry_strategy=oci.retry.NoneRetryStrategy(),
-     timeout=(10, 240),
- )
- 
-def get_embed_payload(chunks, embed_type):
-    """Build embedding payload for OCI Generative AI."""
-    embed_text_detail = EmbedTextDetails()
-    embed_text_detail.serving_mode = OnDemandServingMode(model_id=EMBED_MODEL)
-    embed_text_detail.truncate = embed_text_detail.TRUNCATE_END
-    embed_text_detail.input_type = embed_type
-    embed_text_detail.compartment_id = compartment_id
-    embed_text_detail.inputs = chunks
-    return embed_text_detail
-
+# we will use the oci apis for embedding
 embed_payload = get_embed_payload(texts, EmbedTextDetails.INPUT_TYPE_SEARCH_DOCUMENT)
-embed_response = llm_client.embed_text(embed_payload)
-
+embed_response = embed_client.embed_text(embed_payload)
 embeddings = embed_response.data.embeddings
+
 print(f"Generated {len(embeddings)} embeddings.")
 
-# Text + embeding for display
+# Step 4: Display results
 embedded_docs = [
     {
         "text": texts[i],
