@@ -1,8 +1,9 @@
-import os
 from envyaml import EnvYAML
-import httpx
 from langchain_openai import ChatOpenAI
 from oci_openai import OciUserPrincipalAuth, AsyncOciOpenAI
+from pydantic import SecretStr
+import httpx
+
 
 class OCIOpenAIHelper:
     @staticmethod
@@ -24,7 +25,7 @@ class OCIOpenAIHelper:
 
         client = ChatOpenAI(
             model=model_name,
-            api_key="OCI",
+            api_key=SecretStr("OCI"),
             base_url=base_url,
             http_client=httpx.Client(
                 auth=OciUserPrincipalAuth(profile_name=config['oci']['profile']),
