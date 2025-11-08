@@ -9,7 +9,7 @@ from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDet
 import oracledb
 import array
 import oci
-import os,json 
+import os
 
 #####
 #make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 

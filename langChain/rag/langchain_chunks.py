@@ -9,7 +9,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Using LangChain community document loader
 # Sample PDF document
-pdf_path = "Sample1.pdf"
+pdf_path = "./langChain/rag/Sample1.pdf"
 
 # Step 1: load the documents
 print(f"Loading PDF: {pdf_path}")
@@ -18,7 +18,7 @@ docs = loader.load()  # returns a list of Document objects
 
 # Look at the document details
 print(f"Loaded {len(docs)} pages from the PDF.")
-print(f"Example page content:\n{docs[0].page_content[:250]}...\n")
+print(f"Example page content:\n{docs[0].page_content[:300]}...\n")
 
 # Other option to build custom document chunks without the document loader
 # documents = [
@@ -55,5 +55,14 @@ text_splitter = RecursiveCharacterTextSplitter(
 splits = text_splitter.split_documents(docs) 
 print(f"Created {len(splits)} text chunks for embedding.")
 
-# Inspect one split contained
-print(f"Example chunk:\n{splits[0].page_content[:250]}...\n")
+# Inspect the first 3 splits, clearly separated
+num_to_show = min(3, len(splits))
+print(f"Showing the first {num_to_show} chunks (out of {len(splits)}):")
+for i, doc in enumerate(splits[:num_to_show], start=1):
+    start = doc.metadata.get("start_index", "N/A") if isinstance(doc.metadata, dict) else "N/A"
+    page = doc.metadata.get("page", doc.metadata.get("page_number", "N/A")) if isinstance(doc.metadata, dict) else "N/A"
+    print("\n" + "=" * 20 + f" Chunk {i}/{num_to_show} | page={page} | start_index={start} " + "=" * 20)
+    # Show a preview of the chunk content (first 400 chars)
+    preview = doc.page_content[:400] + ("..." if len(doc.page_content) > 400 else "")
+    print(preview)
+    print("\n" + "=" * 60 + "\n")
