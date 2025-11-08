@@ -20,7 +20,7 @@ Env setup:
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
-uv run langChain/rag/langchain_rag_23ai.py
+uv run langChain/rag/langchain_rag_26ai.py
 
 Comments to important sections of file:
 - Step 1: Load config and initialize clients.

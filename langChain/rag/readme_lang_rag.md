@@ -17,7 +17,7 @@ Oracle AI database is used in this module. Refer to [this page](https://confluen
 ## Environment Setup
 - `sandbox.yaml`: Contains OCI config, compartment, DB details, and wallet path.
 - `.env`: Load environment variables (e.g., API keys if needed).
-- Ensure you have access to Oracle 23 AI DB and OCI Generative AI services.
+- Ensure you have access to Oracle 26 AI DB and OCI Generative AI services.
 
 ## Suggested Study Order and File Descriptions
 The files are designed to build upon each other. Study them in this order for a progressive understanding:
@@ -37,9 +37,9 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: `uv run langChain/rag/langchain_semantic_search.py`.
    - Docs: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/), [OCI GenAI SDK](https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models).
 
-4. **langchain_rag_23ai.py**: Demonstrates a full RAG (Retrieval-Augmented Generation) example using OCI Generative AI for embeddings and LLM, with Oracle DB for vector storage and semantic search.
+4. **langchain_rag_26ai.py**: Demonstrates a full RAG (Retrieval-Augmented Generation) example using OCI Generative AI for embeddings and LLM, with Oracle DB for vector storage and semantic search.
    - Key features: Embeds documents, stores in DB, retrieves context, generates answers via LLM with citations.
-   - How to run: `uv run langChain/rag/langchain_rag_23ai.py`.
+   - How to run: `uv run langChain/rag/langchain_rag_26ai.py`.
    - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview).
 
 ## Project Ideas
