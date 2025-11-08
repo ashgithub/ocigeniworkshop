@@ -6,9 +6,9 @@ Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - LangChain: https://docs.langchain.com/oss/python/langchain/overview
 - Oracle DB Vectors: https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/
-- https://github.com/oracle-samples/oci-openai
-- https://github.com/oracle-devrel/langchain-oci-genai
-- https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API 
+- OCI langchain SDK: https://github.com/oracle-devrel/langchain-oci-genai  note: as of Nov 2025 it is not compatible with langchain v1.0. supports all OCI models including Cohere
+- OCI GenAI SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
 Relevant slack channels:
  - #generative-ai-users: for questions on OCI Gen AI 
