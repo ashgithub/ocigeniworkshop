@@ -6,7 +6,7 @@ Intro
 - 
 
 ----
-llm- 
+******* llm- 
 chat.py
 1. system prompt
 2. multiple models
@@ -50,14 +50,14 @@ rag
    - reranking
    - 
   
-  database: 
+******  database: 
     - select ai
     - NL2SQL
     - clsql mcp server 
 
 
 
-speech
+****** speech
     - tts
       - englihs
       - otehr
@@ -67,7 +67,7 @@ speech
       - english
       - other
   
-vision
+******* vision
     - document understanding
     - vision
     - multi model
@@ -81,3 +81,43 @@ cline
 demos
   - ai world demos
   - current projects
+  -----
+  - Create an isolated checkout and branch:
+  - git worktree add ../workshop-langchain-test -b chore/langchain-upgrade-test
+
+- In the new worktree:
+
+  - cd ../workshop-langchain-test
+  - uv venv .venv-langchain-test
+  - source .venv-langchain-test/bin/activate
+
+- Install current, locked deps:
+
+  - If uv.lock exists: uv sync --frozen
+  - If no uv.lock yet: uv lock && uv sync
+
+- Try the new LangChain without touching main:
+
+  - Pin explicitly (examples):
+
+    - uv add "langchain==<target_version>"
+    - If needed with split packages: uv add "langchain-core==" "langchain-community==" "langchain-openai=="
+
+  - Or upgrade in-place without changing pyproject pins:
+    - uv lock --upgrade-package langchain
+
+- Run your smoke scripts in the sandbox:
+
+  - python langChain/function_calling/langchain_step.py
+  - python langChain/llm/openai_oci_chat.py
+  - (add any others you rely on)
+
+- Inspect changes:
+
+  - git status; git diff
+
+  - If it works, keep commits on this branch; if not, remove sandbox:
+
+    - deactivate
+    - cd ../workshop-langchain-test/.. && git worktree remove workshop-langchain-test
+    - git branch -D chore/langchain-upgrade-test
