@@ -1,36 +1,27 @@
-import json
-from langchain_oci.chat_models import ChatOCIGenAI
-from langchain_core.tools import tool
+import sys,os
+from langchain.tools import tool
 from langchain_core.messages import HumanMessage
 
+from dotenv import load_dotenv
+from envyaml import EnvYAML
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from oci_openai_helper import OCIOpenAIHelper
+
 # How to build tools: https://python.langchain.com/docs/how_to/custom_tools/
+# NEW langchain version: https://docs.langchain.com/oss/python/langchain/agents
+# Version langchain 1.0.0 not compatible with langchain_oci current version 0.1.5
 
-@tool
-def get_weather(city:str) -> str:
-    """ Gets the weather for a given city """
-    return f"The weather in {city} is 70 Fahrenheit"
 
-# This tool depends on weather, which is information that the model initially doesn't have
-# Requires the model to reason and call first the get_weather tool to complete the arguments in the bill projection
-@tool
-def get_projection_bill(current_bill:int, gas_oven:bool, weather:int) -> int:
-    """ Returns the projected bill for a user depending on the current one and if it has or not oven, also the weather of the city"""
-    if gas_oven:
-        return current_bill + 45 + weather
-    return current_bill + 4 + weather
-
-tools = [get_weather,get_projection_bill]
 
 #####
-#make sure your sandbox.json file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
+#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #####
-SANDBOX_CONFIG_FILE = "sandbox.json"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
+load_dotenv()
 
-LLM_MODEL = "openai.gpt-4o"
+LLM_MODEL =  "openai.gpt-4.1"
 
-# available models : https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-# cohere.command-a-03-2025
-# cohere.command-r-08-2024
 # meta.llama-3.1-405b-instruct
 # meta.llama-3.3-70b-instruct
 # openai.gpt-4.1
@@ -38,42 +29,42 @@ LLM_MODEL = "openai.gpt-4o"
 # xai.grok-4
 # xai.grok-3
 
-llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+@tool
+def get_weather(city:str) -> str:
+    """ Gets the weather for a given city """
+    return f"The weather in {city} is 70 Fahrenheit"
+
+@tool
+def get_projection_bill(current_bill:int, gas_oven:bool) -> int:
+    """ Returns the projected bill for a user depending on the current one and if it has or not oven """
+    if gas_oven:
+        return current_bill + 45
+    return current_bill + 4
+
+tools = [get_weather,get_projection_bill]
 
 def load_config(config_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     try:
         with open(config_path, 'r') as f:
-                return json.load(f)
+            return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in configuration file '{config_path}': {e}")
-        return None
 
-# Step 1: load the config file
+def pretty_print(response):
+    for i, m in enumerate(response["messages"], 1):
+        role = getattr(m, "type", m.__class__.__name__)
+        content = m.content if isinstance(m.content, str) else str(m.content)
+        print(f"{i:>2}. [{role.upper()}] {content}")
+       
+# Step 1: Load the config file 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
-PREAMBLE = """ Use the message context when provided """
-
-# Step 2: build a LLM client
-llm_client = ChatOCIGenAI(
-    model_id= LLM_MODEL,
-    service_endpoint= llm_service_endpoint,
-    compartment_id= scfg['oci']['compartment'],
-    auth_file_location= scfg["oci"]["configFile"],
-    auth_profile= scfg["oci"]["profile"],
-    model_kwargs={
-        "temperature":0.7,
-        "max_tokens": 500,
-        # "preamble_override": PREAMBLE, # Not supported by openai / grok / meta models
-        "is_stream": False,
-        "seed": 7555,
-        "top_p": 0.7,
-        "top_k": 1, # Different from 0 for meta models
-        # "frequency_penalty": 0.0 # Not supported by openai / grok models
-    }
+# Step 2: create the OpenAI LLM client using credentials and optional parameters
+llm_client = OCIOpenAIHelper.get_client(
+    model_name=LLM_MODEL,
+    config=scfg, use_responses_api=True
 )
 
 # Step 3: Add some messages to the context list
