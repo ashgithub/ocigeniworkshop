@@ -1,4 +1,26 @@
-""" Sample file to load and chunk documents using LangChain text splitters """
+"""
+What this file does:
+Demonstrates loading and chunking documents using LangChain text splitters.
+
+Documentation to reference:
+- LangChain: https://docs.langchain.com/oss/python/langchain/overview
+- Document loaders: https://docs.langchain.com/oss/python/langchain/knowledge-base#1-documents-and-document-loaders
+- Text splitters: https://docs.langchain.com/oss/python/integrations/splitters
+
+Relevant slack channels:
+ - #igiu-innovation-lab: general discussions on your project 
+ - #igiu-ai-learning: help with sandbox environment or help with running this code 
+
+Env setup:
+- No specific environment setup required for this file.
+
+How to run the file:
+uv run langChain/rag/langchain_chunks.py
+
+Comments to important sections of file:
+- Step 1: Load the documents.
+- Step 2: Use text splitters.
+"""
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -11,7 +33,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 # Sample PDF document
 pdf_path = "./langChain/rag/Sample1.pdf"
 
-# Step 1: load the documents
+# Step 1: Load the documents
 print(f"Loading PDF: {pdf_path}")
 loader = PyPDFLoader(pdf_path)
 docs = loader.load()  # returns a list of Document objects
@@ -32,7 +54,7 @@ print(f"Example page content:\n{docs[0].page_content[:300]}...\n")
 #     ),
 # ]
 
-# Step 2: use text splitters
+# Step 2: Use text splitters
 
 # LangChain Text splitter, most common: recursive
 # Splits according to default list ["\n\n","\n"," ",""]
