@@ -1,8 +1,13 @@
+""" Sample langfuse integration using the langchain agent """
+from langfuse import Langfuse
+from langfuse.langchain import CallbackHandler
+
 import sys
 import os
 from typing import Any
 
 from langchain_core.tools import tool
+from langchain.agents import create_agent
 from dotenv import load_dotenv
 from envyaml import EnvYAML
 from langgraph.graph import StateGraph, START, END
@@ -13,6 +18,8 @@ from langchain_core.runnables import RunnableConfig
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
+
+# Langfuse reference: https://langfuse.com/integrations/frameworks/langchain
 
 #####
 #make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
@@ -34,8 +41,6 @@ LLM_MODEL = "xai.grok-4"
 # xai.grok-3
 # available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
-# Step 1: load config 
-
 def load_config(config_path):
     """Load configuration from a YAML file."""
     try:
@@ -47,13 +52,23 @@ def load_config(config_path):
 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
-# Step 2: create the OpenAI LLM client using credentials and optional parameters
+# Langfuse API connection
+langfuse = Langfuse(
+    public_key=scfg['langfuse']['langfuse_pk'],
+    secret_key=scfg['langfuse']['langfuse_sk'],
+    host=scfg['langfuse']['langfuse_host']
+)
 
+# Calls handler to enable tracing
+langfuse_handler = CallbackHandler()
+
+# Simple model
 openai_llm_client = OCIOpenAIHelper.get_client(
     model_name=LLM_MODEL,
     config=scfg
 )
 
+# Some tool(s)
 @tool
 def get_weather(city:str) -> str:
     """ Gets the weather for a given city """
@@ -69,82 +84,35 @@ def get_projection_bill(current_bill:int, gas_oven:bool, weather:int) -> int:
     return current_bill + 4 + weather
 
 tools = [get_weather,get_projection_bill]
-tools_by_name = {tool.name: tool for tool in tools}
-llm_with_tools = openai_llm_client.bind_tools(tools)
 
-# Nodes
-def llm_call(state: MessagesState):
-    """LLM decides whether to call a tool or not"""
-    # In this function, you can also use a call to a langchain agent using create_agent
-    # This function can call any kind of tooled agent of preference
-    # Here, we use binded tools just as simplier demonstration.
-
-    return {
-        "messages": [
-            llm_with_tools.invoke(
-                [
-                    SystemMessage(
-                        content="You are a helpful assistant."
-                    )
-                ]
-                + state["messages"]
-            )
-        ]
-    }
-
-
-def tool_node(state:MessagesState) -> dict[Any,Any]:
-    """Performs the tool call"""
-
-    result = []
-    for tool_call in state["messages"][-1].tool_calls: # type: ignore[attr-defined]
-        tool = tools_by_name[tool_call["name"]]
-        observation = tool.invoke(tool_call["args"])
-        result.append(ToolMessage(content=observation, tool_call_id=tool_call["id"]))
-    return {"messages": result}
-
-
-# Conditional edge function to route to the tool node or end based upon whether the LLM made a tool call
-def should_continue(state: MessagesState) -> str:
-    """Decide if we should continue the loop or stop based upon whether the LLM made a tool call"""
-
-    messages = state["messages"]
-    last_message = messages[-1]
-
-    # If the LLM makes a tool call, then perform an action
-    if last_message.tool_calls: # type: ignore[attr-defined]
-        return "tool_node"
-
-    # Otherwise, we stop (reply to the user)
-    return END
-
-
-# Build workflow
-agent_builder = StateGraph(MessagesState)
-
-# Add nodes
-agent_builder.add_node("llm_call", llm_call)
-agent_builder.add_node("tool_node", tool_node)
-
-# Add edges to connect nodes
-agent_builder.add_edge(START, "llm_call")
-agent_builder.add_conditional_edges(
-    "llm_call",
-    should_continue,
-    ["tool_node", END]
+# Simple agent
+agent = create_agent(
+    model=openai_llm_client,
+    tools=tools,
+    system_prompt="Use the tools when requested, you are a helpful assistant",
+    name="Sample_workshop_agent"                        # Name to identify the agent in tracing
 )
-agent_builder.add_edge("tool_node", "llm_call")
 
-# Compile the agent
-agent = agent_builder.compile(checkpointer=InMemorySaver())
+config:RunnableConfig = {
+    "callbacks": [langfuse_handler],
+    "metadata":{
+        "langfuse_user_id": "some_user_id",             # To differenciate across users using our applications
+        "langfuse_session_id": "session-1234",          # Store all the traces in one single session for multiturn conversations
+        "langfuse_tags": ["workshop", "langfuse-test"]  # Add tags to filter in the console
+    }}
 
-# Invoke
 MESSAGE = "Which will be my projected bill? I'm in San Frnacisco, and I have oven. My past bill was $45"
-config: RunnableConfig = {"configurable": {"thread_id": "1"}}
 
-messages = agent.invoke(
+print(f"************************** Agent stream invokation and details for each step **************************")
+for chunk in agent.stream(
     input={"messages": [HumanMessage(MESSAGE)]}, 
+    stream_mode="values",
     config=config
-)
-for m in messages["messages"]:
-    print(m)
+):
+    # Messages are added to the agent state, that is why we access the last message
+    latest_message = chunk["messages"][-1]
+    if latest_message.content:
+        print(f"Agent: {latest_message.content}")
+    elif latest_message.tool_calls:
+        # Check any tool calls
+        print(f"Calling tools: {[tc['name'] for tc in latest_message.tool_calls]}")

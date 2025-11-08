@@ -29,3 +29,8 @@ bucket:
   namespace: axaemuxiyife
   bucketName: AISandbox-Bucket
   prefix: ${MY_PREFIX}             # set. in .env  
+
+langfuse:
+  langfuse_pk: ${LANGFUSE_PK}         # set. in .env  
+  langfuse_sk: ${LANGFUSE_SK}         # set. in .env  
+  langfuse_host: ${LANGFUSE_HOST}     # set. in .env
