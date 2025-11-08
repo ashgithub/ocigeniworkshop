@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from envyaml import EnvYAML
 # Library specification:
 # https://python.langchain.com/docs/integrations/providers/oci/
+# https://github.com/oracle-devrel/langchain-oci-genai
 
 #####
 #make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
@@ -14,6 +15,7 @@ from envyaml import EnvYAML
 #  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
 #  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
 #  if you have errors running sample code reach out for help in #igiu-ai-learning
+#   note this will require to downgrade the langchain to 0.3.27 as this is not compatible with langchain 1.0.0
 #####
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()

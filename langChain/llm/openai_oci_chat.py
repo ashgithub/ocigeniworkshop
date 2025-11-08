@@ -1,4 +1,3 @@
-import json
 import time
 import sys
 import os
@@ -95,17 +94,7 @@ except AttributeError:
 
 # Step 5: max token
 print(f"\n\n**************************Chat Result With max_tokens 10 for {llm_id}**************************")
-try:
-    llm_client.max_tokens = 10
-except AttributeError:
-    # Some clients may need to be reconstructed or have a kwargs update
-    llm_client = OciOpenAILangChainClient(
-        profile=scfg['oci']['profile'],
-        compartment_id=scfg['oci']['compartment'],
-        model=llm_id,
-        service_endpoint=llm_service_endpoint,
-    )
-    # If an initialization parameter is required, extend client code to accept it
+llm_client.max_tokens = 10
 response = llm_client.invoke(MESSAGE)
 try:
     print(response.additional_kwargs['finish_reason'])
