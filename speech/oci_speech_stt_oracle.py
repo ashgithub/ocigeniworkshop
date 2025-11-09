@@ -1,26 +1,35 @@
 """
-oci_speech_stt_refactored.py
-───────────────────────────────────────────────────────────────────────────────
-Oracle Cloud Infrastructure – Speech-to-Text (STT) helper script.
+What this file does:
+Oracle Cloud Infrastructure – Speech-to-Text (STT) helper script using Oracle model. Uploads audio to Object Storage, submits transcription job, polls for completion, downloads results (TXT + optional SRT).
 
-Docs / Links
+Documentation to reference:
 • Service docs:    https://docs.oracle.com/en-us/iaas/Content/speech/home.htm
 • Python SDK:      https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_speech
 • Real time:       https://github.com/oracle/oci-ai-speech-realtime-python-sdk
+• Model comparison: https://docs.oracle.com/en-us/iaas/Content/speech/using/speech.htm#compare-models
+
+Relevant slack channels:
 • Support Slack:   #oci_speech_service_users   |  #igiu-innovation-lab
 • Troubleshooting: #igiu-ai-learning
 
-This script uploads an audio file to Object Storage, submits a transcription
-job, polls until completion, and downloads the result (TXT + optional SRT). This verison uses Oracle model. 
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, bucket details.
+- .env: Load environment variables if needed.
 
-see this for comparision of whisper & oracle models: https://docs.oracle.com/en-us/iaas/Content/speech/using/speech.htm#compare-models
+How to run the file:
+uv run speech/oci_speech_stt_oracle.py --file speech/voice_sample_english.mp3 --language en-US
 
-The structure mirrors vision/oci_vision.py for consistency:
-    1. Constants & configuration
-    2. Small helper functions (upload, job creation, etc.)
-    3. main() orchestrator built on argparse
-    4. Standard Python entry point
-───────────────────────────────────────────────────────────────────────────────
+Comments to important sections of file:
+- Step 1: Load config and initialize clients.
+- Step 2: Upload audio file to Object Storage.
+- Step 3: Submit transcription job.
+- Step 4: Wait for job completion.
+- Step 5: Download transcription results.
+
+Experimentation ideas:
+- Try different audio files by changing --file parameter.
+- Experiment with different languages using --language flag.
+- Add more output formats like SRT by using --formats flag.
 """
 from __future__ import annotations
 
@@ -321,7 +330,7 @@ def main() -> None:  # noqa: C901
     args = parser.parse_args()
 
 
-    # 1. Load sandbox.yaml
+    # Step 1: Load config and initialize clients
     scfg = load_config(SANDBOX_CONFIG_FILE)
     if scfg is None or "oci" not in scfg or "bucket" not in scfg:
         logger.error("Invalid sandbox configuration.")
@@ -334,11 +343,11 @@ def main() -> None:  # noqa: C901
     compartment_id = scfg["oci"]["compartment"]
     prefix = bucket_cfg["prefix"]
 
-    # 2. Upload audio
+    # Step 2: Upload audio file to Object Storage
     if not upload_audio(oci_cfg, bucket_cfg, args.file, prefix):
         return
 
-    # 3. Submit job
+    # Step 3: Submit transcription job
     speech_client = get_speech_client(oci_cfg)
     job_id = create_transcription_job(
         speech_client,
@@ -352,12 +361,12 @@ def main() -> None:  # noqa: C901
     if job_id is None:
         return
 
-    # 4. Wait for completion
+    # Step 4: Wait for job completion
     job = wait_for_job(speech_client, job_id)
     if job is None:
         return
 
-    # 5. Download outputs
+    # Step 5: Download transcription results
     download_outputs(oci_cfg, bucket_cfg, job.output_location.prefix, args.file)
 
 

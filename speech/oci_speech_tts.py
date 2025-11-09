@@ -1,26 +1,34 @@
 """
-oci_speech_tts_whisper.py
-───────────────────────────────────────────────────────────────────────────────
-Oracle Cloud Infrastructure – Text-to-Speech (TTS) helper script.
+What this file does:
+Oracle Cloud Infrastructure – Text-to-Speech (TTS) helper script. Reads UTF-8 text from file, detects dominant language using OCI AI Language, maps to voice, synthesizes MP3.
 
-Docs / Links
-• Service docs:  https://docs.oracle.com/en-us/iaas/Content/speech/using/using-tts.htm
-  (lists all supported languages & voices and their language-codes)
+Documentation to reference:
+• Service docs:  https://docs.oracle.com/en-us/iaas/Content/speech/using/using-tts.htm (lists supported languages & voices)
 • Python SDK:    https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_speech
+• OCI Language:  https://docs.oracle.com/en-us/iaas/api/#/en/language/20221001/
+
+Relevant slack channels:
 • Slack:         #oci_speech_service_users  |  #igiu-innovation-lab
 • Troubleshoot:  #igiu-ai-learning
 
-Overview
---------
-1. Read UTF-8 text from a file (defaults to speech/text_sample_english.txt).  
-2. Detect the dominant language with OCI AI Language (batch API).  
-3. Map that language code to a (voice_id, oci_language_code) pair.  
-4. Call OCI TTS and save an MP3 with the same basename as the input file.  
-5. All parameters have sensible defaults; run with no flags for a quick demo.
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment.
+- .env: Load environment variables if needed.
 
-Example
-    python speech/oci_speech_tts_whisper.py
-    python speech/oci_speech_tts_whisper.py speech/text_sample_spanish.txt
+How to run the file:
+uv run speech/oci_speech_tts.py speech/text_sample_english.txt
+
+Comments to important sections of file:
+- Step 1: Load config and initialize clients.
+- Step 2: Read text from input file.
+- Step 3: Detect dominant language.
+- Step 4: Map language to voice and synthesize speech.
+- Step 5: Save MP3 output.
+
+Experimentation ideas:
+- Try different text files in various languages.
+- Experiment with different voices by modifying LANGUAGE_TTS_MAP.
+- Change sample rate or output format in synthesize_mp3 function.
 """
 from __future__ import annotations
 
@@ -197,6 +205,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # Step 1: Parse arguments and validate input file
     if not args.text_file.exists():
         log.error("File not found: %s", args.text_file)
         return
@@ -205,15 +214,18 @@ def main() -> None:
         log.error("Input file is empty.")
         return
 
+    # Step 2: Load config and initialize clients
     scfg = load_yaml(args.config)
     if scfg is None:
         return
     cfg = make_oci_config(scfg)
     compartment = scfg["oci"]["compartment"]
 
+    # Step 3: Detect dominant language
     lang_code = detect_language(text, cfg, compartment)
     voice_id, oci_lang = voice_and_lang_for(lang_code)
 
+    # Step 4: Map language to voice and synthesize speech
     mp3_path = args.text_file.with_suffix(".mp3")
     log.info("Synthesizing with voice '%s' (%s)", voice_id, oci_lang)
     synthesize_mp3(text, voice_id, oci_lang, mp3_path, cfg, compartment)
