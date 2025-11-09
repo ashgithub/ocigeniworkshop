@@ -1,22 +1,31 @@
-"""Natural-Language → SQL demo for the AIWorkshop database (SH schema).
+"""
+What this file does:
+Demonstrates Natural-Language-to-SQL (NL2SQL) conversion using OCI Generative AI. It translates plain English questions into SQL queries that execute against the SH (Sales History) schema in Oracle Database, displaying results in a formatted table.
 
-This script:
-  • Loads OCI + database credentials from *sandbox.yaml*
-  • Prompts OCI Generative AI to translate a user question into SQL
-  • Executes that SQL against the SH schema with python-oracledb (wallet-based)
-  • Prints the results as a simple ASCII table
+Documentation to reference:
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- Oracle DB: https://docs.oracle.com/en/database/oracle/oracle-database/23/
+- Python-oracledb: https://python-oracledb.readthedocs.io/
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
-Prerequisites
--------------
-1.  Ensure the placeholders in *sandbox.yaml* are provided via .env
-      DB_PASSWORD, DB_WALLET_PATH, DB_WALLET_PASS,
-      OCI_CONFIG_FILE, OCI_PROFILE, OCI_COMPARTMENT_OCID …
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
 
-2.  Install the required packages:
-      pip install python-oracledb oci envyaml python-dotenv
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
 
-Run:
-      python database/nl2sql_demo.py
+How to run the file:
+uv run database/nl2sql_demo.py
+
+Comments to important sections of file:
+- Step 1: Load config and initialize OCI client.
+- Step 2: Set up database connection.
+- Step 3: Build chat prompt with schema description and examples.
+- Step 4: Interactive query loop with LLM-generated SQL.
+- Step 5: Execute SQL and display results.
 """
 
 from __future__ import annotations
@@ -209,6 +218,7 @@ def connect_db() -> oracledb.Connection:
 
 
 def execute_query(conn: oracledb.Connection, sql: str):
+    """Execute SQL query and return column names and rows."""
     with conn.cursor() as cur:
         cur.execute(sql)
         return [d[0] for d in cur.description], cur.fetchall()
