@@ -1,8 +1,36 @@
-# Documentation: https://docs.oracle.com/en-us/iaas/Content/vision/using/stored_video_analysis.htm#pretrained_image_analysis_video
-# GitHub SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_vision
-# Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/061avdq/vision-api
-# Slack channels: #oci_ai_vision_support or #igiu-innovation-lab
-# If you have errors running sample code, reach out for help in #igiu-ai-learning
+"""
+What this file does:
+Analyzes video with OCI Vision's pre-trained models for labels, objects, text, and faces.
+
+Documentation to reference:
+- OCI Vision Video Analysis: https://docs.oracle.com/en-us/iaas/Content/vision/using/stored_video_analysis.htm#pretrained_image_analysis_video
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_vision
+- Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/061avdq/vision-api
+
+Relevant slack channels:
+- #oci_ai_vision_support: for OCI Vision API questions
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, and bucket details.
+- .env: Load environment variables if needed.
+
+How to run the file:
+uv run vision/oci_vision_video.py [--file path/to/video]
+
+Comments to important sections of file:
+- Step 1: Load and validate configuration.
+- Step 2: Extract configuration values.
+- Step 3: Upload video to Object Storage.
+- Step 4: Create Vision client.
+- Step 5: Define video analysis features.
+- Step 6: Set up input and output locations.
+- Step 7: Create video job details.
+- Step 8: Submit video analysis job.
+- Step 9: Poll for job completion.
+- Step 10: Download and parse results.
+"""
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
@@ -32,7 +60,7 @@ import os
 
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
-FILE_TO_ANALYZE = Path("./vision/mall.mp4")
+DEFAULT_VIDEO_PATH = Path("./vision/mall.mp4")
 
 
 
@@ -149,12 +177,14 @@ def parse_video_response(data):
 
 
 
-def main(file_path=FILE_TO_ANALYZE):
+def main(file_path=DEFAULT_VIDEO_PATH):
     """Main function to run OCI Video Vision analysis on the given video."""
     # Ensure pathlib.Path instance
     file_path = Path(file_path)
     # Load config
     scfg = load_config(SANDBOX_CONFIG_FILE)
+
+    # Step 1: Load and validate configuration
     if scfg is None or 'oci' not in scfg or 'bucket' not in scfg:
         print("Error: Invalid configuration.")
         return
@@ -173,6 +203,7 @@ def main(file_path=FILE_TO_ANALYZE):
         print("Error: Missing 'oci' or 'bucket' section in config.")
         return
 
+    # Step 2: Extract configuration values
     oci_cfg = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]), scfg["oci"]["profile"])
     bucket_cfg = scfg["bucket"]
     namespace = bucket_cfg["namespace"]
@@ -180,14 +211,14 @@ def main(file_path=FILE_TO_ANALYZE):
     prefix = bucket_cfg['prefix']
     compartment_id = scfg["oci"]["compartment"]
 
-    # Upload file
+    # Step 3: Upload video to Object Storage
     if not upload(oci_cfg, bucket_cfg, file_path):
         return
 
-    # Create Video Vision client
+    # Step 4: Create Vision client
     ai_service_vision_client = oci.ai_vision.AIServiceVisionClient(config=oci_cfg)
 
-    # Define features for video analysis (label, object, text, face detection over time)
+    # Step 5: Define video analysis features
     video_object_detection_feature = VideoObjectDetectionFeature()
     video_face_detection_feature = VideoFaceDetectionFeature()
     video_label_detection_feature = VideoLabelDetectionFeature()
@@ -195,7 +226,9 @@ def main(file_path=FILE_TO_ANALYZE):
     features = [video_text_detection_feature, video_face_detection_feature, video_label_detection_feature, video_object_detection_feature]
 
     try:
-        # Create video job
+        # Step 6: Set up input and output locations
+        # Step 7: Create video job details
+        # Step 8: Submit video analysis job
         create_video_job_details = CreateVideoJobDetails()
         create_video_job_details.features = features
         create_video_job_details.compartment_id = compartment_id
@@ -208,7 +241,7 @@ def main(file_path=FILE_TO_ANALYZE):
             job_id = res.data.id
             print(f"Job {job_id} is in {res.data.lifecycle_state} state.")
 
-            # Poll for completion
+            # Step 9: Poll for job completion
             seconds = 0
             while res is not None and hasattr(res, 'data') and hasattr(res.data, 'lifecycle_state') and res.data.lifecycle_state in ["IN_PROGRESS", "ACCEPTED"]:
                 if hasattr(res.data, 'percent_complete'):
@@ -221,7 +254,7 @@ def main(file_path=FILE_TO_ANALYZE):
                 if res.data.lifecycle_state == "SUCCEEDED":
                     print(f"Job {job_id} succeeded.")
 
-                    # Get results from Object Storage
+                    # Step 10: Download and parse results
                     object_storage_client = oci.object_storage.ObjectStorageClient(oci_cfg)
                     object_name = f"{prefix}/{job_id}/{prefix}/{file_path.name}.json"
 
@@ -242,9 +275,11 @@ def main(file_path=FILE_TO_ANALYZE):
     except Exception as e:
         print(f"Error during video job: {e}")
 
+# Experimentation: Try with different videos, or modify features to focus on specific detection types.
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run OCI Video Vision analysis on a video file.")
-    parser.add_argument("--file", type=Path, default=FILE_TO_ANALYZE, help="Path to the video to analyze (default: ./vision/mall.mp4)")
+    parser.add_argument("--file", type=Path, default=DEFAULT_VIDEO_PATH, help="Path to the video to analyze (default: ./vision/mall.mp4)")
     args = parser.parse_args()
     main(args.file)

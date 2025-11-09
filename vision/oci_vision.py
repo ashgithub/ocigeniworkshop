@@ -1,8 +1,34 @@
-# Documentation: https://docs.oracle.com/en-us/iaas/Content/vision/using/home.htm
-# GitHub SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_vision
-# Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/061avdq/vision-api
-# Slack channels: #oci_ai_vision_support or #igiu-innovation-lab
-# If you have errors running sample code, reach out for help in #igiu-ai-learning
+"""
+What this file does:
+Analyzes images using OCI Vision for object (including text) detection and classification.
+
+Documentation to reference:
+- OCI Vision: https://docs.oracle.com/en-us/iaas/Content/vision/using/home.htm
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_vision
+- Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/061avdq/vision-api
+
+Relevant slack channels:
+- #oci_ai_vision_support: for OCI Vision API questions
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, and bucket details.
+- .env: Load environment variables if needed.
+
+How to run the file:
+uv run vision/oci_vision.py [--file path/to/image]
+
+Comments to important sections of file:
+- Step 1: Load and validate configuration.
+- Step 2: Extract configuration values.
+- Step 3: Upload file to Object Storage.
+- Step 4: Create Vision client.
+- Step 5: Define analysis features.
+- Step 6: Set up image location and analyze image details.
+- Step 7: Analyze image.
+- Step 8: Parse and display results.
+"""
 
 
 from dotenv import load_dotenv
@@ -21,7 +47,7 @@ import os
 
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
-DEFAULT_FILE = Path("./vision/receipt.png")  
+DEFAULT_IMAGE_PATH = Path("./vision/receipt.png")
 
 
 def load_config(config_path):
@@ -108,10 +134,12 @@ def parse_vision_response(response_data):
     if not any([labels, image_objects, image_text, detected_faces]):
         print("No features detected in the image.")
 
-def main(file_path=DEFAULT_FILE):
+def main(file_path=DEFAULT_IMAGE_PATH):
     """Main function to run OCI Vision analysis on the given image."""
     # Load config
     scfg = load_config(SANDBOX_CONFIG_FILE)
+
+    # Step 1: Load and validate configuration
     if scfg is None:
         print("Failed to load config. Exiting.")
         return
@@ -121,18 +149,19 @@ def main(file_path=DEFAULT_FILE):
         print("Error: Missing 'oci' or 'bucket' section in config.")
         return
 
+    # Step 2: Extract configuration values
     oci_cfg = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]), scfg["oci"]["profile"])
     bucket_cfg = scfg["bucket"]
     compartment_id = scfg["oci"]["compartment"]
 
-    # Upload file
+    # Step 3: Upload file to Object Storage
     if not upload(oci_cfg, bucket_cfg, file_path):
         return
 
-    # Create Vision client
+    # Step 4: Create Vision client
     vision_client = oci.ai_vision.AIServiceVisionClient(config=oci_cfg)
 
-    # Define features for analysis (classification, object/text/face detection)
+    # Step 5: Define analysis features
     features = [
         oci.ai_vision.models.ImageClassificationFeature(),
         oci.ai_vision.models.ImageObjectDetectionFeature(),
@@ -141,13 +170,15 @@ def main(file_path=DEFAULT_FILE):
     ]
 
     try:
-        # Analyze image
+        # Step 6: Set up image location and analyze image details
+        # Step 7: Analyze image
         response = vision_client.analyze_image(
             get_analyze_image_details(features, compartment_id, bucket_cfg, file_path.name)
         )
-        
+
         if response is not None and hasattr(response, 'status') and response.status == 200:
             if hasattr(response, 'data'):
+                # Step 8: Parse and display results
                 parse_vision_response(response.data)
             else:
                 print("Error: Response data is missing.")
@@ -156,9 +187,11 @@ def main(file_path=DEFAULT_FILE):
     except Exception as e:
         print(f"Error during analysis: {e}")
 
+# Experimentation: Try with different images, or modify features to focus on specific detection types.
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run OCI Vision analysis on an image.")
-    parser.add_argument("--file", type=Path, default=DEFAULT_FILE, help="Path to the image to analyze (default: ./vision/receipt.png)")
+    parser.add_argument("--file", type=Path, default=DEFAULT_IMAGE_PATH, help="Path to the image to analyze (default: ./vision/receipt.png)")
     args = parser.parse_args()
     main(args.file)
