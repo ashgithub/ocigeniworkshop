@@ -5,38 +5,36 @@
 # file (or export in your shell) to populate them.
 
 oci:
-  # Path to your OCI CLI config (typically is ~/.oci/config)
-  configFile: ${OCI_CONFIG_FILE}  # set in .env
-  # Profile inside the OCI config file
-  profile: ${OCI_PROFILE}       # set in .env
-  # Default compartment OCID
-  compartment: ${OCI_COMPARTMENT_OCID} # set in .env
+   
+  configFile: $OCI_CONFIG_FILE|~/.oci/config  # Path to your OCI CLI config
+  profile: $OCI_PROFILE|DEFAULT               # Profile inside the OCI config file that has access to AI-Sandbox
+  compartment: $OCI_COMPARTMENT_OCID|ocid1.compartment.oc1..aaaaaaaaboqoghc43bbqvei5y4pmnzia36wuh7fpcxn6fia7pfyelyg4rj7a          # OCID of compartment you have access to in AI sandbox
 
 db:
-  dsn: aisandboxadw_medium
-  username: aisandboxuser
-  password: ${DB_PASSWORD}        # set in .env
-  walletPath: ${DB_WALLET_PATH}   # set in .env
-  tablePrefix: ${MY_PREFIX}       # set in .env 
-  walletPass: ${DB_WALLET_PASS}   # set. in .env 
+  dsn: $DB_DSN|aisandboxadw_medium                    # this is the default database that everyone has access to 
+  username: $DB_USER|aisandboxuser                    # same user is shared by everyone
+  password: $DB_PASSWORD                              # set in .env
+  tablePrefix: $MY_PREFIX                             # you oracle cuid like asagarw, thi sis used to create unique tables & bucket to to avoid conflicts with other users
+  walletPath: $DB_WALLET_PATH                         # Path to folder where you unzipped the wallet file
+  walletPass: $DB_WALLET_PASS                         # password for your wallet
 
 agent:
   session: true
-  endpoint: ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaaia3thjll3krauj6ouha224yczth46ui4tof7daqh6nmq
-  no_session_endpoint: ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaa5gokxqx5ytspf5ijxvtvnwxfej6pywy4tdc3uwkun6kq
+  endpoint: $AGENT_ENDPOINT|ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaaia3thjll3krauj6ouha224yczth46ui4tof7daqh6nmq
+  no_session_endpoint: $AGNET_ENDPOINT_NO_SESSION|ocid1.genaiagentendpoint.oc1.us-chicago-1.amaaaaaaghwivzaa5gokxqx5ytspf5ijxvtvnwxfej6pywy4tdc3uwkun6kq
 
 bucket:
-  namespace: axaemuxiyife
-  bucketName: AISandbox-Bucket
-  prefix: ${MY_PREFIX}             # set. in .env  
+  namespace: axaemuxiyife                             # same for everyone
+  bucketName: $OCI_BUCKET|AISandbox-Bucket            # location where your files and batch job artifacts will be stored 
+  prefix: $MY_PREFIX                                  # your oracle cuid like asagarw, thi sis used to create unique tables & bucket to to avoid conflicts with other users
 
 langfuse:
-  langfuse_pk: ${LANGFUSE_PK}         # set. in .env  
-  langfuse_sk: ${LANGFUSE_SK}         # set. in .env  
-  langfuse_host: ${LANGFUSE_HOST}     # set. in .env
+  langfuse_pk: ${LANGFUSE_PK}          # will be provided at workshop
+  langfuse_sk: ${LANGFUSE_SK}          # will be provided at workshop
+  langfuse_host: ${LANGFUSE_HOST}      # will be provided at workshop
 
 aia:
-  idcs_url: ${AIA_IDCS_URL}           # set in .env
-  client_id: ${AIA_CLIENT_ID}         # set in .env
-  client_secret: ${AIA_CLIENT_SECRET_OCID} # set in .env (OCID of secret, id stored in vault )
-  auth_scope: ${AIA_AUTH_SCOPE}       # set in .env
+  idcs_url: ${AIA_IDCS_URL}           # get these values from AIA team, only used for reranking,omit if not using it 
+  client_id: ${AIA_CLIENT_ID}         # get these values from AIA team, only used for reranking,omit if not using it 
+  client_secret: ${AIA_CLIENT_SECRET_OCID} # get these values from AIA team  (OCID of secret, id stored in vault ), only used for reranking,omit if not using it 
+  auth_scope: ${AIA_AUTH_SCOPE}       # # get these values from AIA team, only used for reranking,omit if not using it  
