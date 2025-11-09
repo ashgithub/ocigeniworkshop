@@ -1,15 +1,39 @@
-# Documentation: https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm
-# GitHub SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
-# Postman collection: 
-# Slack channels:#generative-ai-userst or #igiu-innovation-lab
-# If you have errors running sample code, reach out for help in #igiu-ai-learning
+"""
+What this file does:
+Demonstrates multimodal (image+text) prompts with Oracle Cloud's Generative AI, using only the OCI Python SDK (no LangChain needed).
 
+Documentation to reference:
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
+
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config and compartment.
+- .env: Load environment variables if needed.
+
+How to run the file:
+uv run vision/multi_modal.py
+
+Comments to important sections of file:
+- Step 1: Load config and initialize clients.
+- Step 2: Encode image to base64.
+- Step 3: Build multimodal user message.
+- Step 4: Create chat request payload.
+- Step 5: Create chat detail for API.
+- Step 6: Load configuration and set up client.
+- Step 7: Initialize LLM client.
+- Step 8: Loop over models and generate responses.
+"""
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
 import oci
 import base64
-import  os 
+import os
 
 #####
 # Make sure your sandbox.yaml and .env files are set up for your environment.
@@ -18,6 +42,8 @@ import  os
 
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
+
+# Step 1: Load config and initialize clients
 
 MODEL_LIST = [
     "meta.llama-4-scout-17b-16e-instruct",
@@ -28,13 +54,14 @@ MODEL_LIST = [
 llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 
-MESSAGE = "tell me this image"
+user_text = "tell me this image"
 
 
 llm_client = None
 llm_payload = None
-FILE_TO_ANALYZE = "./vision/dussera-b.jpg"
+image_path = "./vision/dussera-b.jpg"
 
+# Helper function to load configuration
 
 def load_config(config_path):
     """Load configuration from a YAML file."""
@@ -46,21 +73,27 @@ def load_config(config_path):
         return None
 
         
+# Step 2: Encode image to base64
+
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
 
+# Step 3: Build multimodal user message
+
 def get_message():
         content1 = oci.generative_ai_inference.models.TextContent()
-        content1.text = MESSAGE
+        content1.text = user_text
         content2 = oci.generative_ai_inference.models.ImageContent()
         image_url = oci.generative_ai_inference.models.ImageUrl()
-        image_url.url = f"data:image/jpeg;base64,{encode_image(FILE_TO_ANALYZE)}"
+        image_url.url = f"data:image/jpeg;base64,{encode_image(image_path)}"
         content2.image_url = image_url
         message = oci.generative_ai_inference.models.UserMessage()
         message.content = [content1,content2] 
 
         return message
+
+# Step 4: Create chat request payload
 
 def get_chat_request():
         chat_request = oci.generative_ai_inference.models.GenericChatRequest()
@@ -75,6 +108,8 @@ def get_chat_request():
 
         return chat_request
 
+# Step 5: Create chat detail for API
+
 def get_chat_detail (llm_request,compartmentId, model_id):
         chat_detail = oci.generative_ai_inference.models.ChatDetails()
         chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id=model_id)
@@ -84,6 +119,9 @@ def get_chat_detail (llm_request,compartmentId, model_id):
         return chat_detail
         
 scfg = load_config(SANDBOX_CONFIG_FILE)
+
+# Step 6: Load configuration and set up client
+
 if scfg is not None and 'oci' in scfg and 'configFile' in scfg['oci'] and 'profile' in scfg['oci'] and 'compartment' in scfg['oci']:
     config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]), scfg["oci"]["profile"])
     compartment_id = scfg["oci"]["compartment"]
@@ -91,6 +129,7 @@ else:
     print("Error: Invalid configuration for OCI.")
     exit(1)
 
+# Step 7: Initialize LLM client
 
 llm_client = oci.generative_ai_inference.GenerativeAiInferenceClient(
                 config=config,
@@ -98,6 +137,8 @@ llm_client = oci.generative_ai_inference.GenerativeAiInferenceClient(
                 retry_strategy=oci.retry.NoneRetryStrategy(),
                 timeout=(10,240))
 import time
+
+# Step 8: Loop over models and generate responses
 
 for model_id in MODEL_LIST:
     banner = "=" * 80
@@ -114,3 +155,5 @@ for model_id in MODEL_LIST:
         print("Error: Invalid response from LLM.")
     end_time = time.time()
     print(f"{banner}\nTime taken: {end_time - start_time:.2f} seconds\n")
+
+# Experimentation: Try changing user_text to ask different questions about the image, or use a different image_path.
