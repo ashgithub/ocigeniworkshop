@@ -1,223 +1,251 @@
+"""
+What this file does:
+Demonstrates a full RAG (Retrieval-Augmented Generation) pipeline using OCI Generative AI for embeddings and Cohere models, with Oracle DB for vector storage and similarity search.
+
+Documentation to reference:
+- OCI GenAI Embeddings: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm#embed-models
+- Cohere Chat: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+- Oracle DB Vectors: https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
+
+Relevant slack channels:
+- #generative-ai-users: For OCI GenAI questions
+- #igiu-innovation-lab: Project discussions
+- #igiu-ai-learning: Environment/code help
+
+Env setup:
+- sandbox.yaml: Needs "oci" and "db" sections (configFile, profile, compartment, tablePrefix, walletPath, username, password, dsn, walletPass).
+- .env: Load environment variables if needed.
+- Download wallet for DB access.
+
+How to run the file:
+uv run rag/cohere-rag-26ai.py
+
+Comments to important sections of file:
+- Step 1: Load config and set up clients.
+- Step 2: Define mock chunks and source metadata.
+- Step 3: Set up DB connection and create vector table.
+- Step 4: Generate embeddings for chunks and store in DB.
+- Step 5: Interactive query: embed query, retrieve similar chunks, augment prompt, generate response.
+- Experiment: Change chunks to real text, try different similarity metrics (COSINE/DOT/EUCLIDEAN), add reranking, adjust chunk size.
+"""
+
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-#!/Users/ashish/anaconda3/bin/python
 
-# Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
-# if you have errors running sample code reach out for help in #igiu-ai-learning
+# Step 1: Import dependencies and define constants
 from oci.generative_ai_inference import GenerativeAiInferenceClient
-from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
+from oci.generative_ai_inference.models import (
+    OnDemandServingMode, 
+    EmbedTextDetails, 
+    CohereChatRequest, 
+    ChatDetails
+)
 import oracledb
 import array
 import oci
 import os
 
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#####
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-EMBED_MODEL = "cohere.embed-multilingual-v3.0"
-LLM_MODEL = "cohere.command-a-03-2025"
-# cohere.command-a-03-2025
-# cohere.command-r-08-2024
-# cohere.command-r-plus-08-2024
+EMBED_MODEL_ID = "cohere.embed-multilingual-v3.0"  # Other: cohere.embed-english-v3.0, cohere.embed-english-light-v3.0
+CHAT_MODEL_ID = "cohere.command-a-03-2025"  # Other: cohere.command-r-08-2024, cohere.command-r-plus-08-2024
+INFERENCE_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-
- 
-llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
-
-# here we are starting with samll chunks. Idelaly you will have to parse teh file and chunk it using a library
-# there are quite a few strategies on parsing and chunking. do you wn ownresearch and enahcne this code. 
-chunks = [
-    			"Baseball is a great game ",
-				"baseball games typically last 9 innings",
-				"Baseball game can finish in about 2 hours",
-				"Indias favroite passtime is cricket",
-				"England's favorite passtime is football",
-				"Football is called soccer in America",
-				"baseball is americas favroite pass time sport"]
-
-# we are mocking the cource of chunks. this will be used in citations. This helps build confidence, avoid hallucination. 
-chunk_source = [ 
-                {"chapter":"Baseball", "question":"1"},
-                {"chapter":"Baseball", "question":"2"},
-                {"chapter":"Baseball", "question":"3"},
-                {"chapter":"Cricket", "question":"1"},
-                {"chapter":"Football", "question":"1"},
-                {"chapter":"Football", "question":"2"},
-                {"chapter":"Baseball", "question":"4"},
-	
+# Step 2: Define mock text chunks and metadata
+# In practice, parse real documents (PDFs, text) and chunk them. Do your own research on chunking strategies.
+mock_chunks = [
+    "Baseball is a great game.",
+    "Baseball games typically last 9 innings.",
+    "A baseball game can finish in about 2 hours.",
+    "India's favorite pastime is cricket.",
+    "England's favorite pastime is football.",
+    "Football is called soccer in America.",
+    "Baseball is America's favorite pastime sport."
 ]
-tablename_prefix = None
-compartmentId = None
 
+chunk_metadata = [
+    {"chapter": "Baseball", "question": "1"},
+    {"chapter": "Baseball", "question": "2"},
+    {"chapter": "Baseball", "question": "3"},
+    {"chapter": "Cricket", "question": "1"},
+    {"chapter": "Football", "question": "1"},
+    {"chapter": "Football", "question": "2"},
+    {"chapter": "Baseball", "question": "4"},
+]
 
-def load_config(config_path):
-    """Load configuration from a YAML file."""
-    
+# Step 3: Load config and set up clients/DB
+def load_configuration(config_file_path):
+    """Load sandbox config."""
     try:
-        with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+        return EnvYAML(config_file_path)
     except FileNotFoundError:
-        print(f"Error: Configuration file '{config_path}' not found.")
+        print(f"Error: Configuration file '{config_file_path}' not found.")
         return None
 
-def create_table(cursor):
-	sql = [
-		f"""drop table if exists {tablename_prefix}_embedding purge"""	,
-  
-		f"""
- 		create table {tablename_prefix}_embedding (
-   			id number,
-			text varchar2(4000),
-			vec vector,
-			chapter varchar2(100),
-			section integer,
-			primary key (id)
-		)"""
-	]
- 
-	for s in sql : 
-		cursor.execute(s)
+sandbox_config = load_configuration(SANDBOX_CONFIG_FILE)
+if sandbox_config is None:
+    raise RuntimeError("Failed to load sandbox configuration.")
 
+oci_config = oci.config.from_file(
+    os.path.expanduser(sandbox_config["oci"]["configFile"]), 
+    sandbox_config["oci"]["profile"]
+)
+compartment_id = sandbox_config["oci"]["compartment"]
+table_prefix = sandbox_config["db"]["tablePrefix"]
+wallet_path = os.path.expanduser(sandbox_config["db"]["walletPath"])
 
-def insert_data(cursor, id, chunk, vec,chapter, section):
-	cursor.execute(f"insert into {tablename_prefix}_embedding values (:1, :2, :3, :4, :5)", [
-				   id, chunk, vec,chapter,section])
+embed_client = GenerativeAiInferenceClient(
+    config=oci_config,
+    service_endpoint=INFERENCE_ENDPOINT,
+    retry_strategy=oci.retry.NoneRetryStrategy(),
+    timeout=(10, 240)
+)
 
+chat_client = GenerativeAiInferenceClient(
+    config=oci_config,
+    service_endpoint=INFERENCE_ENDPOINT,
+    retry_strategy=oci.retry.NoneRetryStrategy(),
+    timeout=(10, 240)
+)
 
-def read_data(cursor):
-	cursor.execute(f"select id,text from {tablename_prefix}_embedding")
-	for row in cursor:
-		print(f"{row[0]}:{row[1]}")
+# DB setup
+db_connection = oracledb.connect(
+    config_dir=wallet_path,
+    user=sandbox_config["db"]["username"],
+    password=sandbox_config["db"]["password"],
+    dsn=sandbox_config["db"]["dsn"],
+    wallet_location=wallet_path,
+    wallet_password=sandbox_config["db"]["walletPass"]
+)
+db_cursor = db_connection.cursor()
 
+def create_vector_table():
+    """Drop and create table for embeddings."""
+    sql_statements = [
+        f"DROP TABLE {table_prefix}_embedding PURGE",
+        f"""
+        CREATE TABLE {table_prefix}_embedding (
+            id NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+            text VARCHAR2(4000),
+            embedding_vector VECTOR,
+            chapter VARCHAR2(100),
+            section INTEGER
+        )
+        """
+    ]
+    for stmt in sql_statements:
+        try:
+            db_cursor.execute(stmt)
+        except oracledb.DatabaseError as e:
+            print(f"Skipping error: {e}")  # Ignore if table doesn't exist
 
-def search_data(cursor, vec,):
+create_vector_table()
 
- # COSINE, DOT, EUCLIDEAN
- # try adding an constraint on the distance eg < 0.5 is something we will need to finetune based on data 
-	cursor.execute(f"""
-		select id,text, vector_distance(vec, :1, COSINE) d, chapter,section 
-		from {tablename_prefix}_embedding
-		order by d
-		fetch first 3 rows only
-	""", [vec])
+# Step 4: Generate embeddings and store in DB
+def create_embed_payload(chunks, embed_type):
+    """Build payload for embedding generation."""
+    payload = EmbedTextDetails()
+    payload.serving_mode = OnDemandServingMode(model_id=EMBED_MODEL_ID)
+    payload.truncate = EmbedTextDetails.TRUNCATE_END
+    payload.input_type = embed_type
+    payload.compartment_id = compartment_id
+    payload.inputs = chunks
+    return payload
 
-	rows =[]
-	for row in cursor:
-		r = [row[0], row[1], row[2], f"chapter:[{row[3]}]_section:[{row[4]}]"]
-		print(r)
-		rows.append(r)
+# Embed chunks for search documents
+embed_payload = create_embed_payload(mock_chunks, EmbedTextDetails.INPUT_TYPE_SEARCH_DOCUMENT)
+embed_response = embed_client.embed_text(embed_payload)
+embeddings = embed_response.data.embeddings
 
-	return rows
+# Insert embeddings into DB
+for i, emb in enumerate(embeddings):
+    db_cursor.execute(
+        f"INSERT INTO {table_prefix}_embedding (text, embedding_vector, chapter, section) VALUES (:1, :2, :3, :4)",
+        [mock_chunks[i], array.array("f", emb), chunk_metadata[i]["chapter"], chunk_metadata[i]["question"]]
+    )
+    print(f"Inserted chunk {i}: {mock_chunks[i]}")
 
-  
-def get_embed_payload(chunks, embed_type):
-	embed_text_detail = EmbedTextDetails()
-	embed_text_detail.serving_mode = OnDemandServingMode(model_id=EMBED_MODEL)
-	embed_text_detail.truncate = embed_text_detail.TRUNCATE_END
-	embed_text_detail.input_type = embed_type 
-	embed_text_detail.compartment_id = compartmentId
-	embed_text_detail.inputs = chunks
-	return  embed_text_detail
+db_connection.commit()
 
-def get_chat_request():
-        cohere_chat_request = CohereChatRequest()
-        cohere_chat_request.preamble_override = " answer only from selected docs, ignore any other information you may know"
-        cohere_chat_request.is_stream = False 
-        cohere_chat_request.max_tokens = 500
-        cohere_chat_request.temperature = 0.75
-        cohere_chat_request.top_p = 0.7
-        cohere_chat_request.frequency_penalty = 1.0
-        #cohere_chat_request.documents = get_documents()
+# Verify insertions
+db_cursor.execute(f"SELECT id, text FROM {table_prefix}_embedding")
+print("Stored chunks:")
+for row in db_cursor:
+    print(f"{row[0]}: {row[1]}")
 
-        return cohere_chat_request
+# Step 5: Interactive RAG loop
+while True:
+    user_query = input("Ask a question (or 'q' to exit): ").strip().lower()
+    if user_query == "q":
+        break
 
-def get_chat_detail (llm_request):
-        chat_detail = ChatDetails()
-        chat_detail.serving_mode = OnDemandServingMode(model_id=LLM_MODEL)
-        chat_detail.compartment_id = compartmentId
-        chat_detail.chat_request = llm_request
+    # Embed query for search
+    query_payload = create_embed_payload([user_query], EmbedTextDetails.INPUT_TYPE_SEARCH_QUERY)
+    query_response = embed_client.embed_text(query_payload)
+    query_vector = array.array("f", query_response.data.embeddings[0])
 
-        return chat_detail
+    # Retrieve similar chunks (COSINE similarity, top 3)
+    # Experiment: Try DOT or EUCLIDEAN, add distance filter (e.g., < 0.5)
+    db_cursor.execute(
+        f"""
+        SELECT id, text, vector_distance(embedding_vector, :1, COSINE) AS distance, chapter, section
+        FROM {table_prefix}_embedding
+        ORDER BY distance
+        FETCH FIRST 3 ROWS ONLY
+        """,
+        [query_vector]
+    )
 
+    retrieved_chunks = []
+    print(f"\nSearching for: {user_query}")
+    for row in db_cursor:
+        formatted_chunk = [row[0], row[1], row[2], f"chapter:[{row[3]}]_section:[{row[4]}]"]
+        print(formatted_chunk)
+        retrieved_chunks.append(formatted_chunk)
 
-# here are omitting the reranking step.
-# reranking is an optional step which can order the set of documents retrived and take a the top few to LLM  
-# as eg, we get top 5 rows from db similarity search, reanak and send top 3 to LLM 
-def get_documents(chunks):
-    docs =[]
-    for chunk in chunks:
+    # Augment prompt with retrieved chunks
+    augmented_documents = []
+    for chunk in retrieved_chunks:
         doc = {
-            "id" : chunk[3],
-            "snippet" : chunk[1]
-        } 
-        docs.append(doc)
-        
-    return docs 
+            "id": chunk[3],
+            "snippet": chunk[1]
+        }
+        augmented_documents.append(doc)
 
-#set up the oci gen ai client based on config 
-scfg = load_config(SANDBOX_CONFIG_FILE)
-config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
-compartmentId = scfg["oci"]["compartment"]
-tablename_prefix = scfg["db"]["tablePrefix"]
-wallet = os.path.expanduser(scfg["db"]["walletPath"])
+    # Build chat request
+    chat_request = CohereChatRequest()
+    chat_request.message = user_query
+    chat_request.is_stream = False
+    chat_request.max_tokens = 500
+    chat_request.temperature = 0.75
+    chat_request.top_p = 0.7
+    chat_request.frequency_penalty = 1.0
+    chat_request.preamble_override = "Answer only from the provided documents; ignore other knowledge."
+    chat_request.documents = augmented_documents
 
+    chat_details = ChatDetails()
+    chat_details.serving_mode = OnDemandServingMode(model_id=CHAT_MODEL_ID)
+    chat_details.compartment_id = compartment_id
+    chat_details.chat_request = chat_request
 
-# create a llm client 
-llm_client = GenerativeAiInferenceClient(
-				config=config, 
-				service_endpoint=llm_service_endpoint, 
-				retry_strategy=oci.retry.NoneRetryStrategy(),
-				timeout=(10,240))	
+    # Generate response
+    chat_response = chat_client.chat(chat_details)
+    print("\n************************** Response **************************")
+    print(chat_response.data.chat_response.text)
+    print("\n************************** Citations **************************")
+    print(chat_response.data.chat_response.citations)
 
+# Cleanup
+db_cursor.close()
+db_connection.close()
+print("DB connection closed.")
 
-print("creating embeddings")
-response = llm_client.embed_text(get_embed_payload(chunks,EmbedTextDetails.INPUT_TYPE_SEARCH_DOCUMENT))
-embeddings = response.data.embeddings
-
-# insert & query  vectors
-with oracledb.connect(  config_dir=scfg["db"]["walletPath"],user= scfg["db"]["username"], password=scfg["db"]["password"], dsn=scfg["db"]["dsn"],wallet_location=scfg["db"]["walletPath"],wallet_password=scfg["db"]["walletPass"]) as db:
-	cursor = db.cursor()
-
-	print("creating table")
-	create_table(cursor)
-	for i in range(len(embeddings)):
-		insert_data(cursor, i, chunks[i], array.array("f",embeddings[i]),chunk_source[i]["chapter"], chunk_source[i]["question"] )
-		print(f"inserted {i}-{chunks[i]}")
-
-	print("commiting")
-	db.commit()
-
-	print("reading")
-	read_data(cursor)
-
-	while True:
-		query = input("Ask a question: ").strip().lower()
-		q=[]
-		q.append(query)
-		prompt_embed = llm_client.embed_text (get_embed_payload(q,EmbedTextDetails.INPUT_TYPE_SEARCH_QUERY))
-		vec = array.array("f",prompt_embed.data.embeddings[0])
-		
-		# R of RAG : retrieving appicable text 
-		print(f"searching for query:{query}")
-		chunks = search_data(cursor,vec)
-
-		# A of RAG : Augmenting the selected text
-  
-		llm_request = get_chat_request()
-		llm_request.documents = get_documents(chunks)
-		llm_payload =get_chat_detail(llm_request)
-		
-		# G of RAG generate a respomse usimg llm  
-		llm_payload.chat_request.message = query
-		llm_response = llm_client.chat(llm_payload)
-
-  
-		# Print result
-		print("**************************Chat Result**************************")
-		#llm_text = llm_response.data.chat_response.text
-		print(llm_response.data.chat_response.text)
-		print("************************** Citations**************************")
-		print(llm_response.data.chat_response.citations)
+# Experiment suggestions:
+# 1. Replace mock_chunks with parsed PDF content (use PyPDFLoader or similar).
+# 2. Change chunking: Add overlap, use semantic chunking for better splits.
+# 3. Similarity: Switch to DOT_PRODUCT or EUCLIDEAN in vector_distance.
+# 4. Retrieval: Adjust top_k (FETCH FIRST), add distance threshold (WHERE distance < 0.5).
+# 5. Generation: Modify temperature (0.3 factual, 1.0 creative), add reranking before augment.
+# 6. Models: Try different EMBED_MODEL_ID or CHAT_MODEL_ID for comparison.
