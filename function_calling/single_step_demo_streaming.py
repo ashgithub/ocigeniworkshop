@@ -1,15 +1,39 @@
+"""
+What this file does:
+Demonstrates single-step function calling with streaming using OCI Generative AI Cohere models. Shows how to handle streaming responses and tool calls.
+
+Documentation to reference:
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- Cohere Command Models: https://docs.cohere.com/docs/command-r
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
+
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, and other details.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run function_calling/single_step_demo_streaming.py
+
+Comments to important sections of file:
+- Step 1: Define tool specifications and make streaming chat request with tools.
+- Step 2: Provide tool results and get the final streaming response.
+- Experiment: Try changing tool outputs and observe streaming behavior.
+"""
+
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-#!/Users/ashish/anaconda3/bin/python
-# if you have errors running sample code reach out for help in #igiu-ai-learnin
-# Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
+
 from oci.generative_ai_inference import GenerativeAiInferenceClient
-from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
+from oci.generative_ai_inference.models import CohereChatRequest, ChatDetails
 import oci
-import json, os
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#####
+import json
+import os
+
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
@@ -61,25 +85,23 @@ shop_tool.parameter_definitions = {
     "quantity": quantity_param
 }
 
-# Step 1, describe the tool spec
-
+# Step 1: Define tool specifications and make streaming chat request with tools
 chat_request = oci.generative_ai_inference.models.CohereChatRequest()
 chat_request.message = "I'd like 4 apples and a fish please"
 chat_request.max_tokens = 600
 chat_request.is_stream = True
 chat_request.is_force_single_step = True
-chat_request.tools = [ shop_tool ]
+chat_request.tools = [shop_tool]
 
 chat_detail = oci.generative_ai_inference.models.ChatDetails()
-chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id="cohere.command-r-08-2024")
-chat_detail.compartment_id =  scfg["oci"]["compartment"]
+chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id=LLM_MODEL)
+chat_detail.compartment_id = scfg["oci"]["compartment"]
 chat_detail.chat_request = chat_request
 
 chat_response = llm_client.chat(chat_detail)
 
 # Print result
 print("**************************Step 1 Result**************************")
-#print(vars(chat_response))
 
 def get_tool_calls(chat_response):
     for event in chat_response.data.events():
@@ -94,7 +116,7 @@ def get_tool_calls(chat_response):
 
 tool_calls = get_tool_calls(chat_response)
 
-# Step 2, provide the tool results and get the final response
+# Step 2: Provide tool results and get the final streaming response
 
 chat_request.tool_results = []
 for call in tool_calls:

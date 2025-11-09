@@ -1,18 +1,39 @@
+"""
+What this file does:
+Demonstrates function calling using OCI Generative AI Llama models. Shows how to define tools and handle tool calls with Llama models in a multi-step conversation.
+
+Documentation to reference:
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- Llama Models: https://www.llama.com/
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
+
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, and other details.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run function_calling/llama_tool_example.py
+
+Comments to important sections of file:
+- Step 1: Define tools and make initial chat request with system and user messages.
+- Step 2+: Handle tool calls, provide results, and continue the conversation.
+- Experiment: Try different Llama models or modify tool definitions and responses.
+"""
+
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-#!/Users/ashish/anaconda3/bin/python
-# Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
-# if you have errors running sample code reach out for help in #igiu-ai-learnin
-# https://bitbucket.oci.oraclecorp.com/projects/GEN/repos/genai-demo/browse/genai-demo-sdk/genai-data-plane-python-sample/llama_chat_function_calling.py
 
 from oci.generative_ai_inference import GenerativeAiInferenceClient
-from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,GenericChatRequest, ChatDetails,ToolChoice
+from oci.generative_ai_inference.models import GenericChatRequest, ChatDetails
 import oci
-import json,os
+import json
+import os
 
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#####
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
@@ -108,20 +129,17 @@ chat_request.tools = [ report_tool, calculator_tool ]
 
 chat_detail = oci.generative_ai_inference.models.ChatDetails()
 chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id=LLM_MODEL)
-chat_detail.compartment_id =  scfg["oci"]["compartment"]
+chat_detail.compartment_id = scfg["oci"]["compartment"]
 chat_detail.chat_request = chat_request
 
-
-
-
- #Step :  ask teh questions and let llm figure out tool strategy 
+# Step 1: Make initial chat request and let LLM figure out tool strategy
 chat_response = llm_client.chat(chat_detail)
 
 # Print result
 print("**************************Step 1 Result**************************")
 print(vars(chat_response))
 
-# Step 2, provide the tool results for step 1 and ask the model what the next step is
+# Step 2+: Provide tool results and continue the conversation
 
 tool_results = []
 step = 1
