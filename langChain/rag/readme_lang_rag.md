@@ -42,6 +42,18 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: `uv run langChain/rag/langchain_rag_26ai.py`.
    - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview).
 
+5. **aia_rerank.py**: Demonstrates reranking using AIA services with Cohere models to improve retrieval quality in RAG pipelines.
+   - Key features: Uses AIA reranking API for reordering retrieved documents based on relevance.
+   - How to run: `uv run langChain/rag/aia_rerank.py`.
+   - Docs: [AIA Rerank Service Details](https://gbuconfluence.oraclecorp.com/display/AIAcc/Technical+Design+-+AIA+Services+APIs#:~:text=%7D-,AIA%20Service%20Endpoints%20Details,-Service), [Cohere Reranking](https://docs.cohere.com/docs/rerank).
+
+6. **langchain_rag_26ai.ipynb**: A Jupyter notebook variation of the langchain_rag_26ai.py script, demonstrating the full RAG example with markdown explanations and interactive cells.
+   - Key features: Mirrors the Python script; includes step-by-step markdown for understanding; embeds documents, stores in DB, retrieves context, generates answers via LLM with citations.
+   - How to run: Open in Jupyter or VS Code and run cells sequentially.
+   - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview).
+
+Note: AIA provides a toolkit to make RAG much simpler and production-ready. Refer to [IGIU AI Accelerator Toolkit Capabilities](https://gbuconfluence.oraclecorp.com/display/AIAcc/I-GIU+AI+Accelerator+Toolkit+Capabilities) for more details.
+
 ## Project Ideas
 Here are some ideas for projects you can build upon these examples:
 
@@ -65,12 +77,19 @@ Here are some ideas for projects you can build upon these examples:
    - Integrate with a web UI (e.g., Streamlit or Gradio).
    - Resources: [LangChain Caching](https://docs.langchain.com/oss/python/langchain/caching), [Streamlit Docs](https://docs.streamlit.io/).
 
+4. Build a production-ready RAG application using the AIA toolkit:
+   - Integrate AIA's reranking capabilities into your existing RAG pipeline.
+   - Use the toolkit's pre-built components for document ingestion, embedding, and retrieval.
+   - Experiment with  AIA's features like evaluation and guardrail.
+   - Resources: [AIA Toolkit Capabilities](https://gbuconfluence.oraclecorp.com/display/AIAcc/I-GIU+AI+Accelerator+Toolkit+Capabilities).
+
 ## Resources and Links
 - **Documentation**:
   - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
   - [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview)
   - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/)
   - [OCI Python SDK](https://github.com/oracle/oci-python-sdk)
+  - [AIA SDK](https://artifactory.oci.oraclecorp.com/igiu-aia-dev-pypi-local/aia-common/)
 
 - **Slack Channels**:
   - **#igiu-innovation-lab**: Discuss project ideas.
@@ -78,3 +97,4 @@ Here are some ideas for projects you can build upon these examples:
   - **#generative-ai-users**: Questions about OCI Gen AI.
   - **#adb-select-ai-users**: Questions about Select AI.
   - **#ww-autonomous-int**: Questions about Oracle Autonomous Database.
+  - **#igiu-ai-accelerator-collab**: Collaboration on AIA services and toolkit.
