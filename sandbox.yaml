@@ -34,3 +34,9 @@ langfuse:
   langfuse_pk: ${LANGFUSE_PK}         # set. in .env  
   langfuse_sk: ${LANGFUSE_SK}         # set. in .env  
   langfuse_host: ${LANGFUSE_HOST}     # set. in .env
+
+aia:
+  idcs_url: ${AIA_IDCS_URL}           # set in .env
+  client_id: ${AIA_CLIENT_ID}         # set in .env
+  client_secret: ${AIA_CLIENT_SECRET_OCID} # set in .env (OCID of secret, id stored in vault )
+  auth_scope: ${AIA_AUTH_SCOPE}       # set in .env
