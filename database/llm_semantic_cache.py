@@ -1,42 +1,54 @@
-from dotenv import load_dotenv
-from envyaml import EnvYAML
-#!/Users/ashish/anaconda3/bin/python
+"""
+What this file does:
+Demonstrates semantic caching using OCI Generative AI embeddings and Oracle Database vector search. It stores Q&A pairs as embeddings and retrieves semantically similar answers for user queries, reducing the need for repeated LLM calls.
 
-# Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
-# if you have errors running sample code reach out for help in #igiu-ai-learning
+Documentation to reference:
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- Oracle DB Vectors: https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
-from oci.generative_ai_inference import GenerativeAiInferenceClient
-from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
-import oracledb
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run database/llm_semantic_cache.py
+
+Comments to important sections of file:
+- Step 1: Load config and initialize clients.
+- Step 2: Set up Oracle DB connection and create vector table.
+- Step 3: Generate embeddings for Q&A pairs.
+- Step 4: Insert embeddings into DB.
+- Step 5: Interactive semantic search and response.
+"""
+
+import os
 import array
 import oci
-import os, json
+import oracledb
+from dotenv import load_dotenv
+from envyaml import EnvYAML
+from oci.generative_ai_inference import GenerativeAiInferenceClient
+from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails
 
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#####
+# Constants
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 EMBED_MODEL = "cohere.embed-multilingual-v3.0"
+# Available embedding models: cohere.embed-english-v3.0, cohere.embed-multilingual-v3.0, cohere.embed-english-light-v3.0, cohere.embed-multilingual-light-v3.0
 
-# cohere.embed-english-v3.0
-# cohere.embed-multilingual-v3.0
-# cohere.embed-english-light-v3.0 
-# cohere.embed-multilingual-light-v3.0
-llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+LLM_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-# available models with tool calling support
-# cohere.command-r-08-2024
-# cohere.command-r-plus-08-2024
-# cohere.command-a-03-2025
+# Available models with tool calling support: cohere.command-r-08-2024, cohere.command-r-plus-08-2024, cohere.command-a-03-2025
+LLM_MODEL = "cohere.command-a-03-2025"
 
-#LLM_MODEL = "cohere.command-r-16k" 
-LLM_MODEL = "cohere.command-a-03-2025" 
-
-
-
-# The input text to vectorize
+# Sample Q&A pairs for semantic caching
 qa_pairs = [
     {
         "question": "What is the largest continent by land area?",
@@ -80,9 +92,6 @@ qa_pairs = [
     }
 ]
 
-tablename_prefix = None
-compartmentId = None
-
 def load_config(config_path):
     """Load configuration from a YAML file."""
     
@@ -93,114 +102,163 @@ def load_config(config_path):
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
 
-def create_table(cursor):
-	sql = [
-		f"""drop table if exists {tablename_prefix}_semantic_cache purge"""	,
-  
-  
-		f"""
- 		create table {tablename_prefix}_semantic_cache (
-   			id number,
-			question varchar2(4000),
-			answer varchar2(4000),
-			embedding vector,
-			primary key (id)
-		)"""
-	]
- 
-	for s in sql : 
-		cursor.execute(s)
+def create_table(cursor, table_prefix):
+    """Drop and create semantic cache table."""
+    sql_statements = [
+        f"DROP TABLE {table_prefix}_semantic_cache PURGE",
+        f"""
+        CREATE TABLE {table_prefix}_semantic_cache (
+            id NUMBER,
+            question VARCHAR2(4000),
+            answer VARCHAR2(4000),
+            embedding VECTOR,
+            PRIMARY KEY (id)
+        )
+        """
+    ]
+
+    for stmt in sql_statements:
+        try:
+            cursor.execute(stmt)
+        except Exception as e:
+            # Ignore if table doesn't exist and create a new one
+            print(f"Skipping error: {e}")
 
 
-def insert_data(cursor, id, question, answer, vec):
-	cursor.execute(f"insert into {tablename_prefix}_semantic_cache values (:1, :2, :3, :4)", [
-				   id, question, answer, vec])
+def insert_data(cursor, table_prefix, id, question, answer, vec):
+    """Insert Q&A pair with embedding into table."""
+    cursor.execute(f"INSERT INTO {table_prefix}_semantic_cache VALUES (:1, :2, :3, :4)", [
+        id, question, answer, vec
+    ])
 
 
-def read_data(cursor):
-	cursor.execute(f"select id,question,answer from {tablename_prefix}_semantic_cache")
-	for row in cursor:
-		print(f"{row[0]}:{row[1]}:{[row[2]]}")
-      
-def search_data(cursor, vec,):
-# try adding the constraint the distance of < 0.5 is something we will need to finetune based on data
-	cursor.execute(f"""
-		select id,question,answer, vector_distance(embedding, :1, COSINE) d 
-		from {tablename_prefix}_semantic_cache
-		order by d
-		fetch first 3 rows only
-	""", [vec])
-
-	rows =[]
-	for row in cursor:
-		r = [row[0], row[1], row[2], row[3]]
-		print(r)
-		rows.append(r)
-
-	return rows
-
-#boilerplate text for embeddings
-def get_embed_payload(questions,embed_type):
-	embed_text_detail = EmbedTextDetails()
-	embed_text_detail.serving_mode = OnDemandServingMode(model_id="cohere.embed-english-v3.0")
-	embed_text_detail.truncate = embed_text_detail.TRUNCATE_END
-	embed_text_detail.input_type =embed_type 
-	embed_text_detail.compartment_id = compartmentId
-	embed_text_detail.inputs = questions
-	return  embed_text_detail
+def read_data(cursor, table_prefix):
+    """Read and display all Q&A pairs from table."""
+    cursor.execute(f"SELECT id, question, answer FROM {table_prefix}_semantic_cache")
+    for row in cursor:
+        print(f"{row[0]}:{row[1]}:{[row[2]]}")
 
 
+def search_data(cursor, table_prefix, vec, top_k=3):
+    """Perform semantic search with cosine similarity."""
+    # Try adding the constraint the distance of < 0.5, something we will need to finetune based on data
+    cursor.execute(f"""
+        SELECT id, question, answer, vector_distance(embedding, :1, COSINE) d
+        FROM {table_prefix}_semantic_cache
+        ORDER BY d
+        FETCH FIRST {top_k} ROWS ONLY
+    """, [vec])
 
-#set up the oci gen ai client based on config 
+    rows = []
+    for row in cursor:
+        r = [row[0], row[1], row[2], row[3]]
+        print(r)
+        rows.append(r)
+
+    return rows
+
+
+def get_embed_payload(questions, embed_type, compartment_id):
+    """Build embedding payload for OCI Generative AI."""
+    embed_text_detail = EmbedTextDetails()
+    embed_text_detail.serving_mode = OnDemandServingMode(model_id=EMBED_MODEL)
+    embed_text_detail.truncate = embed_text_detail.TRUNCATE_END
+    embed_text_detail.input_type = embed_type
+    embed_text_detail.compartment_id = compartment_id
+    embed_text_detail.inputs = questions
+    return embed_text_detail
+
+
+
+# Step 1: Load config and initialize clients
 scfg = load_config(SANDBOX_CONFIG_FILE)
-config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
-compartmentId = scfg["oci"]["compartment"]
-tablename_prefix = scfg["db"]["tablePrefix"]
-wallet = os.path.expanduser(scfg["db"]["walletPath"])
+config = oci.config.from_file(
+    os.path.expanduser(scfg["oci"]["configFile"]),
+    scfg["oci"]["profile"]
+)
+compartment_id = scfg["oci"]["compartment"]
+table_prefix = scfg["db"]["tablePrefix"]
+wallet_path = os.path.expanduser(scfg["db"]["walletPath"])
 
-
-
-# create a llm client 
+# Create LLM client
 llm_client = GenerativeAiInferenceClient(
-				config=config, 
-				service_endpoint=llm_service_endpoint, 
-				retry_strategy=oci.retry.NoneRetryStrategy(),
-				timeout=(10,240))	
+    config=config,
+    service_endpoint=LLM_ENDPOINT,
+    retry_strategy=oci.retry.NoneRetryStrategy(),
+    timeout=(10, 240)
+)
 
+# Step 2: Set up Oracle DB connection and create vector table
+db_connection = oracledb.connect(
+    config_dir=wallet_path,
+    user=scfg["db"]["username"],
+    password=scfg["db"]["password"],
+    dsn=scfg["db"]["dsn"],
+    wallet_location=wallet_path,
+    wallet_password=scfg["db"]["walletPass"]
+)
+cursor = db_connection.cursor()
 
-print("creating embeddings")
-response = llm_client.embed_text(get_embed_payload([pair["question"] for pair in qa_pairs], EmbedTextDetails.INPUT_TYPE_SEARCH_DOCUMENT))
-embeddings = response.data.embeddings
+print("Creating table for semantic cache...")
+create_table(cursor, table_prefix)
 
-# insert & query  vectors
-with oracledb.connect(  config_dir=scfg["db"]["walletPath"],user= scfg["db"]["username"], password=scfg["db"]["password"], dsn=scfg["db"]["dsn"],wallet_location=scfg["db"]["walletPath"],wallet_password=scfg["db"]["walletPass"]) as db:
-	cursor = db.cursor()
+# Step 3: Generate embeddings for Q&A pairs
+print("Generating embeddings for Q&A pairs...")
+embed_payload = get_embed_payload(
+    [pair["question"] for pair in qa_pairs],
+    EmbedTextDetails.INPUT_TYPE_SEARCH_DOCUMENT,
+    compartment_id
+)
+embed_response = llm_client.embed_text(embed_payload)
+embeddings = embed_response.data.embeddings
 
-	print("creating table")
-	create_table(cursor)
-	for i in range(len(embeddings)):
-		insert_data(cursor, i, qa_pairs[i]['question'],qa_pairs[i]['answer'], array.array("f",embeddings[i]))
-		print(f"inserted {i}-{qa_pairs[i]}")
+print(f"Generated {len(embeddings)} embeddings.")
 
-	print("commiting")
-	db.commit()
+# Step 4: Insert embeddings into DB
+for i, emb in enumerate(embeddings):
+    insert_data(cursor, table_prefix, i, qa_pairs[i]['question'], qa_pairs[i]['answer'], array.array("f", emb))
+    print(f"Inserted Q&A pair {i}")
 
-	print("reading")
-	read_data(cursor)
+db_connection.commit()
 
-	while True:
-		query = input("Ask a question: ").strip().lower()
-		q=[]
-		q.append(query)
-		prompt_embed = llm_client.embed_text (get_embed_payload(q, EmbedTextDetails.INPUT_TYPE_SEARCH_QUERY))
-		vec = array.array("f",prompt_embed.data.embeddings[0])
-		
-		# R of RAG : retrieving appicable text 
-		print(f"searching for query:{query}")
-		chunks = search_data(cursor,vec)
+print("Reading stored Q&A pairs...")
+read_data(cursor, table_prefix)
 
-		print("**************************Chat Result**************************")
-		print (f"Answer is {chunks[0][2]}")
-		print ("\n other answers:\n")
-		for chunk in chunks[0:3]: 
-			print(f"{chunk[3]}:{chunk[1]}")
+# Step 5: Interactive semantic search and response
+print("\nReady for queries. Try rephrasing questions to test semantic matching.")
+print("Suggestions for experimentation:")
+print("- Change the embedding model (e.g., to 'cohere.embed-english-v3.0')")
+print("- Adjust top_k parameter in search_data for more/less results")
+print("- Add distance threshold filtering in search query")
+print("- Experiment with different similarity algorithms (COSINE, DOT, EUCLIDEAN)")
+
+while True:
+    query = input("\nAsk a question (or 'q' to exit): ").strip()
+    if query.lower() == "q":
+        break
+
+    query_list = [query]
+    query_payload = get_embed_payload(
+        query_list,
+        EmbedTextDetails.INPUT_TYPE_SEARCH_QUERY,
+        compartment_id
+    )
+    query_response = llm_client.embed_text(query_payload)
+    query_vec = array.array("f", query_response.data.embeddings[0])
+
+    print(f"Searching for: '{query}'")
+    results = search_data(cursor, table_prefix, query_vec, top_k=5)
+
+    print("\n************************** SEMANTIC CACHE RESULTS **************************")
+    if results:
+        print(f"Best match answer: {results[0][2]}")
+        print("\nOther similar questions and distances:")
+        for result in results:
+            print(f"{result[3]:.4f}: {result[1]}")
+    else:
+        print("No matches found.")
+
+# Close DB connections
+cursor.close()
+db_connection.close()
+print("Database connection closed.")

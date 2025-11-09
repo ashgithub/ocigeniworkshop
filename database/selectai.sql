@@ -1,66 +1,119 @@
 
 
---https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/select-ai-examples.html#GUID-2FBD7DDB-CAC3-47AF-AB66-17F44C2ADAA4
---  if you have errors running sample code reach out for help in #igiu-ai-learning
--- #igiu-innovation-lab: discuss project ideas 
--- #adb-select-ai-users : questions about oracle 23ai select ai 
+-- What this file does:
+-- Demonstrates Oracle 23ai Select AI capabilities for natural language database queries.
+-- Shows different AI query modes (narrate, showsql, explainsql, chat) and how they work with the SH schema.
+
+-- Documentation to reference:
+-- - Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/
+-- - Select AI Examples: https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/select-ai-examples.html
+-- - DBMS_CLOUD_AI Package: https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/DBMS_CLOUD_AI.html
+
+-- Relevant slack channels:
+-- - #adb-select-ai-users: questions about Oracle 23ai Select AI
+-- - #igiu-innovation-lab: general discussions on your project
+-- - #igiu-ai-learning: help with sandbox environment or help with running this code
+
+-- Prerequisites:
+-- 1. Oracle 23ai Autonomous Database with Select AI enabled
+-- 2. Access to the SH (Sales History) sample schema
+-- 3. OCI credentials configured for GenAI access
+
+-- How to run the file:
+-- 1. Update the credential details below with your OCI information
+-- 2. Execute this script in SQL*Plus or SQL Developer connected to your 23ai database
+-- 3. Test the various AI query examples
+
+-- Step 1: Verify database connection
 SELECT USER FROM DUAL;
 
- -- change the details per your user. you can file the details in your ~/.oci/config file thay you setup
- -- copy & paste the private key frm uyour keypair file that you setup NOTE. this is provate key not the public key that is referenced in 
- DBMS_CLOUD.CREATE_CREDENTIAL(
-    credential_name =>              'OCI_GENAI_CRED',
-    user_ocid =>'your user ocid', 
-    tenancy_ocid => 'ocid1.tenancy.oc1..aaaaaaaapdvbfci2muxdqdwwpm6ubi2at6ys6wzat6l7etv2kkno6ot2litq',
-    private_key => 'your key',
-    fingerprint => '5a:a1:1c:1d:a5:c2:00:e8:5a:2c:2f:93:bb:f9:c0:8f');
-END;
-/
-
+-- Step 2: Create OCI credential for GenAI access
+-- IMPORTANT: Replace the placeholder values below with your actual OCI credentials
+-- You can find these details in your ~/.oci/config file and private key file
+-- NOTE: This is your PRIVATE key, not the public key referenced in the config
 BEGIN
-dbms_cloud_ai.drop_profile(
-    profile_name => 'genaish',
-    force => true
+    DBMS_CLOUD.CREATE_CREDENTIAL(
+        credential_name => 'OCI_GENAI_CRED',
+        user_ocid => 'your-user-ocid-here',
+        tenancy_ocid => 'your-tenancy-ocid-here',
+        private_key => '-----BEGIN PRIVATE KEY-----
+your-private-key-content-here
+-----END PRIVATE KEY-----',
+        fingerprint => 'your-key-fingerprint-here'
     );
 END;
 /
 
+-- Step 3: Clean up existing profile
 BEGIN
-DBMS_CLOUD_AI.CREATE_PROFILE (
-        profile_name => 'genaish',        
+    dbms_cloud_ai.drop_profile(
+        profile_name => 'genaish',
+        force => true
+    );
+END;
+/
+
+-- Step 4: Create AI profile for SH schema
+BEGIN
+    DBMS_CLOUD_AI.CREATE_PROFILE(
+        profile_name => 'genaish',
         attributes => '{
             "provider": "oci",
-             "credential_name": "OCI_GENAI_CRED",
-            "model":"meta.llama-4-scout-17b-16e-instruct",
-            "comments":"true",            
+            "credential_name": "OCI_GENAI_CRED",
+            "model": "meta.llama-4-scout-17b-16e-instruct",
+            "comments": "true",
             "object_list": [{"owner": "SH"}]
-            }'
-        );
-end;
+        }'
+    );
+END;
 /
 
-begin
-  dbms_cloud_ai.set_profile(
+-- Step 5: Set the active profile
+BEGIN
+    dbms_cloud_ai.set_profile(
         profile_name => 'genaish'
     );
-end;
+END;
 /
 
-set wrap on
+-- Step 6: Configure output formatting
+SET WRAP ON
 
+-- Step 7: Sample Select AI queries demonstrating different modes
 
-select ai how many customers exist;
-select ai runsql  narrate how many customers exist;
-select ai showsql  narrate how many customers exist;
-select ai explainsql  narrate how many customers exist;
-select ai narrate how many customers exist;
-select ai chat how many customers exist;
-select ai chat why is sky blue
-select ai showsql how many customers in San Francisco are married;
+-- Basic AI query - returns natural language answer
+SELECT AI 'how many customers exist';
 
-select ai find top3 baby boomer big spenders
-select ai showsql find top3 baby boomer big spenders
+-- Show the SQL that would be executed
+SELECT AI showsql 'how many customers exist';
 
+-- Explain the SQL that would be executed
+SELECT AI explainsql 'how many customers exist';
 
+-- Run the SQL and return results
+SELECT AI runsql 'how many customers exist';
 
-SELECT * FROM ( SELECT "CUST_FIRST_NAME", "CUST_LAST_NAME", "CUST_INCOME_LEVEL", "CUST_YEAR_OF_BIRTH", SUM("AMOUNT_SOLD") AS "TOTAL_SPENT" FROM "SH"."CUSTOMERS" "C" INNER JOIN "SH"."SALES" "S" ON "C"."CUST_ID" = "S"."CUST_ID" WHERE "CUST_YEAR_OF_BIRTH" BETWEEN 1946 AND 1964 GROUP BY "CUST_FIRST_NAME", "CUST_LAST_NAME", "CUST_INCOME_LEVEL", "CUST_YEAR_OF_BIRTH" ORDER BY SUM("AMOUNT_SOLD") DESC ) WHERE ROWNUM <= 3
+-- Narrative answer (same as basic AI query)
+SELECT AI narrate 'how many customers exist';
+
+-- Chat mode for conversational queries
+SELECT AI chat 'how many customers exist';
+SELECT AI chat 'why is the sky blue';
+
+-- Complex queries with filtering
+SELECT AI showsql 'how many customers in San Francisco are married';
+
+-- Business intelligence style queries
+SELECT AI 'find top 3 baby boomer big spenders';
+SELECT AI showsql 'find top 3 baby boomer big spenders';
+
+-- Example of the actual SQL generated by Select AI for the baby boomer query
+SELECT * FROM (
+    SELECT "CUST_FIRST_NAME", "CUST_LAST_NAME", "CUST_INCOME_LEVEL",
+           "CUST_YEAR_OF_BIRTH", SUM("AMOUNT_SOLD") AS "TOTAL_SPENT"
+    FROM "SH"."CUSTOMERS" "C"
+    INNER JOIN "SH"."SALES" "S" ON "C"."CUST_ID" = "S"."CUST_ID"
+    WHERE "CUST_YEAR_OF_BIRTH" BETWEEN 1946 AND 1964
+    GROUP BY "CUST_FIRST_NAME", "CUST_LAST_NAME", "CUST_INCOME_LEVEL", "CUST_YEAR_OF_BIRTH"
+    ORDER BY SUM("AMOUNT_SOLD") DESC
+) WHERE ROWNUM <= 3;

@@ -1,53 +1,94 @@
 ## Welcome to the Database Module
 
-In this module you’ll explore how Oracle Autonomous Database (23ai) and **Select AI** enable Large Language Model (LLM) workflows ​directly inside the database and how to combine them with Retrieval-Augmented Generation (RAG).
+In this module, we will explore how Oracle Autonomous Database (23ai) and **Select AI** enable Large Language Model (LLM) workflows directly inside the database and how to combine them with Retrieval-Augmented Generation (RAG).
 
-### What you will try
+## What you will learn
 
-1. **Natural-Language-to-SQL (NL2SQL)** – Ask questions in plain English and let the database generate and execute the SQL for you.  
-2. **Select AI** – Compare “inline LLM” SQL (`SELECT AI …`) with external LLM calls.  
-3. **Database-centric RAG** – Use SQL and Embeddings stored in the database to build a full RAG pipeline that returns citations.  
-4. **Hybrid RAG** – Orchestrate Select AI with OCI GenAI to blend structured and unstructured knowledge.
+In this module, we will explore the following capabilities:
 
----
+1. **Natural-Language-to-SQL (NL2SQL)** – Ask questions in plain English and let the database generate and execute the SQL for you.
+2. **Select AI** – Compare "inline LLM" SQL (`SELECT AI …`) with external LLM calls.
+3. **Database-centric RAG** – Use SQL and Embeddings stored in the database to build a full RAG pipeline that returns citations.
+4. **Semantic Caching** – Cache answers and retrieve them based on similar questions using vector embeddings.
 
-### Environment setup
+## Environment Setup
 
-1. Download the **ADB / 23ai wallet** and unzip it locally.  
-2. In **sandbox.yaml** populate the `db` section (wallet directory, user, password, service name, prefix).  
-3. Verify `oci` section is complete (needed for embedding generation or bucket staging).  
-4. Optional: add sensitive values to `.env` and load them with `python-dotenv`.
+- `sandbox.yaml`: Contains OCI config, compartment, DB details, and wallet path.
+- `.env`: Load environment variables (e.g., API keys if needed).
+- Download the **ADB / 23ai wallet** and unzip it locally.
+- Populate the `db` section in `sandbox.yaml` (wallet directory, user, password, service name, prefix).
+- Verify `oci` section is complete (needed for embedding generation).
+- Ensure you have access to Oracle Autonomous Database 23ai.
 
----
+## Suggested Study Order and File Descriptions
 
-### Example code
+The files are designed to build upon each other. Study them in this order for a progressive understanding:
 
-| Task | Script / Notebook |
-|------|-------------------|
-| NL2SQL demo with Select AI | `nl2sql_demo.py` |
-| Pure Select AI examples (inline SQL) | `selectai.sql` |
-| Full RAG in 23ai (embeddings, similarity search, citations) | `rag.sql` |
-| Ability to cache answers and retrieve them based on similar questions | `llm_semantic_cache.py, semantic_cache.ipynb` |
+1. **nl2sql_demo.py**: Demonstrates Natural-Language-to-SQL (NL2SQL) conversion using OCI Generative AI. It translates plain English questions into SQL queries that execute against the SH (Sales History) schema in Oracle Database, displaying results in a formatted table.
+   - Key features: Uses few-shot prompting with schema description; handles database connections and error handling.
+   - How to run: `uv run database/nl2sql_demo.py`.
+   - Docs: [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm), [Python-oracledb](https://python-oracledb.readthedocs.io/).
 
----
+2. **llm_semantic_cache.py**: Demonstrates semantic caching using OCI Generative AI embeddings and Oracle Database vector search. It stores Q&A pairs as embeddings and retrieves semantically similar answers for user queries, reducing the need for repeated LLM calls.
+   - Key features: Embeds Q&A pairs, stores in DB, performs semantic search with cosine similarity.
+   - How to run: `uv run database/llm_semantic_cache.py`.
+   - Docs: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/), [OCI GenAI SDK](https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models).
 
-### Project ideas
+3. **semantic_cache.ipynb**: A Jupyter notebook variation of the llm_semantic_cache.py script, demonstrating semantic caching with step-by-step markdown explanations and interactive cells.
+   - Key features: Mirrors the Python script; includes detailed steps and experimentation suggestions; embeds Q&A pairs, stores in DB, retrieves semantically similar answers.
+   - How to run: Open in Jupyter or VS Code and run cells sequentially.
+   - Docs: [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm), [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/).
 
-* Build a **“Chat with my tables”** app – automatic schema discovery, Select AI for structured Q&A, plus GenAI summarisation.  
-* Store vector embeddings in 23ai, create an **in-database semantic search** view, then connect it to OCI GenAI for answers with citations.  
-* Compare cost / latency of Select AI versus external LLM calls for the same NL prompt workload.
+4. **selectai.sql**: Pure Select AI examples demonstrating "inline LLM" SQL capabilities directly in the database.
+   - Key features: Shows various SELECT AI queries for natural language database interactions.
+   - How to run: Execute in SQL client connected to 23ai database.
+   - Docs: [Select AI Documentation](https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/).
 
----
+5. **rag.sql**: Full RAG implementation in 23ai using embeddings, similarity search, and citations.
+   - Key features: Demonstrates database-centric RAG with vector operations and LLM integration.
+   - How to run: Execute in SQL client connected to 23ai database.
+   - Docs: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/).
 
-### Helpful links
+## Project Ideas
 
-* Slack **#adb-select-ai-users** – questions on Select AI.  
-* Slack **##ww-autonomous-int** - questions on autonomous database
-* Slack **#generative-ai-users** – OCI GenAI discussions. 
-* Slack **#igiu-innovation-lab** – project ideas  
-* Slack **#igiu-ai-learning** – help with code or environment issues   
-* Docs: <https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/>  
+Here are some ideas for projects you can build upon these examples:
 
----
+1. **Build a "Chat with my tables" application**:
+   - Implement automatic schema discovery for any database.
+   - Use NL2SQL for structured Q&A on tabular data.
+   - Add GenAI summarization for query results.
+   - Resources: [Schema Discovery Techniques](https://docs.oracle.com/en/database/oracle/oracle-database/23/dblic/Licensing-Information.html), [NL2SQL Best Practices](https://arxiv.org/abs/2010.05262).
 
+2. **Create an in-database semantic search view**:
+   - Store vector embeddings in 23ai with proper indexing.
+   - Build views that combine similarity search with traditional SQL filtering.
+   - Connect to OCI GenAI for answer generation with citations.
+   - Resources: [Vector Indexes in Oracle](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/vector-indexes.html).
 
+3. **Compare Select AI vs external LLM performance**:
+   - Benchmark latency and cost for the same NL queries.
+   - Implement hybrid approaches that use both inline and external LLMs.
+   - Analyze accuracy differences between approaches.
+   - Resources: [Performance Benchmarking](https://docs.oracle.com/en/cloud/paas/autonomous-database/adbsb/performance.html).
+
+4. **Advanced semantic caching system**:
+   - Implement cache expiration and LRU eviction policies.
+   - Add multi-tenant support with user-specific caches.
+   - Integrate with existing RAG pipelines for performance optimization.
+   - Resources: [Caching Strategies](https://redis.io/docs/latest/develop/reference/patterns/caching/), [Vector Databases](https://milvus.io/docs/overview.md).
+
+## Resources and Links
+
+- **Documentation**:
+  - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
+  - [Oracle Autonomous Database](https://docs.oracle.com/en/cloud/paas/autonomous-database/)
+  - [Select AI](https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/)
+  - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/)
+  - [Python-oracledb](https://python-oracledb.readthedocs.io/)
+
+- **Slack Channels**:
+  - **#generative-ai-users**: Questions about OCI Gen AI.
+  - **#adb-select-ai-users**: Questions on Select AI.
+  - **#ww-autonomous-int**: Questions about Oracle Autonomous Database.
+  - **#igiu-innovation-lab**: General discussions on your project.
+  - **#igiu-ai-learning**: Help with sandbox environment or running code.
