@@ -7,7 +7,7 @@ Documentation to reference:
 - OCI OpenAI Compatible SDK: https://github.com/oracle-samples/oci-openai
 - LangChain Structured Output: https://python.langchain.com/docs/how_to/structured_output/
 - Pydantic Models: https://docs.pydantic.dev/latest/concepts/models/
-- OpenAI Structured Outputs: https://platform.openai.com/docs/guides/structured-outputs
+- OpenAI Structured Outputs: https://platform.openai.com//guides/structured-outputs
 
 Relevant slack channels:
 - #generative-ai-users: for questions on OCI Gen AI

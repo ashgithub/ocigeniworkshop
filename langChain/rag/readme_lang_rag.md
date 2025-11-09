@@ -35,7 +35,7 @@ The files are designed to build upon each other. Study them in this order for a 
 3. **langchain_semantic_search.py**: Demonstrates a semantic search example using OCI Generative AI for embeddings and Oracle DB for vector storage and retrieval. Perform vector similarity searches over stored embeddings.
    - Key features: Embeds queries, stores chunks in Oracle DB, retrieves top results using cosine similarity.
    - How to run: `uv run langChain/rag/langchain_semantic_search.py`.
-   - Docs: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/), [OCI GenAI SDK](https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models).
+   - Docs: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/), [OCI GenAI SDK](https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models).
 
 4. **langchain_rag_26ai.py**: Demonstrates a full RAG (Retrieval-Augmented Generation) example using OCI Generative AI for embeddings and LLM, with Oracle DB for vector storage and semantic search.
    - Key features: Embeds documents, stores in DB, retrieves context, generates answers via LLM with citations.
@@ -63,13 +63,12 @@ Here are some ideas for projects you can build upon these examples:
    - Experiment with similarity algorithms (COSINE is popular, but try Euclidean or DOT product).
    - Add rerankers (e.g., using Cohere or cross-encoders) to reorder retrieved documents.
    - Include citations in responses for transparency.
-   - Resources: [Semantic Chunking Guide](https://docs.langchain.com/docs/guides/semantic-chunking), [Reranking Techniques](https://www.sbert.net/docs/pretrained-models/ce-msmarco.html).
-
+   - Resources: [Semantic Chunking Guide](https://docs.langchain.com/docs/guides/semantic-chunking), 
 2. Build a chatbot with custom knowledge base:
    - Extend the RAG example to handle multiple document types (e.g., PDFs, text files).
    - Implement conversation history using LangChain's memory modules.
    - Add evaluation metrics (e.g., BLEU or ROUGE) to assess answer quality.
-   - Resources: [LangChain Memory](https://docs.langchain.com/oss/python/langchain/memory), [Chatbot Evaluation](https://huggingface.co/docs/evaluate/main/en/tasks/question_answering).
+   - Resources: [LangChain Memory](https://docs.langchain.com/oss/python/langchain/memory) 
 
 3. Optimize for production:
    - Implement caching for embeddings to avoid recomputation.
@@ -87,7 +86,7 @@ Here are some ideas for projects you can build upon these examples:
 - **Documentation**:
   - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
   - [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview)
-  - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/)
+  - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/)
   - [OCI Python SDK](https://github.com/oracle/oci-python-sdk)
   - [AIA SDK](https://artifactory.oci.oraclecorp.com/igiu-aia-dev-pypi-local/aia-common/)
 

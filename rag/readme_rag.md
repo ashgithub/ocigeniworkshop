@@ -28,20 +28,20 @@ Study in this order for progressive understanding:
    - Key features: Builds chat requests with documents, handles citations, adds chat history.
    - How to run: `uv run rag/cohere_chat_citation.py` or open notebook and run cells.
    - Experiment: Try different models (e.g., cohere.command-r-plus), adjust temperature/top_p, add more documents, or test with/without history.
-   - Docs: [OCI GenAI Chat Models](https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm), [Cohere Documents](https://docs.cohere.com/docs/documents).
+   - Docs: [OCI GenAI Chat Models](https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm), [Cohere Documents](https://docs.cohere.com), [Cohere RAG citation](https://docs.cohere.com/v2/docs/rag-citations#citation-modes).
 
 2. **oci_rag_agents.py, RAG-agents.ipynb**: Leverages OCI GenAI Agent service for ready-made RAG with a shared knowledge base.
    - Key features: Creates sessions, chats with agent endpoint, handles citations from ingested docs.
    - Setup: See rag_agents.md for uploading docs to shared knowledge base and ingesting.
    - How to run: `uv run rag/oci_rag_agents.py` or open notebook and run cells. Ensure agent endpoint in `sandbox.yaml`.
    - Experiment: Add your own PDFs (e.g., with images/charts) to knowledge base, ask domain-specific questions, compare session vs. sessionless endpoints.
-   - Docs: [OCI GenAI Agents](https://docs.oracle.com/en-us/iaas/Content/generative-ai/agents.htm).
+   - Docs: [OCI GenAI Agents](https://docs.oracle.com/en-us/iaas/Content/generative-ai-agents/home.htm).
 
 3. **cohere-rag-26ai.py, RAG-full.ipynb**: Full home-grown RAG: chunk text, embed with Cohere, store/retrieve from Oracle DB, generate with Cohere.
    - Key features: Manual chunking, DB vector storage, cosine similarity search, augment prompt with retrieved chunks, citations via documents.
    - How to run: `uv run rag/cohere-rag-26ai.py` or open notebook and run cells. Requires DB setup.
    - Experiment: Try different chunk sizes/overlap, similarity metrics (COSINE/DOT/EUCLIDEAN), add reranking (see cohere docs), use real PDFs instead of mock chunks.
-   - Docs: [OCI Embeddings](https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm#embed-models), [Oracle Vector Search](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/).
+   - Docs: [OCI Embeddings](https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm#embed-models), [Oracle Vector Search](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/).
 
 Note: For production, consider libraries like LangChain for easier chunking/retrieval (see langChain/rag/ examples). rag_agents.md provides detailed setup for OCI Agents knowledge base.
 
@@ -68,7 +68,7 @@ Here are ideas to extend these examples:
 - **Documentation**:
   - [OCI GenAI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
   - [Cohere Models on OCI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm)
-  - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/)
+  - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/)
 
 - **Slack Channels**:
   - **#igiu-innovation-lab**: Discuss project ideas.

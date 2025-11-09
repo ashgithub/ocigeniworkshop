@@ -4,11 +4,11 @@ Demonstrates OCI Language service capabilities for natural language processing t
 
 Documentation to reference:
 - OCI Language: https://docs.oracle.com/en-us/iaas/language/using/home.htm
-- Sentiment Analysis: https://docs.oracle.com/en-us/iaas/language/using/sentiment.htm
-- Key Phrases: https://docs.oracle.com/en-us/iaas/language/using/keyphrases.htm
-- Named Entities: https://docs.oracle.com/en-us/iaas/language/using/ner.htm
-- Text Classification: https://docs.oracle.com/en-us/iaas/language/using/text-classification.htm
-- PII Detection: https://docs.oracle.com/en-us/iaas/language/using/pii.htm
+- Sentiment Analysis: hhttps://docs.oracle.com/en-us/iaas/Content/language/using/sentment.htm
+- Key Phrases: https://docs.oracle.com/en-us/iaas/Content/language/using/key_ref.htm
+- Named Entities: https://docs.oracle.com/en-us/iaas/Content/language/using/ner.htm
+- Text Classification: https://docs.oracle.com/en-us/iaas/Content/language/using/text-class.htm
+- PII Detection: https://docs.oracle.com/en-us/iaas/Content/language/using/pii.htm
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_language
 
 Relevant slack channels:

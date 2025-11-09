@@ -70,25 +70,21 @@ Here are some ideas for projects you can build upon these examples:
 1. Create an agent that finds the credentials for a user:
    - Build a simple mock data retrieval tool that simulates user credential lookup.
    - Implement secure tool calls to retrieve user information based on queries.
-   - Resources: [Tool Calling Best Practices](https://docs.cohere.com/docs/tool-calling), [OCI Security](https://docs.oracle.com/en-us/iaas/Content/security/home.htm).
 
 2. Build a personal shopping assistant:
    - Create tools for inventory checking, price comparison, and order placement.
    - Use multi-step calling to handle complex shopping scenarios (e.g., check stock, calculate total, process payment).
-   - Resources: [E-commerce Integration](https://docs.oracle.com/en/cloud/saas/fusion-service/index.html), [Multi-step Tool Calling](https://docs.cohere.com/docs/multi-step-tool-calling).
 
 3. Create an agent that suggests clothes based on weather and schedule:
    - Build weather API tool to get current conditions.
    - Build closet inventory tool to list available clothing.
    - Build calendar tool to check daily agenda.
    - Agent orchestrates multiple tool calls to provide personalized clothing recommendations.
-   - Resources: [Weather APIs](https://openweathermap.org/api), [Calendar Integration](https://docs.oracle.com/en/cloud/saas/fusion-service/index.html).
 
 4. Implement a customer support chatbot with tool routing:
    - Use classification to route queries to appropriate tools (billing, technical support, account management).
    - Integrate with CRM systems for customer data lookup.
    - Combine with semantic caching for improved response times.
-   - Resources: [Chatbot Development](https://docs.oracle.com/en/cloud/saas/fusion-service/index.html), [Semantic Caching](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/).
 
 ## Resources and Links
 - **Documentation**:

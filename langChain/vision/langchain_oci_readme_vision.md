@@ -34,25 +34,21 @@ Here are some ideas for projects you can build upon these examples:
    - Build a tool to extract structured data from receipts, invoices, or forms.
    - Experiment with different prompt strategies for accuracy.
    - Add validation and error handling for real-world use.
-   - Resources: [Multimodal Prompting Guide](https://docs.oracle.com/en-us/iaas/Content/generative-ai/multimodal.htm).
 
 2. **Visual Content Moderation**:
    - Create a system to analyze images for content appropriateness.
    - Implement multi-model voting for better accuracy.
    - Add confidence scoring and human-in-the-loop review.
-   - Resources: [Content Moderation Best Practices](https://docs.oracle.com/en-us/iaas/Content/generative-ai/content-moderation.htm).
 
 3. **Educational Image Analysis**:
    - Develop tools to describe diagrams, charts, or educational materials.
    - Add support for multiple languages and accessibility features.
    - Integrate with learning management systems.
-   - Resources: [Accessibility Guidelines](https://www.w3.org/WAI/).
 
 4. **Video Frame Analysis**:
    - Extend image analysis to video content by processing frames.
    - Implement temporal analysis and scene change detection.
    - Create video summarization tools.
-   - Resources: [Video Analysis Techniques](https://docs.oracle.com/en-us/iaas/Content/generative-ai/video-analysis.htm).
 
 ## Ideas for Experimenting
 - **Prompt Engineering**: Try different question types (descriptive, analytical, comparative).
