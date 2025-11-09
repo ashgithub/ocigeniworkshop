@@ -1,124 +1,189 @@
+"""
+What this file does:
+Demonstrates how to pass custom documents to OCI Generative AI (Cohere models) for chat responses with citations. This is a basic form of RAG without external storage—documents are provided directly in the request.
+
+Documentation to reference:
+- OCI GenAI Chat: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+- Cohere Documents and Citations: https://docs.cohere.com/docs/documents
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
+
+Relevant slack channels:
+- #generative-ai-users: For questions on OCI GenAI
+- #igiu-innovation-lab: General discussions on projects
+- #igiu-ai-learning: Help with sandbox environment or running this code
+
+Env setup:
+- sandbox.yaml: Ensure "oci" section has configFile and profile set.
+- .env: Loaded for any additional variables.
+
+How to run the file:
+uv run rag/cohere_chat_citation.py
+
+Comments to important sections of file:
+- Step 1: Import dependencies and define constants.
+- Step 2: Load configuration and set up OCI client.
+- Step 3: Define helper functions for chat requests and details.
+- Step 4: Prepare documents and chat history (optional).
+- Step 5: Build and send chat request, print response with citations.
+- Experiment: Try different messages (uncomment examples), add/remove documents, adjust citation_quality (FAST vs ACCURATE), or include chat_history for context.
+"""
+
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-#!/Users/ashish/anaconda3/bin/python
 
-# Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
-
-# if you have errors running sample code reach out for help in #igiu-ai-learning
-# we can pass the documents to LLM & get citations back. 
-
+# Step 1: Import OCI dependencies
 from oci.generative_ai_inference import GenerativeAiInferenceClient
-from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
+from oci.generative_ai_inference.models import (
+    OnDemandServingMode, 
+    CohereChatRequest, 
+    ChatDetails
+)
 import oci
-import os,json
+import os
 
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#####
+# Constants
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "cohere.command-a-03-2025" 
+COHERE_MODEL_ID = "cohere.command-a-03-2025"  # Other options: cohere.command-r-08-2024, cohere.command-r-plus-08-2024
+INFERENCE_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-# cohere.command-a-03-2025
-# cohere.command-r-08-2024
-# cohere.command-r-plus-08-2024
-
-
-llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
-llm_client = None
-llm_payload = None
-
-def load_config(config_path):
-    """Load configuration from a YAML file."""
+# Step 2: Load configuration and initialize OCI client
+def load_configuration(config_file_path):
+    """Load sandbox configuration from YAML file."""
     try:
-        with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+        return EnvYAML(config_file_path)
     except FileNotFoundError:
-        print(f"Error: Configuration file '{config_path}' not found.")
+        print(f"Error: Configuration file '{config_file_path}' not found.")
         return None
 
-def get_chat_request():
-        cohere_chat_request = CohereChatRequest()
-        cohere_chat_request.preamble_override = "Provide factual answers based of document provided nclude citations if you can. Say you cant answer if the answer is not in provided documents "
-        #cohere_chat_request.message = "Tell me one fact about earth"
-        cohere_chat_request.is_stream = False 
-        cohere_chat_request.max_tokens = 500
-        cohere_chat_request.temperature = 0.75
-        cohere_chat_request.top_p = 0.7
-        cohere_chat_request.frequency_penalty = 1.0
-     #   cohere_chat_request.chat_history = None  # try adding history see ../llm/cohere_chat_history.py ofr details
-        cohere_chat_request.documents = get_documents()  # will only answer from supplied documnets not frm its own knopwledge
-        cohere_chat_request.citation_quality =  cohere_chat_request.CITATION_QUALITY_FAST # FAST or accurate
-#        cohere_chat_request.citation_quality =  cohere_chat_request.CITATION_QUALITY_ACCURATE # FAST or accurate
-        return cohere_chat_request
+sandbox_config = load_configuration(SANDBOX_CONFIG_FILE)
+if sandbox_config is None:
+    raise RuntimeError("Failed to load sandbox configuration.")
 
-def get_chat_detail (llm_request,compartmentId):
-        chat_detail = ChatDetails()
-        chat_detail.serving_mode = OnDemandServingMode(model_id=LLM_MODEL)
-        chat_detail.compartment_id = compartmentId
-        chat_detail.chat_request = llm_request
+oci_config = oci.config.from_file(
+    os.path.expanduser(sandbox_config["oci"]["configFile"]), 
+    sandbox_config["oci"]["profile"]
+)
 
-        print(f"documents are {llm_request.documents}")
-        print(f"citation quality {llm_request.citation_quality}")
-        return chat_detail
+inference_client = GenerativeAiInferenceClient(
+    config=oci_config,
+    service_endpoint=INFERENCE_ENDPOINT,
+    retry_strategy=oci.retry.NoneRetryStrategy(),
+    timeout=(10, 240)
+)
 
+compartment_id = sandbox_config["oci"]["compartment"]
 
-def get_history():
-        previous_chat_message = oci.generative_ai_inference.models.CohereUserMessage(message="Tell me something about Oracle.")
-        previous_chat_reply = oci.generative_ai_inference.models.CohereChatBotMessage(message="Oracle is one of the largest vendors in the enterprise IT market and the shorthand name of its flagship product. The database software sits at the center of many corporate IT")
-        return [previous_chat_message, previous_chat_reply]
+# Step 3: Helper functions to build chat requests and details
+def create_chat_request(message, documents=None, use_history=False, citation_quality="FAST"):
+    """Create a Cohere chat request with optional documents and history."""
+    chat_request = CohereChatRequest()
+    chat_request.preamble_override = (
+        "Provide factual answers based on the provided documents. "
+        "Include citations if possible. If the answer is not in the documents, say so."
+    )
+    chat_request.message = message
+    chat_request.is_stream = False
+    chat_request.max_tokens = 500  # Adjust for longer/shorter responses
+    chat_request.temperature = 0.75  # Higher = more random (default 0.3)
+    chat_request.top_p = 0.7  # Nucleus sampling (default 0.75)
+    chat_request.frequency_penalty = 1.0  # Reduces repetition (max 1.9)
+    
+    if documents:
+        chat_request.documents = documents  # Restricts response to these docs
+    
+    if use_history:
+        chat_request.chat_history = get_chat_history()
+    
+    chat_request.citation_quality = (
+        CohereChatRequest.CITATION_QUALITY_FAST if citation_quality == "FAST" 
+        else CohereChatRequest.CITATION_QUALITY_ACCURATE
+    )
+    
+    return chat_request
 
-def get_documents():
-    return  [
-                 {
-                        "title": "Oracle",
-                        "snippet": "Oracle database services and products offer customers cost-optimized and high-performance versions of Oracle Database, the world's leading converged, multi-model database management system, as well as in-memory, NoSQL and MySQL databases. Oracle Autonomous Database, available on premises via Oracle Cloud@Customer or in the Oracle Cloud Infrastructure, enables customers to simplify relational database environments and reduce management workloads.",
-                        "website": "https://www.oracle.com/database",
-                        "id": "ORA001"
-                },
-                 {
-                        "title": "Amazon",
-                        "snippet": """ AWS provides the broadest selection of purpose-built databases allowing you to save, grow, and innovate faster.
-Purpose Built
-Choose from 15+ purpose-built database engines including relational, key-value, document, in-memory, graph, time series, wide column, and ledger databases.
-Performance at Scale
-Get relational databases that are 3-5X faster than popular alternatives, or non-relational databases that give you microsecond to sub-millisecond latency.
-Fully Managed
-AWS continuously monitors your clusters to keep your workloads running with self-healing storage and automated scaling, so that you can focus on application development.
-Secure & Highly Available
-AWS databases are built for business-critical, enterprise workloads, offering high availability, reliability, and security.
-""",
-                        "website": "https://aws.amazon.com/free/database/e",
-                        "id": "AWS001"
-                }
-]
+def create_chat_details(chat_request):
+    """Create chat details for OCI inference."""
+    details = ChatDetails()
+    details.serving_mode = OnDemandServingMode(model_id=COHERE_MODEL_ID)
+    details.compartment_id = compartment_id
+    details.chat_request = chat_request
+    return details
 
-#set up the oci gen ai client based on config 
-scfg = load_config(SANDBOX_CONFIG_FILE)
-config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
+# Step 4: Define sample documents and optional chat history
+def get_sample_documents():
+    """Return sample documents for citation testing."""
+    return [
+        {
+            "title": "Oracle",
+            "snippet": (
+                "Oracle database services and products offer customers cost-optimized and high-performance "
+                "versions of Oracle Database, the world's leading converged, multi-model database management "
+                "system, as well as in-memory, NoSQL and MySQL databases. Oracle Autonomous Database, "
+                "available on premises via Oracle Cloud@Customer or in the Oracle Cloud Infrastructure, "
+                "enables customers to simplify relational database environments and reduce management workloads."
+            ),
+            "website": "https://www.oracle.com/database",
+            "id": "ORA001"
+        },
+        {
+            "title": "Amazon",
+            "snippet": (
+                "AWS provides the broadest selection of purpose-built databases allowing you to save, grow, "
+                "and innovate faster. Purpose Built: Choose from 15+ purpose-built database engines including "
+                "relational, key-value, document, in-memory, graph, time series, wide column, and ledger databases. "
+                "Performance at Scale: Get relational databases that are 3-5X faster than popular alternatives, "
+                "or non-relational databases that give you microsecond to sub-millisecond latency. "
+                "Fully Managed: AWS continuously monitors your clusters to keep your workloads running with "
+                "self-healing storage and automated scaling, so that you can focus on application development. "
+                "Secure & Highly Available: AWS databases are built for business-critical, enterprise workloads, "
+                "offering high availability, reliability, and security."
+            ),
+            "website": "https://aws.amazon.com/free/database/e",
+            "id": "AWS001"
+        }
+    ]
 
+def get_chat_history():
+    """Optional chat history for context-aware responses."""
+    from oci.generative_ai_inference.models import CohereUserMessage, CohereChatBotMessage
+    user_message = CohereUserMessage(message="Tell me something about Oracle.")
+    bot_reply = CohereChatBotMessage(
+        message="Oracle is one of the largest vendors in the enterprise IT market and the shorthand name "
+                "of its flagship product. The database software sits at the center of many corporate IT"
+    )
+    return [user_message, bot_reply]
 
+# Step 5: Main execution - Send chat request and print results
+documents = get_sample_documents()
 
-llm_client = GenerativeAiInferenceClient(
-                config=config,
-                service_endpoint=llm_service_endpoint,
-                retry_strategy=oci.retry.NoneRetryStrategy(),
-                timeout=(10,240))
-llm_payload =get_chat_detail(get_chat_request(),scfg["oci"]["compartment"])
+# Experiment: Choose a message below (uncomment one)
+# message = "Tell me about Ashish?"  # Should use Oracle doc and cite it
+# message = "Tell me about Oracle's databases"  # Should cite Oracle snippet
+message = "Tell me about Amazon's databases"  # Should cite AWS snippet
+# message = "Tell me about its databases"  # With history: Refers to previous Oracle context
 
-# experiment by uncommenting one of teh following three lines 
-#llm_payload.chat_request.message = "Tell me about Ashish ?"  # should answer with oracle document & citation 
-#llm_payload.chat_request.message = "tell me about oracles  databases"  # should answer with oracle document & citation 
-llm_payload.chat_request.message = "tell me about Amazon's databases"  # Should answert with aws document and citation
-#llm_payload.chat_request.message = "tell me about its databases"  # uses history to resolve it, and use appropriate citation  
+chat_request = create_chat_request(
+    message=message, 
+    documents=documents, 
+    use_history=False,  # Set to True to test history
+    citation_quality="FAST"  # Or "ACCURATE" for better but slower citations
+)
 
-llm_response = llm_client.chat(llm_payload)
+chat_details = create_chat_details(chat_request)
 
-# Print result
-print("**************************Chat Result**************************")
-#llm_text = llm_response.data.chat_response.text
-print(llm_response.data.chat_response.text)
-print("************************** Citations**************************")  # citations are from documents given, not from its own corpus
-print(llm_response.data.chat_response.citations)
-        
+response = inference_client.chat(chat_details)
+
+# Print the response and citations
+print("************************** Chat Response **************************")
+print(response.data.chat_response.text)
+print("\n************************** Citations **************************")
+print(response.data.chat_response.citations)
+
+# Experiment suggestions:
+# 1. Change COHERE_MODEL_ID to another Cohere model and compare responses.
+# 2. Modify temperature (0.3 for factual, 1.0 for creative) or top_p to see variation.
+# 3. Add your own documents (e.g., from a PDF snippet) and query about them.
+# 4. Enable use_history=True and use a follow-up message to test conversation flow.
+# 5. Set citation_quality="ACCURATE" for more precise citations (may be slower).
