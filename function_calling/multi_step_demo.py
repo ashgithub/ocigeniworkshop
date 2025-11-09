@@ -1,17 +1,39 @@
+"""
+What this file does:
+Demonstrates multi-step function calling using OCI Generative AI Cohere models. Shows how the model can make multiple tool calls sequentially to accomplish a complex task.
+
+Documentation to reference:
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- Cohere Command Models: https://docs.cohere.com/docs/command-r
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
+
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, and other details.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run function_calling/multi_step_demo.py
+
+Comments to important sections of file:
+- Step 1: Define multiple tools and make initial chat request.
+- Step 2+: Provide tool results and continue the conversation with chat history.
+- Experiment: Try changing tool outputs or adding more complex multi-step scenarios.
+"""
+
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-#!/Users/ashish/anaconda3/bin/python
-# Questions use #generative-ai-users  or #igiu-innovation-lab slack channel
-# if you have errors running sample code reach out for help in #igiu-ai-learnin
 
 from oci.generative_ai_inference import GenerativeAiInferenceClient
-from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
+from oci.generative_ai_inference.models import CohereChatRequest, ChatDetails
 import oci
-import json,os
+import json
+import os
 
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#####
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
@@ -68,26 +90,18 @@ calculator_tool.parameter_definitions = {
     "expression": expression_param
 }
 
-# Step 1, describe the tool spec
-
+# Step 1: Define multiple tools and make initial chat request
 chat_request = oci.generative_ai_inference.models.CohereChatRequest()
 chat_request.message = "Total sales amount over the 28th and 29th of September."
 chat_request.max_tokens = 600
 chat_request.is_stream = False
 chat_request.is_force_single_step = False
-chat_request.tools = [ report_tool, calculator_tool ]
+chat_request.tools = [report_tool, calculator_tool]
 
 chat_detail = oci.generative_ai_inference.models.ChatDetails()
-chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id="cohere.command-r-plus-08-2024")
-#chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id="cohere.command-r-16k")
-# chat_detail.serving_mode = generative_ai_service_bmc_python_client.models.DedicatedServingMode(
-#     endpoint_id="ocid1.generativeaiendpoint.oc1.us-chicago-1.amaaaaaabgjpxjqa43esnc2c6yluihthqqfa24ll5y5d4jhct6rgq523rena")
-chat_detail.compartment_id =  scfg["oci"]["compartment"]
+chat_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id=LLM_MODEL)
+chat_detail.compartment_id = scfg["oci"]["compartment"]
 chat_detail.chat_request = chat_request
-
-
-
-
 
 chat_response = llm_client.chat(chat_detail)
 
@@ -95,7 +109,7 @@ chat_response = llm_client.chat(chat_detail)
 print("**************************Step 1 Result**************************")
 print(vars(chat_response))
 
-# Step 2, provide the tool results for step 1 and ask the model what the next step is
+# Step 2+: Provide tool results and continue the conversation with chat history
 
 tool_results = []
 chat_request.message = ""

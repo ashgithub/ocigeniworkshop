@@ -1,17 +1,37 @@
-#!/Users/ashish/anaconda3/bin/python
+"""
+What this file does:
+Demonstrates text classification using OCI Generative AI Cohere models. Shows how to prompt the model to classify customer questions into predefined categories using a custom preamble.
 
-# Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
-# if you have errors running sample code reach out for help in #igiu-ai-learning
+Documentation to reference:
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- Cohere Command Models: https://docs.cohere.com/docs/command-r
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
+
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, and other details.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run function_calling/llm_classification.py
+
+Comments to important sections of file:
+- Setup: Load config and initialize client.
+- Classification: Define preamble with categories and make chat request.
+- Experiment: Try different questions or modify categories in the preamble.
+"""
 
 from oci.generative_ai_inference import GenerativeAiInferenceClient
-from oci.generative_ai_inference.models import OnDemandServingMode, EmbedTextDetails,CohereChatRequest, ChatDetails
-import oci, os
+from oci.generative_ai_inference.models import OnDemandServingMode, CohereChatRequest, ChatDetails
+import oci
+import os
 from dotenv import load_dotenv
 from envyaml import EnvYAML
 
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#####
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
