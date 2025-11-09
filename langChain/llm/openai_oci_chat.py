@@ -1,3 +1,35 @@
+"""
+What this file does:
+Demonstrates basic chat functionality using OCI's OpenAI-compatible API for LLM interactions. Shows single calls, batch processing, parameter tuning, model performance comparison, and different prompt types.
+
+Documentation to reference:
+- OCI Gen AI Chat Models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+- OCI OpenAI Compatible SDK: https://github.com/oracle-samples/oci-openai
+- OpenAI API Reference: https://platform.openai.com/docs/api-reference
+- LangChain Chat Models: https://docs.langchain.com/oss/python/langchain/chat_models
+
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment details.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run langChain/llm/openai_oci_chat.py
+
+Comments to important sections of file:
+- Step 1: Load config and initialize client.
+- Step 2: Create OpenAI LLM client.
+- Step 3: Single LLM call demonstration.
+- Step 4: Model performance comparison with timing.
+- Step 5: Batch processing example.
+- Step 6: Max tokens parameter demonstration.
+- Step 7: System and user prompt types.
+"""
+
 import time
 import sys
 import os
@@ -7,30 +39,17 @@ from envyaml import EnvYAML
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
 
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#
-#
-#  OCI's langchain client supports all oci models, but it doesnt support all the features requires for robust agents (output schema, function calling etc)
-#  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
-#  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
-#  if you have errors running sample code reach out for help in #igiu-ai-learning
-#####
-
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 LLM_MODEL = "openai.gpt-4.1"
-# LLM_MODEL = "openai.gpt-5"
-# available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-
+# Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
 MESSAGE = """
-    why is the sky blue? expalin in 2 sentenses like i am 5
+    why is the sky blue? explain in 2 sentences like i am 5
 """
 
-# Step 1: load config 
-
+# Step 1: Load config and initialize client
 def load_config(config_path):
     """Load configuration from a YAML file."""
     try:
@@ -42,34 +61,33 @@ def load_config(config_path):
 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
-# Step 2: create the OpenAI LLM client using credentials and optional parameters
-
+# Step 2: Create OpenAI LLM client using credentials and optional parameters
 llm_client = OCIOpenAIHelper.get_client(
     model_name=LLM_MODEL,
     config=scfg
 )
 
-# Step 3: Call Single LLM
+# Step 3: Single LLM call demonstration
 print(f"\n\n**************************Chat Result for {LLM_MODEL} **************************")
 response = llm_client.invoke(MESSAGE)
 print(response)
 
-# Timing and model loop
+# Step 4: Model performance comparison with timing
 selected_llms = [
     "openai.gpt-4.1",
     "openai.gpt-5",
-#    "cohere.command-a-03-2025",      # cohere doesnt support openAi compaitable APIs yet 
-#    "cohere.command-r-08-2024",      # cohere doesnt support openAi compaitable APIs yet 
+    # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
+    # "cohere.command-r-08-2024",      # Cohere doesn't support OpenAI compatible APIs yet
     "meta.llama-4-maverick-17b-128e-instruct-fp8",
     "meta.llama-4-scout-17b-16e-instruct",
     "xai.grok-4",
     "xai.grok-4-fast-non-reasoning"
 ]
 
-# Reinitialize client for each model (since .model assignment isn't supported)
+# Test each model with timing
 for llm_id in selected_llms:
     print(f"\n\n**************************Chat Result for {llm_id} **************************")
-    llm_client.model_name = llm_id 
+    llm_client.model_name = llm_id
     start_time = time.time()
     response = llm_client.invoke(MESSAGE)
     end_time = time.time()
@@ -79,7 +97,7 @@ for llm_id in selected_llms:
 print(f"\n\n**************************Chat Full LangChain result for {llm_id} **************************")
 print(response)
 
-# Step 4: batch
+# Step 5: Batch processing example
 print(f"\n\n**************************Chat Result With batch for {llm_id} **************************")
 try:
     # If batch method supported
@@ -92,7 +110,7 @@ except AttributeError:
     for q, r in zip(questions, batch_responses):
         print(f"Q: {q}\nA: {r}")
 
-# Step 5: max token
+# Step 6: Max tokens parameter demonstration
 print(f"\n\n**************************Chat Result With max_tokens 10 for {llm_id}**************************")
 llm_client.max_tokens = 10
 response = llm_client.invoke(MESSAGE)
@@ -102,7 +120,7 @@ except Exception:
     pass
 print(response)
 
-# Step 6: prompt types system & human
+# Step 7: System and user prompt types demonstration
 print(f"\n\n**************************Chat Result with system & user prompts for {llm_id} **************************")
 system_message = {"role": "system", "content": "You are a poetic assistant who responds in exactly four lines."}
 user_message = {"role": "user", "content": "What is the meaning of life?"}

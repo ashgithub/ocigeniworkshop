@@ -1,3 +1,35 @@
+"""
+What this file does:
+Demonstrates asynchronous operations using OCI's OpenAI-compatible API for concurrent LLM calls. Shows async invoke and streaming with model performance comparisons between sequential and concurrent execution.
+
+Documentation to reference:
+- OCI Gen AI Chat Models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+- OCI OpenAI Compatible SDK: https://github.com/oracle-samples/oci-openai
+- OpenAI API Reference: https://platform.openai.com/docs/api-reference
+- Python Asyncio: https://docs.python.org/3/library/asyncio.html
+
+Relevant slack channels:
+- #generative-ai-users: for questions on OCI Gen AI
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment details.
+- .env: Load environment variables (e.g., API keys if needed).
+- Note: Uses OpenAI native client for async operations as LangChain async is not fully compatible with OCI clients.
+
+How to run the file:
+uv run langChain/llm/openai_oci_async.py
+
+Comments to important sections of file:
+- Step 1: Load config and initialize clients.
+- Step 2: Define async invoke function.
+- Step 3: Define async streaming function.
+- Step 4: Sequential execution demo.
+- Step 5: Concurrent execution with gather.
+- Step 6: Performance comparison.
+"""
+
 import asyncio
 import time
 import sys
@@ -7,17 +39,6 @@ from envyaml import EnvYAML
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#
-#
-#  OCI's langchain client supports all oci models, but it doesnt support all the features requires for robust agents (output schema, function calling etc)
-#  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
-#
-# ***** NOte this examples use OpenAI native client as async with lang-chain is not working using oci clients
-#  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
-#  if you have errors running sample code reach out for help in #igiu-ai-learning
-#####
 
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
@@ -28,6 +49,7 @@ MESSAGE = """
     why is the sky blue? explain in 2 sentences like I am 5
 """
 
+# Step 1: Load config and initialize clients
 def load_config(config_path):
     """Load configuration from a YAML file."""
     try:
@@ -39,20 +61,21 @@ def load_config(config_path):
 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
+# Supported models for async operations (OpenAI-compatible models only)
 selected_llms = [
     "openai.gpt-4.1",
     "openai.gpt-5",
-#    "cohere.command-a-03-2025",      # cohere doesnt support openAi compaitable APIs yet 
-#    "cohere.command-r-08-2024",      # cohere doesnt support openAi compaitable APIs yet 
-#    "meta.llama-4-maverick-17b-128e-instruct-fp8",
-#    "meta.llama-4-scout-17b-16e-instruct",
+    # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
+    # "cohere.command-r-08-2024",      # Cohere doesn't support OpenAI compatible APIs yet
+    # "meta.llama-4-maverick-17b-128e-instruct-fp8",
+    # "meta.llama-4-scout-17b-16e-instruct",
     "xai.grok-4",
     "xai.grok-4-fast-non-reasoning"
 ]
 
-
-
+# Step 2: Define async invoke function
 async def call_ainvoke(client, model_id, message):
+    """Perform async non-streaming LLM call."""
     start = time.perf_counter()
     response = await client.responses.create(model=model_id, input=message)
     print(f"\n**************************Async Chat Result (ainvoke) for {model_id} **************************")
@@ -60,25 +83,31 @@ async def call_ainvoke(client, model_id, message):
     print(f"ainvoke done in {time.perf_counter() - start:.2f}s")
     return response.output_text
 
+# Step 3: Define async streaming function
 async def call_astream(client, model_id, message):
+    """Perform async streaming LLM call."""
     start = time.perf_counter()
     print(f"\n**************************Async Chat Stream (astream) for {model_id} **************************")
-    async for event in  await client.responses.create(model=model_id, input=message, stream=True):
-        if event.type ==  "response.output_text.delta":
-            print(f"{event.delta}",end="",flush=True)
+    async for event in await client.responses.create(model=model_id, input=message, stream=True):
+        if event.type == "response.output_text.delta":
+            print(f"{event.delta}", end="", flush=True)
         elif event.type == "response.error":
-           print(f"\nError occurred: {event.error}")
-            
+            print(f"\nError occurred: {event.error}")
+
     print(f"\nastream done in {time.perf_counter() - start:.2f}s")
 
+# Step 4: Sequential execution demo
 async def sequential_run():
+    """Execute async calls sequentially for each model."""
     print(f"\n\n*************** Sequential Run ***************\n")
     for llm_id in selected_llms:
         client = OCIOpenAIHelper.get_async_native_client(config=scfg)
         await call_ainvoke(client, llm_id, MESSAGE)
         await call_astream(client, llm_id, MESSAGE)
 
+# Step 5: Concurrent execution with gather
 async def gather_run():
+    """Execute async calls concurrently using asyncio.gather."""
     print(f"\n\n*************** Gather Run (Concurrent) ***************\n")
     tasks = []
     for llm_id in selected_llms:
@@ -87,7 +116,9 @@ async def gather_run():
         tasks.append(call_astream(client, llm_id, MESSAGE))
     await asyncio.gather(*tasks)
 
+# Step 6: Performance comparison
 async def main():
+    """Main function demonstrating sequential vs concurrent execution."""
     total_start = time.perf_counter()
     await sequential_run()
     seq_time = time.perf_counter()
