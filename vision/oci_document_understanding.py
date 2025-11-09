@@ -1,8 +1,36 @@
-# Documentation: https://docs.oracle.com/en-us/iaas/Content/document-understanding/using/home.htm
-# GitHub SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_document
-# Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/28z4h20/document-understanding-api
-# Slack channels: #oci_ai_document_service_users or #igiu-innovation-lab
-# If you have errors running sample code, reach out for help in #igiu-ai-learning
+"""
+What this file does:
+Analyzes documents using OCI Document Understanding for OCR capability: classification of documents, and extraction of text, tables, and key/value pairs.
+
+Documentation to reference:
+- OCI Document Understanding: https://docs.oracle.com/en-us/iaas/Content/document-understanding/using/home.htm
+- OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_document
+- Postman collection: https://www.postman.com/oracledevs/oracle-cloud-infrastructure-rest-apis/collection/28z4h20/document-understanding-api
+
+Relevant slack channels:
+- #oci_ai_document_service_users: for OCI Document Understanding API questions
+- #igiu-innovation-lab: general discussions on your project
+- #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, and bucket details.
+- .env: Load environment variables if needed.
+
+How to run the file:
+uv run vision/oci_document_understanding.py [--file path/to/document]
+
+Comments to important sections of file:
+- Step 1: Load and validate configuration.
+- Step 2: Extract configuration values.
+- Step 3: Upload file to Object Storage.
+- Step 4: Create Document Understanding client.
+- Step 5: Define analysis features.
+- Step 6: Set up input and output locations.
+- Step 7: Create processor job details.
+- Step 8: Submit job and wait for completion.
+- Step 9: Retrieve and parse results.
+- Step 10: Parse and display key results.
+"""
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
@@ -25,7 +53,7 @@ import json
 
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
-FILE_TO_ANALYZE = Path("./vision/receipt.png")  
+DEFAULT_DOCUMENT_PATH = Path("./vision/receipt.png")
 
 def load_config(config_path):
     """Load configuration from a YAML file with environment variable substitution."""
@@ -56,11 +84,11 @@ def upload(oci_cfg, bucket_cfg, file_path):
     print("Upload completed!")
     return True
 
-def get_input_location(bucket_cfg): 
+def get_input_location(bucket_cfg, file_path):
     object_location = oci.ai_document.models.ObjectLocation()
-    object_location.namespace_name = bucket_cfg["namespace"] 
-    object_location.bucket_name = bucket_cfg["bucketName"]  
-    object_location.object_name = f"{bucket_cfg['prefix']}/{os.path.basename(FILE_TO_ANALYZE)}"
+    object_location.namespace_name = bucket_cfg["namespace"]
+    object_location.bucket_name = bucket_cfg["bucketName"]
+    object_location.object_name = f"{bucket_cfg['prefix']}/{file_path.name}"
 
     return object_location
 
@@ -73,15 +101,15 @@ def get_output_location(bucket_cfg):
     return object_location
 
 # Create a processor_job for text_extraction feature
-def create_processor(features, prefix, compartmentid, bucket_cfg):
+def create_processor(features, prefix, compartmentid, bucket_cfg, file_path):
     display_name = f"{prefix}-test"
     job_details = oci.ai_document.models.CreateProcessorJobDetails(
                                                     display_name=display_name,
                                                     compartment_id=compartmentid,
-                                                    input_location=oci.ai_document.models.ObjectStorageLocations(object_locations=[get_input_location(bucket_cfg)]),
+                                                    input_location=oci.ai_document.models.ObjectStorageLocations(object_locations=[get_input_location(bucket_cfg, file_path)]),
                                                     output_location= get_output_location(bucket_cfg),
                                                     processor_config=oci.ai_document.models.GeneralProcessorConfig(features=features))
-    return job_details 
+    return job_details
     
 def create_processor_job_callback(times_called, response):
     print("Waiting for processor lifecycle state to go into succeeded state:", response.data)
@@ -131,10 +159,12 @@ def parse_response(json_data):
                 print(f"Unsupported field type: {field['fieldType']}")
     
     
-def main(file_path=FILE_TO_ANALYZE):
+def main(file_path=DEFAULT_DOCUMENT_PATH):
     """Main function to run OCI Document Understanding on the given file."""
     # Load config
     scfg = load_config(SANDBOX_CONFIG_FILE)
+
+    # Step 1: Load and validate configuration
     if scfg is None or 'oci' not in scfg or 'bucket' not in scfg:
         print("Error: Invalid configuration.")
         return
@@ -153,6 +183,8 @@ def main(file_path=FILE_TO_ANALYZE):
         print("Error: Missing 'oci' or 'bucket' section in config.")
         return
 
+    # Step 2: Extract configuration values
+
     oci_cfg = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]), scfg["oci"]["profile"])
     bucket_cfg = scfg["bucket"]
     namespace = bucket_cfg["namespace"]
@@ -160,16 +192,16 @@ def main(file_path=FILE_TO_ANALYZE):
     prefix = bucket_cfg['prefix']
     compartment_id = scfg["oci"]["compartment"]
 
-    # Upload file
+    # Step 3: Upload file to Object Storage
     if not upload(oci_cfg, bucket_cfg, file_path):
         return
 
-    # Create Document Understanding client
+    # Step 4: Create Document Understanding client
     dus_client = oci.ai_document.AIServiceDocumentClientCompositeOperations(
         oci.ai_document.AIServiceDocumentClient(config=oci_cfg)
     )
 
-    # Define features for extraction (classification, language, key-value, tables, text)
+    # Step 5: Define analysis features
     features = [
         oci.ai_document.models.DocumentClassificationFeature(),
         oci.ai_document.models.DocumentLanguageClassificationFeature(),
@@ -180,9 +212,11 @@ def main(file_path=FILE_TO_ANALYZE):
 
     processor_job = None
     try:
-        # Create and wait for processor job
+        # Step 6: Set up input and output locations
+        # Step 7: Create processor job details
+        # Step 8: Submit job and wait for completion
         processor = dus_client.create_processor_job_and_wait_for_state(
-            create_processor_job_details=create_processor(features, prefix, compartment_id, bucket_cfg),
+            create_processor_job_details=create_processor(features, prefix, compartment_id, bucket_cfg, file_path),
             wait_for_states=[oci.ai_document.models.ProcessorJob.LIFECYCLE_STATE_SUCCEEDED],
             waiter_kwargs={"wait_callback": create_processor_job_callback}
         )
@@ -205,7 +239,7 @@ def main(file_path=FILE_TO_ANALYZE):
     if processor_job is None:
         return
 
-    # Get results from Object Storage
+    # Step 9: Retrieve and parse results
     print(f"Getting results JSON from output location {processor_job.id}")
     object_storage_client = oci.object_storage.ObjectStorageClient(config=oci_cfg)
     if processor_job is not None and hasattr(processor_job, 'id'):
@@ -218,6 +252,8 @@ def main(file_path=FILE_TO_ANALYZE):
         if response is not None and hasattr(response, 'status') and response.status == 200:
             if hasattr(response, 'data') and hasattr(response.data, 'content'):
                 json_data = json.loads(response.data.content.decode('utf-8'))
+
+                # Step 10: Parse and display key results
                 parse_response(json_data)
             else:
                 print("Error: Invalid response data.")
@@ -226,9 +262,11 @@ def main(file_path=FILE_TO_ANALYZE):
     else:
         print("Error: Invalid processor job.")
 
+# Experimentation: Try with different document types like PDFs, or modify features to focus on specific analysis.
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run OCI Document Understanding on an image or PDF.")
-    parser.add_argument("--file", type=Path, default=FILE_TO_ANALYZE, help="Path to the file to analyze (default: ./vision/receipt.png)")
+    parser.add_argument("--file", type=Path, default=DEFAULT_DOCUMENT_PATH, help="Path to the file to analyze (default: ./vision/receipt.png)")
     args = parser.parse_args()
     main(args.file)
