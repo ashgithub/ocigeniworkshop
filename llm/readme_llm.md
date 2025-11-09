@@ -28,7 +28,7 @@ The files are designed to build upon each other. Study them in this order for a 
 2. **cohere_chat_history.py**: Demonstrates chat with conversation history using Cohere models. Shows how to maintain context across multiple interactions by including previous messages in chat requests.
    - Key features: Conversation history management, context-aware responses, history vs no-history comparison.
    - How to run: `uv run llm/cohere_chat_history.py`.
-   - Docs: [Chat History Management](https://docs.oracle.com/en-us/iaas/api/#/en/generative-ai-inference/20231130/ChatDetails/), [Cohere Conversation Context](https://docs.cohere.com/docs/conversation-context).
+   - Docs: [Chat History Management](https://docs.oracle.com/en-us/iaas/api/#/en/generative-ai-inference/20231130/ChatDetails/)
 
 3. **cohere_chat_stream.py**: Demonstrates streaming chat responses with Cohere models. Shows how to receive responses in real-time as tokens are generated for better user experience.
    - Key features: Real-time token streaming, event processing, flush printing for smooth output.
@@ -38,7 +38,7 @@ The files are designed to build upon each other. Study them in this order for a 
 4. **cohere_output_schema.py**: Demonstrates structured output generation with JSON schemas using Cohere models. Shows how to enforce specific response formats and validate outputs against schemas.
    - Key features: JSON schema constraints, multiple format comparisons (text, JSON, schema-validated), nested object handling.
    - How to run: `uv run llm/cohere_output_schema.py`.
-   - Docs: [Structured Outputs](https://docs.cohere.com/docs/structured-outputs-json), [JSON Schema](https://json-schema.org/).
+   - Docs: [Structured Outputs](https://docs.cohere.com/docs/structured-outputs-json)
 
 5. **openai_xai_llama_chat.py**: Demonstrates OpenAI-compatible chat using Meta Llama models through OCI. Shows unified API access to various hosted models.
    - Key features: OpenAI-compatible API usage, multiple model support (OpenAI, xAI, Meta), parameter configuration.
@@ -48,28 +48,26 @@ The files are designed to build upon each other. Study them in this order for a 
 6. **openai_xai_llama_chat_history.py**: Demonstrates conversational chat with history using OpenAI-compatible models. Shows context maintenance across multi-turn conversations.
    - Key features: Message history management (system, user, assistant), conversation persistence, context-aware responses.
    - How to run: `uv run llm/openai_xai_llama_chat_history.py`.
-   - Docs: [Conversation Management](https://docs.oracle.com/en-us/iaas/api/#/en/generative-ai-inference/20231130/ChatDetails/), [OpenAI Chat Format](https://platform.openai.com/docs/guides/chat-completions).
+
 
 7. **openai_xai_llama_chat_stream.py**: Demonstrates streaming chat with OpenAI-compatible models. Shows real-time response generation for conversational applications.
    - Key features: Streaming event processing, token-by-token output, real-time UI enablement.
    - How to run: `uv run llm/openai_xai_llama_chat_stream.py`.
-   - Docs: [Streaming with OpenAI API](https://platform.openai.com/docs/api-reference/chat/create#chat-create-stream), [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events).
+ 
 
 8. **oci_language.py**: Demonstrates OCI Language service for NLP tasks including sentiment analysis, key phrases, NER, text classification, and PII masking.
    - Key features: Multiple NLP analyses (sentiment, key phrases, NER, classification, PII), batch processing, comprehensive results display.
    - How to run: `uv run llm/oci_language.py`.
-   - Docs: [OCI Language Overview](https://docs.oracle.com/en-us/iaas/language/using/home.htm), [NLP Capabilities](https://docs.oracle.com/en-us/iaas/language/using/nlp.htm).
-
+   - Docs: [OCI Language Overview](https://docs.oracle.com/en-us/iaas/language/using/home.htm),
 9. **llm.ipynb**: Jupyter notebook version covering Cohere chat examples with interactive markdown explanations.
    - Key features: Interactive execution, step-by-step explanations, visual learning format.
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
-   - Docs: [Jupyter Notebooks](https://jupyter.org/), [Interactive Python](https://ipython.org/).
+
 
 10. **oci-language.ipynb**: Jupyter notebook demonstrating OCI Language service with markdown explanations.
     - Key features: Interactive NLP exploration, visual results display, educational format.
     - How to run: Open in Jupyter or VS Code and run cells sequentially.
-    - Docs: [OCI Language](https://docs.oracle.com/en-us/iaas/language/using/home.htm), [Jupyter Integration](https://jupyter.org/).
-
+    - Docs: [OCI Language](https://docs.oracle.com/en-us/iaas/language/using/home.htm), 
 ## Project Ideas
 Here are some ideas for projects you can build upon these examples:
 
@@ -77,31 +75,31 @@ Here are some ideas for projects you can build upon these examples:
    - Implement persistent conversation history across sessions
    - Add conversation summarization for long contexts
    - Integrate with external knowledge sources for enhanced responses
-   - Resources: [LangChain Memory](https://docs.langchain.com/oss/python/langchain/memory), [Conversation Summarization](https://arxiv.org/abs/2108.07990).
+   - Resources: [LangChain Memory](https://docs.langchain.com/oss/python/langchain/memory),
 
 2. Create a structured data extraction system:
    - Use JSON schemas to extract specific information from unstructured text
    - Build APIs that return validated, structured data
    - Implement multi-step extraction with validation and correction
-   - Resources: [JSON Schema Validation](https://json-schema.org/), [Information Extraction](https://en.wikipedia.org/wiki/Information_extraction).
+
 
 3. Develop a real-time chat application:
    - Implement streaming responses for live user interaction
    - Add typing indicators and progress feedback
    - Support multiple concurrent conversations
-   - Resources: [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), [Streaming APIs](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API).
+   - 
 
 4. Build an NLP analysis dashboard:
    - Combine multiple OCI Language analyses into comprehensive reports
    - Create visualizations for sentiment trends and entity relationships
    - Implement batch processing for large document collections
-   - Resources: [OCI Language Analytics](https://docs.oracle.com/en-us/iaas/language/using/analytics.htm), [Data Visualization](https://matplotlib.org/).
+
 
 5. Create a multi-model comparison tool:
    - Compare responses across different models (Cohere, OpenAI, xAI, Meta)
    - Analyze performance, cost, and quality metrics
    - Implement A/B testing for model selection
-   - Resources: [Model Evaluation](https://huggingface.co/docs/evaluate/index), [A/B Testing](https://en.wikipedia.org/wiki/A/B_testing).
+  
 
 ## Resources and Links
 - **Documentation**:
@@ -109,7 +107,6 @@ Here are some ideas for projects you can build upon these examples:
   - [OCI Language Service](https://docs.oracle.com/en-us/iaas/language/using/home.htm)
   - [OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai)
   - [Cohere Documentation](https://docs.cohere.com/)
-  - [JSON Schema](https://json-schema.org/)
 
 - **Slack Channels**:
   - **#generative-ai-users**: For questions on OCI Gen AI APIs and models

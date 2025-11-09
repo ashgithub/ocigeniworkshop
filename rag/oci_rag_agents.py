@@ -3,7 +3,7 @@ What this file does:
 Demonstrates using OCI Generative AI Agent Runtime service for out-of-the-box RAG functionality with a shared knowledge base and citations.
 
 Documentation to reference:
-- OCI GenAI Agents: https://docs.oracle.com/en-us/iaas/Content/generative-ai/agents.htm
+- OCI GenAI Agents: https://docs.oracle.com/en-us/iaas/Content/generative-ai-agents/home.htm 
 - Agent Runtime API: https://docs.oracle.com/en-us/iaas/api/#/en/generative-ai-agent-runtime/20240531/
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_agent_runtime
 

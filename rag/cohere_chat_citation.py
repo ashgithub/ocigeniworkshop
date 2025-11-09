@@ -4,7 +4,7 @@ Demonstrates how to pass custom documents to OCI Generative AI (Cohere models) f
 
 Documentation to reference:
 - OCI GenAI Chat: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-- Cohere Documents and Citations: https://docs.cohere.com/docs/documents
+- Cohere Documents and Citations: https://docs.cohere.com/docs/rag-citations
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
 
 Relevant slack channels:
@@ -140,7 +140,7 @@ def get_sample_documents():
                 "Secure & Highly Available: AWS databases are built for business-critical, enterprise workloads, "
                 "offering high availability, reliability, and security."
             ),
-            "website": "https://aws.amazon.com/free/database/e",
+            "website": "https://aws.amazon.com/free/database",
             "id": "AWS001"
         }
     ]

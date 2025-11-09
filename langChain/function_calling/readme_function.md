@@ -69,7 +69,7 @@ Here are some ideas for projects you can build upon these examples. Focus on exp
    - Integrate semantic cache from llm_semantic_cache.py into a RAG pipeline.
    - Measure performance improvements by caching frequent queries.
    - Experiment with different embedding models or similarity thresholds.
-   - Resources: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/), [LangChain Caching](https://docs.langchain.com/oss/python/langchain/caching).
+   - Resources: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/), [LangChain Caching](https://docs.langchain.com/oss/python/langchain/caching).
 
 4. **Streaming enhancements**:
    - Modify streaming demos to handle errors gracefully.
@@ -96,7 +96,7 @@ Here are some ideas for projects you can build upon these examples. Focus on exp
   - [LangChain Agents and Tools](https://docs.langchain.com/oss/python/langchain/agents)
   - [OCI Python SDK](https://github.com/oracle/oci-python-sdk)
   - [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai)
-  - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/)
+  - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/)
 
 - **Slack Channels**:
   - **#igiu-ai-learning**: Help with sandbox environment or running code.

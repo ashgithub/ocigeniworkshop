@@ -61,8 +61,7 @@ The files are designed to build upon each other. Study them in this order for a 
 8. **openai_oci_llm.ipynb**: A Jupyter notebook variation demonstrating comprehensive usage of OpenAI-compatible LLMs via LangChain. Covers basic chat, model performance comparison, batching, streaming, conversation history, structured output, and reasoning capabilities.
    - Key features: Interactive tutorial; step-by-step examples; hands-on exercises and experimentation.
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
-   - Docs: [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview), [Jupyter Notebooks](https://jupyter.org/).
-
+   - Docs: [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview)
 ## Project Ideas
 
 Here are some ideas for projects you can build upon these examples:
@@ -71,31 +70,27 @@ Here are some ideas for projects you can build upon these examples:
    - Build a chatbot that can switch between different models based on the task.
    - Compare response quality and speed across models.
    - Add user preferences for model selection.
-   - Resources: [Multi-Model Chatbots](https://docs.langchain.com/oss/python/langchain/chat_models), [Model Selection Strategies](https://platform.openai.com/docs/guides/model-selection).
+   - Resources:  [Model Selection Strategies](https://platform.openai.com/docs/guides/model-selection).
 
 2. **Develop a structured data extraction system**:
    - Use structured output to extract information from unstructured text.
    - Build schemas for different document types (invoices, resumes, articles).
    - Implement validation and error handling for malformed outputs.
-   - Resources: [Pydantic Validation](https://docs.pydantic.dev/latest/concepts/validators/), [JSON Schema](https://json-schema.org/).
 
 3. **Build a real-time conversation analyzer**:
    - Use streaming to analyze conversations as they happen.
    - Implement sentiment analysis or topic detection.
    - Add real-time feedback or suggestions.
-   - Resources: [Streaming Processing](https://docs.langchain.com/oss/python/langchain/chat_models#streaming), [Real-time Analytics](https://kafka.apache.org/).
 
 4. **Create an async batch processing pipeline**:
    - Process large volumes of text using async operations.
    - Implement queuing and rate limiting.
    - Add monitoring and logging for production use.
-   - Resources: [Async Python](https://docs.python.org/3/library/asyncio.html), [Production Pipelines](https://docs.celeryproject.org/).
 
 5. **Develop a reasoning-powered problem solver**:
    - Use reasoning models to break down complex problems.
    - Implement step-by-step problem solving with explanations.
    - Add verification and confidence scoring.
-   - Resources: [Reasoning Models](https://platform.openai.com/docs/guides/reasoning), [Problem Solving Techniques](https://en.wikipedia.org/wiki/Problem_solving).
 
 ## Resources and Links
 
