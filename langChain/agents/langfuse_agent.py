@@ -1,20 +1,15 @@
 """ Sample langfuse integration using the langchain agent """
-from langfuse import Langfuse
-from langfuse.langchain import CallbackHandler
-
 import sys
 import os
-from typing import Any
 
 from langchain_core.tools import tool
 from langchain.agents import create_agent
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.graph import MessagesState
-from langchain.messages import SystemMessage, HumanMessage, ToolMessage
+from langchain.messages import HumanMessage
 from langchain_core.runnables import RunnableConfig
+from langfuse import Langfuse
+from langfuse.langchain import CallbackHandler
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
@@ -31,7 +26,7 @@ from oci_openai_helper import OCIOpenAIHelper
 #  if you have errors running sample code reach out for help in #igiu-ai-learning
 #####
 
-SANDBOX_CONFIG_FILE = "C:/Users/Cristopher Hdz/Desktop/ocigeniworkshop/sandbox.yaml"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 LLM_MODEL = "xai.grok-4"
@@ -52,57 +47,84 @@ def load_config(config_path):
 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
-# Langfuse API connection
+# Step 1: First build the client with the langfuse keys on .env file
 langfuse = Langfuse(
     public_key=scfg['langfuse']['langfuse_pk'],
     secret_key=scfg['langfuse']['langfuse_sk'],
     host=scfg['langfuse']['langfuse_host']
 )
 
-# Calls handler to enable tracing
+# Step 2: build the call back. Calls handler to enable tracing
 langfuse_handler = CallbackHandler()
 
-# Simple model
+# Simple model to do the tracing
 openai_llm_client = OCIOpenAIHelper.get_client(
     model_name=LLM_MODEL,
     config=scfg
 )
 
-# Some tool(s)
+# How to build tools: https://python.langchain.com/docs/how_to/custom_tools/
+# Some tools to give the model
 @tool
-def get_weather(city:str) -> str:
-    """ Gets the weather for a given city """
-    return f"The weather in {city} is 70 Fahrenheit"
+def get_weather(zipcode:int, date:str) -> dict[str,bool | int]:
+    """ Gets the weather for a given city zipcode and date in format yyyy-mm-dd """
+    
+    # This is simple hardcoded data, could use zip code to fetch weather API and get real results
+    city_weather = {
+        "rain": True,
+        "min_temperature": "50 f",
+        "max_temperature": "62 f"
+    }
 
-# This tool depends on weather, which is information that the model initially doesn't have
-# Requires the model to reason and call first the get_weather tool to complete the arguments in the bill projection
+    return city_weather
+
 @tool
-def get_projection_bill(current_bill:int, gas_oven:bool, weather:int) -> int:
-    """ Returns the projected bill for a user depending on the current one and if it has or not oven, also the weather of the city"""
-    if gas_oven:
-        return current_bill + 45 + weather
-    return current_bill + 4 + weather
+def get_city(criteria:str) -> dict[str,int|str]:
+    """ Based on the criteria given, recommends the user a city and provides the city name and zipcode """
 
-tools = [get_weather,get_projection_bill]
+    # This tool could use criteria + LLM + maps API to find the  best city
+    city_details = {
+        "city_name": "Chicago",
+        "zipcode": 60601
+    }
 
-# Simple agent
+    return city_details
+    
+@tool
+def get_clothes(gender:str, temp:int, rain:bool) -> dict[str,list[str]]:
+    """ Tool to suggest best clothes depending on the city weather, temperature and genders """
+
+    # Hardcoded data, could use any other user details
+    clothes = {
+        "clothes": ["ran coat", "jeans", "formal chemise"],
+        "accessories": ["watch","umbrella", "boots"]
+    }
+
+    return clothes
+
+tools = [get_weather,get_city,get_clothes]
+
+# Simple agent to perform tracing
 agent = create_agent(
     model=openai_llm_client,
     tools=tools,
     system_prompt="Use the tools when requested, you are a helpful assistant",
-    name="Sample_workshop_agent"                        # Name to identify the agent in tracing
+    name="Sample_workshop_agent"    # Name to identify the agent in tracing
 )
+print(f"************************** Agent ready **************************")
 
+# Step 3: on the runnable config of the call, add the langfuse parameters
 config:RunnableConfig = {
-    "callbacks": [langfuse_handler],
-    "metadata":{
+    "callbacks": [langfuse_handler],                    # Add the calls back
+    "metadata":{                                        # Extra metadata to use (optional, but useful)
         "langfuse_user_id": "some_user_id",             # To differenciate across users using our applications
         "langfuse_session_id": "session-1234",          # Store all the traces in one single session for multiturn conversations
         "langfuse_tags": ["workshop", "langfuse-test"]  # Add tags to filter in the console
     }}
 
-MESSAGE = "Which will be my projected bill? I'm in San Frnacisco, and I have oven. My past bill was $45"
+MESSAGE = "What types of clothes should I wear on a trip to Oracle headquarters next week?"
 
+# Step 4: invoke the agent as normal, the traces are auto
 print(f"************************** Agent stream invokation and details for each step **************************")
 for chunk in agent.stream(
     input={"messages": [HumanMessage(MESSAGE)]}, 
