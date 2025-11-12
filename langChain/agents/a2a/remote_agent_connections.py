@@ -1,17 +1,20 @@
 from uuid import uuid4
+from typing import Any
 import httpx
-from a2a.client import A2ACardResolver, ClientFactory, ClientConfig
+from a2a.client import A2ACardResolver, ClientFactory, ClientConfig, ClientCallContext, A2AClient
 from a2a.types import (
     AgentCard,
     TransportProtocol,
     Message,
     Role,
     Part,
-    TextPart
+    TextPart,
+    SendMessageRequest,
+    MessageSendParams
 )
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(name=f"A2A_CALLS.{__name__}")
 
 # All availble agent servers
@@ -23,13 +26,12 @@ remote_addresses = {
 
 # this function uses the url and agent name to fetch the response from the agent
 async def call_a2a_agent(agent_name:str,message:str)->str:
-    print("\n\nCalling the agent")
+    print("\n\nCalling the agent via A2A:")
     print(agent_name)
     PUBLIC_AGENT_CARD_PATH = '/.well-known/agent.json'
     EXTENDED_AGENT_CARD_PATH = '/agent/authenticatedExtendedCard'
 
     logger.debug("\na2a call function ===================")
-    logger.debug(remote_addresses.keys())
 
     try:
         if agent_name not in remote_addresses.keys():
@@ -75,27 +77,65 @@ async def call_a2a_agent(agent_name:str,message:str)->str:
             logger.error(f'Critical error fetching public agent card: {e}', exc_info=True)
             raise RuntimeError('Failed to fetch the public agent card. Cannot continue.') from e
 
-        config = ClientConfig(
-            httpx_client=httpx_client,
-            supported_transports=[
-                TransportProtocol.http_json,
-                TransportProtocol.jsonrpc
-            ]
+        # config = ClientConfig(
+        #     httpx_client=httpx_client,
+        #     supported_transports=[
+        #         TransportProtocol.http_json,
+        #         TransportProtocol.jsonrpc
+        #     ]
+        # )
+        # factory = ClientFactory(config)
+        # client = factory.create(final_agent_card_to_use)
+
+        # request_message = Message(
+        #     role=Role.user,
+        #     parts=[Part(root=TextPart(text=message))],
+        #     message_id=str(uuid4())
+        # )
+
+        # ans = []
+        # try:
+        #     async for chunk in client.send_message(request_message, request_metadata={'timeout':300}):
+        #         if isinstance(chunk,Message):
+        #             print(chunk.parts[-1].root.text) #type: ignore
+        #             ans.extend(str(chunk.parts[-1].root.text))#type: ignore
+        # except Exception as e:
+        #     print("Error in streaming response")
+        #     print(e)
+
+        client = A2AClient(httpx_client=httpx_client, agent_card=final_agent_card_to_use)
+        logger.info('A2AClient initialized.')
+        timeout = 50.0
+
+        send_message_payload: dict[str, Any] = {
+            'message': {
+                'role': 'user',
+                'parts': [
+                    {'kind': 'text', 'text': message}
+                ],
+                'message_id': uuid4().hex,
+            },
+        }
+        request = SendMessageRequest(
+            id=str(uuid4()), params=MessageSendParams(**send_message_payload)
         )
-        factory = ClientFactory(config)
-        client = factory.create(final_agent_card_to_use)
 
-        request_message = Message(
-            role=Role.user,
-            parts=[Part(root=TextPart(text=message))],
-            message_id=str(uuid4())
-        )
-
-        ans = []
-        async for chunk in client.send_message(request_message):
-            if isinstance(chunk,Message):
-                print(chunk.parts[-1].root.text) #type: ignore
-                ans.extend(str(chunk.parts[-1].root.text))#type: ignore
-
-        
+        print("Starting A2A response stream...\n")
+        try:
+            response = await client.send_message(request, http_kwargs={"timeout": timeout})
+            ans = response.model_dump(mode='json', exclude_none=True)
+            print("A2A response:")
+            print(ans)
+        except Exception as e:
+            ans = f"Error in response: {e}"
+                
         return str(ans)
+    
+async def test():
+    response = await call_a2a_agent("city_agent","What is the city where are most piramids?")
+
+    print(response)
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(test())

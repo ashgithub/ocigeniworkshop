@@ -1,4 +1,3 @@
-from langchain.agents import create_agent
 from langchain_core.tools import tool
 from remote_agent_connections import call_a2a_agent
 
@@ -6,11 +5,16 @@ import sys
 import os
 
 from langchain_core.tools import tool
-from langchain.messages import HumanMessage
+from langgraph.checkpoint.memory import InMemorySaver
+from langchain.messages import SystemMessage,ToolMessage, HumanMessage
+from langchain_core.runnables import RunnableConfig
+from langgraph.graph import MessagesState
+from langgraph.graph import StateGraph, START, END
 
 from dotenv import load_dotenv
-load_dotenv()
 from envyaml import EnvYAML
+from typing import Any
+load_dotenv()
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from oci_openai_helper import OCIOpenAIHelper
@@ -34,13 +38,9 @@ class MainAgent:
     #  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
     #  if you have errors running sample code reach out for help in #igiu-ai-learning
     #####
-    SANDBOX_CONFIG_FILE = "sandbox.yaml"
+    SANDBOX_CONFIG_FILE = "C:/Users/Cristopher Hdz/ocigeniworkshop/sandbox.yaml"
 
     LLM_MODEL = "xai.grok-4"
-    # LLM_MODEL = "openai.gpt-4.1"
-    # LLM_MODEL = "openai.gpt-5"
-    # xai.grok-4
-    # xai.grok-3
     # available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
     def __init__(self):
@@ -52,20 +52,52 @@ class MainAgent:
             use_responses_api=True
         )
 
-        self.tools = [
-            sent_task_agent
-        ]
+        self.tools = [sent_task_agent]
+        self.tools_by_name = {tool.name: tool for tool in self.tools}
+        self.model_with_tools = self.openai_llm_client.bind_tools(self.tools)
 
-        self.agent = create_agent(
-            model=self.openai_llm_client,
-            tools=self.tools,
-            system_prompt=""" 
+        self.agent = self.build_langgraph_agent()
+
+    def build_langgraph_agent(self):
+        """ This function builds a langgraph agent in order to make async calls with the openai client """
+        system_prompt=""" 
         Use the provided tools to gather context when necessary.
         Always provide sufficient context to call the agents.
         Use the correct names as the tools> weather_agent, clothes_agent or city_agent
         Each tool call will only call one agent specified, to call multiple agents, use multiple tool calls with different agent names
         """
-        )
+        
+        def llm_call(state: MessagesState):
+            """LLM decides whether to call a tool or not"""
+            system_instructions = [SystemMessage(system_prompt)]
+            return {"messages": [self.model_with_tools.invoke( system_instructions + state["messages"])]}
+
+        async def tool_node(state:MessagesState) -> dict[Any,Any]:
+            """Performs the tool call"""
+            result = []
+            for tool_call in state["messages"][-1].tool_calls: # type: ignore[attr-defined]
+                tool = self.tools_by_name[tool_call["name"]]
+                observation = await tool.ainvoke(tool_call["args"])
+                result.append(ToolMessage(content=str(observation), tool_call_id=tool_call["id"]))
+            return {"messages": result}
+
+        def should_continue(state: MessagesState) -> str:
+            """Decide if we should continue the loop or stop based upon whether the LLM made a tool call"""
+            messages = state["messages"]
+            last_message = messages[-1]
+            if last_message.tool_calls: # type: ignore[attr-defined]
+                return "tool_node"
+            return END
+
+        agent_builder = StateGraph(MessagesState)
+        agent_builder.add_node("llm_call", llm_call)
+        agent_builder.add_node("tool_node", tool_node)
+        agent_builder.add_edge(START, "llm_call")
+        agent_builder.add_conditional_edges("llm_call",should_continue,["tool_node", END])
+        agent_builder.add_edge("tool_node", "llm_call")
+        agent = agent_builder.compile(checkpointer=InMemorySaver())
+
+        return agent
 
     def load_config(self, config_path):
         """Load configuration from a YAML file."""
@@ -81,16 +113,22 @@ async def main():
 
     main_agent = MainAgent()
 
-    MESSAGE = "What types of clothes should I wear on a trip to Oracle headquarters next week?"
+    prompt = "What types of clothes should I wear on a trip to Oracle headquarters next week?"
+    config: RunnableConfig = {"configurable": {"thread_id": "1"}} # thread for the agent memory
 
     async for chunk in main_agent.agent.astream(
-        input={"messages": [HumanMessage(MESSAGE)]},
+        input={"messages": [HumanMessage(prompt)]},
+        config=config,
         stream_mode="values",
     ):
         # Messages are added to the agent state, that is why we access the last message
         latest_message = chunk["messages"][-1]
+        print("Agentic response from graph")
         if latest_message.content:
-            print(f"Agent: {latest_message.content}")
+            try:
+                print(latest_message.content[0]['text'])
+            except:
+                print(latest_message.content)
         elif latest_message.tool_calls:
             # Check any tool calls
             print(f"Calling tools: {[tc['name'] for tc in latest_message.tool_calls]}")
