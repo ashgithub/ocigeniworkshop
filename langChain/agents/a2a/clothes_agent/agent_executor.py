@@ -60,11 +60,13 @@ class ClothesAgent:
 
     async def invoke(self,context:RequestContext) -> str:
         user_input = context.get_user_input()
-
+        print(user_input)
 
         response = self.agent.invoke(
             input={"messages":[HumanMessage(str(user_input))]}
         )
+
+        print(response)
 
         final_response = response['messages'][-1].content
 
