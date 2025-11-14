@@ -6,16 +6,31 @@ from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.utils import new_agent_text_message
 from dotenv import load_dotenv
+load_dotenv()
+from langchain.tools import tool
+from langchain.agents import create_agent
+from langchain.messages import HumanMessage
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from oci_openai_helper import OCIOpenAIHelper
 
-# --8<-- [start:HelloWorldAgent]
-class HelloWorldAgent:
-    """Hello World Agent."""
+@tool
+def get_city(criteria:str) -> dict[str,int|str]:
+    """ Based on the criteria given, recommends the user a city and provides the city name and zipcode """
+
+    # This tool could use criteria + LLM + maps API to find the  best city
+    city_details = {
+        "city_name": "Chicago",
+        "zipcode": 60601
+    }
+
+    return city_details
+
+# --8<-- [start:CityAgent]
+class CityAgent:
+    """City Agent."""
     def __init__(self):
-        SANDBOX_CONFIG_FILE = "C:/Users/Cristopher Hdz/Desktop/ocigeniworkshop/sandbox.yaml"
-        load_dotenv()
+        SANDBOX_CONFIG_FILE = "sandbox.yaml"
 
         LLM_MODEL = "xai.grok-4"
         # LLM_MODEL = "openai.gpt-4.1"
@@ -24,9 +39,14 @@ class HelloWorldAgent:
         # xai.grok-3
         # available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
         scfg = self.load_config(SANDBOX_CONFIG_FILE)
-        self.agent = OCIOpenAIHelper.get_client(
+        self.model = OCIOpenAIHelper.get_client(
             model_name=LLM_MODEL,
             config=scfg
+        )
+        self.agent = create_agent(
+            model=self.model,
+            tools=[get_city],
+            system_prompt="Answer only details about cities, provide the city and the zip code"
         )
 
     def load_config(self, config_path):
@@ -39,25 +59,30 @@ class HelloWorldAgent:
                 return None
 
     async def invoke(self,context:RequestContext) -> str:
-        # message = context.message
-        # message_context = context.call_context
-        # print(message.parts)
-        # print(message_context)
         user_input = context.get_user_input()
-        # response = self.agent.invoke(user_input)
-        return f"Hello, yout request was: {user_input}"
+        print(user_input)
 
-# --8<-- [end:HelloWorldAgent]
+        response = self.agent.invoke(
+            input={"messages":[HumanMessage(str(user_input))]}
+        )
 
-# --8<-- [start:HelloWorldAgentExecutor_init]
-class HelloWorldAgentExecutor(AgentExecutor):
+        print(response)
+
+        final_response = response['messages'][-1].content
+
+        return str(final_response)
+
+# --8<-- [end:CityAgent]
+
+# --8<-- [start:CityAgentExecutor_init]
+class CityAgentExecutor(AgentExecutor):
     """Test AgentProxy Implementation."""
 
     def __init__(self):
-        self.agent = HelloWorldAgent()
+        self.agent = CityAgent()
 
-    # --8<-- [end:HelloWorldAgentExecutor_init]
-    # --8<-- [start:HelloWorldAgentExecutor_execute]
+    # --8<-- [end:CityAgentExecutor_init]
+    # --8<-- [start:CityAgentExecutor_execute]
     async def execute(
         self,
         context: RequestContext,
@@ -66,12 +91,12 @@ class HelloWorldAgentExecutor(AgentExecutor):
         result = await self.agent.invoke(context)
         await event_queue.enqueue_event(new_agent_text_message(result))
 
-    # --8<-- [end:HelloWorldAgentExecutor_execute]
+    # --8<-- [end:CityAgentExecutor_execute]
 
-    # --8<-- [start:HelloWorldAgentExecutor_cancel]
+    # --8<-- [start:CityAgentExecutor_cancel]
     async def cancel(
         self, context: RequestContext, event_queue: EventQueue
     ) -> None:
         raise Exception('cancel not supported')
 
-    # --8<-- [end:HelloWorldAgentExecutor_cancel]
+    # --8<-- [end:CityAgentExecutor_cancel]
