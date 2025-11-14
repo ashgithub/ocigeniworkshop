@@ -1,3 +1,4 @@
+""" Agent executor is in charge of receiving the request and call the agent as needed """
 import sys
 import os
 
@@ -14,6 +15,9 @@ from langchain.messages import HumanMessage
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from oci_openai_helper import OCIOpenAIHelper
 
+# AgentExecutor details: https://a2a-protocol.org/latest/tutorials/python/4-agent-executor/
+
+# Sample remote agent tool
 @tool
 def get_weather(zipcode:int, date:str) -> dict[str,bool | int]:
     """ Gets the weather for a given city zipcode and date in format yyyy-mm-dd """
@@ -29,16 +33,13 @@ def get_weather(zipcode:int, date:str) -> dict[str,bool | int]:
 
 
 # --8<-- [start:WeatherAgent]
+# This is the remote agent, built as any other normal agent
 class WeatherAgent:
     """Weather Agent."""
     def __init__(self):
         SANDBOX_CONFIG_FILE = "sandbox.yaml"
 
         LLM_MODEL = "xai.grok-4"
-        # LLM_MODEL = "openai.gpt-4.1"
-        # LLM_MODEL = "openai.gpt-5"
-        # xai.grok-4
-        # xai.grok-3
         # available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
         
         scfg = self.load_config(SANDBOX_CONFIG_FILE)
@@ -61,10 +62,12 @@ class WeatherAgent:
                 print(f"Error: Configuration file '{config_path}' not found.")
                 return None
 
+    # Helper invokation method to call the agent
     async def invoke(self,context:RequestContext) -> str:
         user_input = context.get_user_input()
         print(user_input)
 
+        # Actual agent call using langchain agent
         response = self.agent.invoke(
             input={"messages":[HumanMessage(str(user_input))]}
         )
@@ -78,6 +81,7 @@ class WeatherAgent:
 # --8<-- [end:WeatherAgent]
 
 # --8<-- [start:WeatherAgentExecutor_init]
+# Agent executor to manage requests
 class WeatherAgentExecutor(AgentExecutor):
     """Test AgentProxy Implementation."""
 
@@ -86,6 +90,7 @@ class WeatherAgentExecutor(AgentExecutor):
 
     # --8<-- [end:WeatherAgentExecutor_init]
     # --8<-- [start:WeatherAgentExecutor_execute]
+    # Execution function that uses the agent class to perform the model call
     async def execute(
         self,
         context: RequestContext,

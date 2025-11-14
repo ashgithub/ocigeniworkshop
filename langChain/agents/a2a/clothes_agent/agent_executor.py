@@ -1,3 +1,4 @@
+""" Agent executor is in charge of receiving the request and call the agent as needed """
 import sys
 import os
 
@@ -14,6 +15,7 @@ from langchain.messages import HumanMessage
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from oci_openai_helper import OCIOpenAIHelper
 
+# Sample remote agent tool
 @tool
 def get_clothes(gender:str, temp:int, rain:bool) -> dict[str,list[str]]:
     """ Tool to suggest best clothes depending on the city weather, temperature and genders """
@@ -27,6 +29,7 @@ def get_clothes(gender:str, temp:int, rain:bool) -> dict[str,list[str]]:
     return clothes
 
 # --8<-- [start:ClothesAgent]
+# This is the remote agent, built as any other normal agent
 class ClothesAgent:
     """Clothes Agent."""
     def __init__(self):
@@ -58,10 +61,12 @@ class ClothesAgent:
                 print(f"Error: Configuration file '{config_path}' not found.")
                 return None
 
+    # Helper invokation method to call the agent
     async def invoke(self,context:RequestContext) -> str:
         user_input = context.get_user_input()
         print(user_input)
-
+        
+        # Actual agent call using langchain agent
         response = self.agent.invoke(
             input={"messages":[HumanMessage(str(user_input))]}
         )
@@ -75,6 +80,7 @@ class ClothesAgent:
 # --8<-- [end:ClothesAgent]
 
 # --8<-- [start:ClothesAgentExecutor_init]
+# Agent executor to manage requests
 class ClothesAgentExecutor(AgentExecutor):
     """Test AgentProxy Implementation."""
 
@@ -83,6 +89,7 @@ class ClothesAgentExecutor(AgentExecutor):
 
     # --8<-- [end:ClothesAgentExecutor_init]
     # --8<-- [start:ClothesAgentExecutor_execute]
+    # Execution function that uses the agent class to perform the model call
     async def execute(
         self,
         context: RequestContext,
