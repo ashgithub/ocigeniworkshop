@@ -1,3 +1,6 @@
+""" Main a2a server that runs and has the agent card to be discovered """
+""" TODO: !Important: Make sure to have running weather_server in indicated port BEFORE run main host agent """
+""" First run the weather, city, and clothes server and then the main agent to connect to """
 import uvicorn
 
 from a2a.server.apps import A2AStarletteApplication
@@ -10,8 +13,12 @@ from a2a.types import (
 )
 from agent_executor import WeatherAgentExecutor
 
+# Agent server details: https://a2a-protocol.org/latest/tutorials/python/3-agent-skills-and-card/
+# Start the server: https://a2a-protocol.org/latest/tutorials/python/5-start-server/
+
 if __name__ == '__main__':
     # --8<-- [start:AgentSkill]
+    # Build an agent skill so the host agent knows the remote agent capabilites
     skill = AgentSkill(
         id='get_weather',
         name='get_weather',
@@ -35,6 +42,7 @@ if __name__ == '__main__':
     )
     # --8<-- [end:AgentCard]
 
+    # This section handles the message request, and uses the AgentExecutor for calling the remote agent.
     request_handler = DefaultRequestHandler(
         agent_executor=WeatherAgentExecutor(),
         task_store=InMemoryTaskStore(),
@@ -45,4 +53,5 @@ if __name__ == '__main__':
         http_handler=request_handler
     )
 
+    # Starts the server in dedicated port already in the addresses dictionary on the remote_agent_connections.py
     uvicorn.run(server.build(), host='0.0.0.0', port=9999)

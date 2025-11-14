@@ -1,3 +1,6 @@
+""" Main a2a server that runs and has the agent card to be discovered """
+""" TODO: !Important: Make sure to have running clothes_server in indicated port BEFORE run main host agent """
+""" First run the weather, city, and clothes server and then the main agent to connect to """
 import uvicorn
 
 from a2a.server.apps import A2AStarletteApplication
@@ -12,6 +15,7 @@ from agent_executor import ClothesAgentExecutor
 
 if __name__ == '__main__':
     # --8<-- [start:AgentSkill]
+    # Build an agent skill so the host agent knows the remote agent capabilites
     skill = AgentSkill(
         id='get_clothes',
         name='get_clothes',
@@ -35,6 +39,7 @@ if __name__ == '__main__':
     )
     # --8<-- [end:AgentCard]
 
+    # This section handles the message request, and uses the AgentExecutor for calling the remote agent.
     request_handler = DefaultRequestHandler(
         agent_executor=ClothesAgentExecutor(),
         task_store=InMemoryTaskStore(),
@@ -45,4 +50,5 @@ if __name__ == '__main__':
         http_handler=request_handler
     )
 
+    # Starts the server in dedicated port already in the addresses dictionary on the remote_agent_connections.py
     uvicorn.run(server.build(), host='0.0.0.0', port=9998)
