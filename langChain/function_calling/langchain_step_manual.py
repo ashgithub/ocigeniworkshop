@@ -68,11 +68,11 @@ def get_weather(city: str) -> str:
     return f"The weather in {city} is 70 Fahrenheit"
 
 @tool
-def get_projection_bill(current_bill: int, gas_oven: bool) -> int:
+def get_projection_bill(current_weather: int, gas_oven: bool) -> int:
     """ Returns the projected bill for a user depending on the current one and if it has or not oven """
     if gas_oven:
-        return current_bill + 45
-    return current_bill + 4
+        return (current_weather*2) + 45
+    return (current_weather*2) + 4
 
 tools = [get_weather, get_projection_bill]
 

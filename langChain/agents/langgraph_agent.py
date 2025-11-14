@@ -14,6 +14,8 @@ from langchain_core.runnables import RunnableConfig
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
 
+# LangGraph agent reference: https://docs.langchain.com/oss/python/langgraph/workflows-agents#agents
+
 #####
 #make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
 #
@@ -24,7 +26,7 @@ from oci_openai_helper import OCIOpenAIHelper
 #  if you have errors running sample code reach out for help in #igiu-ai-learning
 #####
 
-SANDBOX_CONFIG_FILE = "C:/Users/Cristopher Hdz/Desktop/ocigeniworkshop/sandbox.yaml"
+SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 LLM_MODEL = "xai.grok-4"
@@ -54,25 +56,55 @@ openai_llm_client = OCIOpenAIHelper.get_client(
     config=scfg
 )
 
+# How to build tools: https://python.langchain.com/docs/how_to/custom_tools/
+# Build some tools for the agent
 @tool
-def get_weather(city:str) -> str:
-    """ Gets the weather for a given city """
-    return f"The weather in {city} is 70 Fahrenheit"
+def get_weather(zipcode:int, date:str) -> dict[str,bool | int]:
+    """ Gets the weather for a given city zipcode and date in format yyyy-mm-dd """
+    
+    # This is simple hardcoded data, could use zip code to fetch weather API and get real results
+    city_weather = {
+        "rain": True,
+        "min_temperature": "50 f",
+        "max_temperature": "62 f"
+    }
+
+    return city_weather
+
 
 # This tool depends on weather, which is information that the model initially doesn't have
 # Requires the model to reason and call first the get_weather tool to complete the arguments in the bill projection
 @tool
-def get_projection_bill(current_bill:int, gas_oven:bool, weather:int) -> int:
-    """ Returns the projected bill for a user depending on the current one and if it has or not oven, also the weather of the city"""
-    if gas_oven:
-        return current_bill + 45 + weather
-    return current_bill + 4 + weather
+def get_city(criteria:str) -> dict[str,int|str]:
+    """ Based on the criteria given, recommends the user a city and provides the city name and zipcode """
 
-tools = [get_weather,get_projection_bill]
+    # This tool could use criteria + LLM + maps API to find the  best city
+    city_details = {
+        "city_name": "Chicago",
+        "zipcode": 60601
+    }
+
+    return city_details
+    
+@tool
+def get_clothes(gender:str, temp:int, rain:bool) -> dict[str,list[str]]:
+    """ Tool to suggest best clothes depending on the city weather, temperature and genders """
+
+    # Hardcoded data, could use any other user details
+    clothes = {
+        "clothes": ["ran coat", "jeans", "formal chemise"],
+        "accessories": ["watch","umbrella", "boots"]
+    }
+
+    return clothes
+
+tools = [get_weather,get_city,get_clothes]
 tools_by_name = {tool.name: tool for tool in tools}
+# Bind the tools to the client
 llm_with_tools = openai_llm_client.bind_tools(tools)
 
-# Nodes
+######### Nodes of the graph #########
+# node to call the llm
 def llm_call(state: MessagesState):
     """LLM decides whether to call a tool or not"""
     # In this function, you can also use a call to a langchain agent using create_agent
@@ -84,7 +116,7 @@ def llm_call(state: MessagesState):
             llm_with_tools.invoke(
                 [
                     SystemMessage(
-                        content="You are a helpful assistant."
+                        content="You are a helpful assistant. Infer the information missing from the user if needed."
                     )
                 ]
                 + state["messages"]
@@ -92,7 +124,7 @@ def llm_call(state: MessagesState):
         ]
     }
 
-
+# node to process all the tool calls and give the response to the model
 def tool_node(state:MessagesState) -> dict[Any,Any]:
     """Performs the tool call"""
 
@@ -105,6 +137,7 @@ def tool_node(state:MessagesState) -> dict[Any,Any]:
 
 
 # Conditional edge function to route to the tool node or end based upon whether the LLM made a tool call
+# This function is in charge of deciding if the graph should finish or go back to the model for response
 def should_continue(state: MessagesState) -> str:
     """Decide if we should continue the loop or stop based upon whether the LLM made a tool call"""
 
@@ -128,6 +161,7 @@ agent_builder.add_node("tool_node", tool_node)
 
 # Add edges to connect nodes
 agent_builder.add_edge(START, "llm_call")
+# Conditional edge that decides if the flow is done
 agent_builder.add_conditional_edges(
     "llm_call",
     should_continue,
@@ -137,14 +171,37 @@ agent_builder.add_edge("tool_node", "llm_call")
 
 # Compile the agent
 agent = agent_builder.compile(checkpointer=InMemorySaver())
+print(f"************************** Agent graph compiled **************************")
 
 # Invoke
-MESSAGE = "Which will be my projected bill? I'm in San Frnacisco, and I have oven. My past bill was $45"
-config: RunnableConfig = {"configurable": {"thread_id": "1"}}
+MESSAGE = "What types of clothes should I wear on a trip to Oracle headquarters next week?"
 
-messages = agent.invoke(
-    input={"messages": [HumanMessage(MESSAGE)]}, 
+config: RunnableConfig = {"configurable": {"thread_id": "1"}} # thread for the agent memory
+
+print(f"************************** Agent stream invokation and details for each step **************************")
+for chunk in agent.stream(
+    input={"messages": [HumanMessage(MESSAGE)]},
+    config=config,
+    stream_mode="values",
+):
+    # Messages are added to the agent state, that is why we access the last message
+    latest_message = chunk["messages"][-1]
+    if latest_message.content:
+        print(f"Agent: {latest_message.content}")
+    elif latest_message.tool_calls:
+        # Check any tool calls
+        print(f"Calling tools: {[tc['name'] for tc in latest_message.tool_calls]}")
+
+print(f"************************** Agent single step invoke **************************")
+# Single step agent invokation
+result = agent.invoke(
+    input={"messages": [HumanMessage(MESSAGE)]},
     config=config
 )
-for m in messages["messages"]:
-    print(m)
+print(result['messages'][-1].content)
+
+print(f"************************** Agent full response state **************************")
+# Full result
+for message in result['messages']:
+    print("Agent step message:")
+    print(message)
