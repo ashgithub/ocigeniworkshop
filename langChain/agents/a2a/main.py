@@ -1,3 +1,4 @@
+""" Main host agent that performs the a2a calls depending on the needs """
 from langchain_core.tools import tool
 from remote_agent_connections import call_a2a_agent
 
@@ -19,6 +20,10 @@ load_dotenv()
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from oci_openai_helper import OCIOpenAIHelper
 
+# A2A docs: https://a2a-protocol.org/latest/
+# A2A tutorial: https://a2a-protocol.org/latest/tutorials/python/1-introduction/
+
+# this tool is simply implementing the a2a call function that is in remote_agent_connections.py
 @tool
 async def sent_task_agent(agent_name:str,full_context:str)->str:
     """ Sends a task to an agent expert in gathering the information requested
@@ -57,7 +62,23 @@ class MainAgent:
         self.model_with_tools = self.openai_llm_client.bind_tools(self.tools)
 
         self.agent = self.build_langgraph_agent()
+        """
+        TODO: This agent declaration is the best one using from langchain.agents import create_agent
+        yet, oci_openai does not support the agent.ainvoke method that is required to call async tools,
+        self.build_langgraph_agent() is a function that is used to solve the async invokation issue.
+        Below you can find the best agent declaration once this issue id fixed
 
+        self.agent = create_agent(
+            model = self.openai_llm_client,
+            tools = self.tools
+        )
+        """
+
+    # this function is an example graph that has the particularity that is able to perform async tool calls
+    # using `tool.ainvoke` method. This allows the program to call the model in sync mode (supported by library)
+    # And call the tools in async mode which is required to perform a2a.
+    # This is a temporary solution as we wait to the issue> openai.BadRequestError: Error code: 400 - {'code': '400', 'message': 'The given api key not found'}
+    # Is fixed, this is present when you do agent.ainvoke using oci_openai client (update 11/14/2025)
     def build_langgraph_agent(self):
         """ This function builds a langgraph agent in order to make async calls with the openai client """
         system_prompt=""" 

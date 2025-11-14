@@ -1,12 +1,18 @@
+""" This is a complex MCP server integration that uses external API to fetch weather from US weather """
+""" Server connection is using http transport """
 from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP
+
+# MCP Servers reference: https://modelcontextprotocol.io/docs/learn/server-concepts
+# Build an MCP server: https://modelcontextprotocol.io/docs/develop/build-server
 
 mcp = FastMCP("weather", host="localhost",port=8000,stateless_http=True,mount_path="/mcp")
 
 NWS_API_BASE = "https://api.weather.gov"
 USER_AGENT = "weather-app/1.0"
 
+# Helper function to make request to weather API
 async def make_nws_request(url: str) -> dict[str, Any] | None:
     """Make a request to the NWS API with proper error handling."""
     headers = {
@@ -21,6 +27,7 @@ async def make_nws_request(url: str) -> dict[str, Any] | None:
         except Exception:
             return None
 
+# Helper function
 def format_alert(feature: dict) -> str:
     """Format an alert feature into a readable string."""
     props = feature["properties"]
@@ -32,6 +39,7 @@ def format_alert(feature: dict) -> str:
             Instructions: {props.get('instruction', 'No specific instructions provided')}
             """
 
+# Actual mcp tool exposed to the LLM
 @mcp.tool()
 async def get_alerts(state: str) -> str:
     """Get weather alerts for a US state.
@@ -51,6 +59,7 @@ async def get_alerts(state: str) -> str:
     alerts = [format_alert(feature) for feature in data["features"]]
     return "\n---\n".join(alerts)
 
+# Other tool exposed to LLM
 @mcp.tool()
 async def get_forecast(latitude: float, longitude: float) -> str:
     """Get weather forecast for a location.
@@ -89,6 +98,7 @@ async def get_forecast(latitude: float, longitude: float) -> str:
 
 if __name__ == "__main__":
     try:
+        # Running server on http transport
         mcp.run(transport="streamable-http")
     except KeyboardInterrupt:
         print("Closing server")

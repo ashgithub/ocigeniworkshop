@@ -1,4 +1,5 @@
 """ Sample langfuse integration using the langchain agent """
+""" Check readme file to set up the .env required keys """
 import sys
 import os
 
@@ -119,7 +120,7 @@ config:RunnableConfig = {
     "metadata":{                                        # Extra metadata to use (optional, but useful)
         "langfuse_user_id": "some_user_id",             # To differenciate across users using our applications
         "langfuse_session_id": "session-1234",          # Store all the traces in one single session for multiturn conversations
-        "langfuse_tags": ["workshop", "langfuse-test"]  # Add tags to filter in the console
+        "langfuse_tags": ["workshop", "user-name"]      # Add tags to filter in the console. TODO: Add your own identificator to filter later on on the web interface
     }}
 
 MESSAGE = "What types of clothes should I wear on a trip to Oracle headquarters next week?"

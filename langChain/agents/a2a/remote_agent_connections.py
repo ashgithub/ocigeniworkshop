@@ -1,3 +1,4 @@
+""" Helper file to perform the a2a call """
 from uuid import uuid4
 from typing import Any
 import httpx
@@ -14,10 +15,10 @@ from a2a.types import (
 )
 import logging
 
-# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(name=f"A2A_CALLS.{__name__}")
 
 # All availble agent servers
+# TODO: !Important Make sure to match the ports with the running ports of the weather, clothes, city agent.
 remote_addresses = {
         'weather_agent':'http://localhost:9999/',
         'clothes_agent':'http://localhost:9998/',
@@ -33,6 +34,7 @@ async def call_a2a_agent(agent_name:str,message:str)->str:
 
     logger.debug("\na2a call function ===================")
 
+    # find the agent remote URL
     try:
         if agent_name not in remote_addresses.keys():
             return f"Wrong agent name, agent names are: {remote_addresses.keys()}"
@@ -42,12 +44,14 @@ async def call_a2a_agent(agent_name:str,message:str)->str:
     base_url = remote_addresses[agent_name]
 
     async with httpx.AsyncClient() as httpx_client:
+        # Build the card resolver
         resolver = A2ACardResolver(
             httpx_client=httpx_client,
             base_url=base_url,
         )
         final_agent_card_to_use: AgentCard | None = None
 
+        # Fetch the remote agent cards
         try:
             _public_card = (await resolver.get_agent_card())
             final_agent_card_to_use = _public_card
@@ -58,6 +62,7 @@ async def call_a2a_agent(agent_name:str,message:str)->str:
                     auth_headers_dict = {
                         'Authorization': 'Bearer dummy-token-for-extended-card'
                     }
+                    # Resolver fetch card
                     _extended_card = await resolver.get_agent_card(
                         relative_card_path=EXTENDED_AGENT_CARD_PATH,
                         http_kwargs={'headers': auth_headers_dict},
@@ -77,6 +82,7 @@ async def call_a2a_agent(agent_name:str,message:str)->str:
             logger.error(f'Critical error fetching public agent card: {e}', exc_info=True)
             raise RuntimeError('Failed to fetch the public agent card. Cannot continue.') from e
 
+        # TODO: possible solution if in future A2AClient is removed by library updates
         # config = ClientConfig(
         #     httpx_client=httpx_client,
         #     supported_transports=[
@@ -103,10 +109,13 @@ async def call_a2a_agent(agent_name:str,message:str)->str:
         #     print("Error in streaming response")
         #     print(e)
 
+        # build the connection client using the a2a card found on previous step
         client = A2AClient(httpx_client=httpx_client, agent_card=final_agent_card_to_use)
         logger.info('A2AClient initialized.')
+        # Reasonable timeout for agent on the other side response
         timeout = 50.0
-
+        
+        # Message for the remote model
         send_message_payload: dict[str, Any] = {
             'message': {
                 'role': 'user',
@@ -116,11 +125,13 @@ async def call_a2a_agent(agent_name:str,message:str)->str:
                 'message_id': uuid4().hex,
             },
         }
+        # Building the message task request
         request = SendMessageRequest(
             id=str(uuid4()), params=MessageSendParams(**send_message_payload)
         )
 
         print("Starting A2A response stream...\n")
+        # Sending the message via client connection, awaits for the JSON response
         try:
             response = await client.send_message(request, http_kwargs={"timeout": timeout})
             ans = response.model_dump(mode='json', exclude_none=True)
@@ -129,6 +140,7 @@ async def call_a2a_agent(agent_name:str,message:str)->str:
         except Exception as e:
             ans = f"Error in response: {e}"
                 
+        # Final answer after a2a call that gets back to the main agent
         return str(ans)
     
 async def test():
