@@ -1,4 +1,31 @@
-""" This file is showcasing a simple agent constitution using langchain new method `create_agent` """
+"""
+What this file does:
+Demonstrates creating a LangChain agent using the create_agent function with custom tools for weather, city, and clothing recommendations.
+
+Documentation to reference:
+- LangChain Agents: https://python.langchain.com/docs/concepts/agents/
+- LangChain Tools: https://python.langchain.com/docs/how_to/custom_tools/
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+
+Relevant slack channels:
+ - #generative-ai-users: for questions on OCI Gen AI
+ - #igiu-innovation-lab: general discussions on your project
+ - #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run langChain/agents/langchain_agent.py
+
+Comments to important sections of file:
+- Step 1: Load configuration and initialize OCI client
+- Step 2: Define agent tools
+- Step 3: Create and configure the agent
+- Step 4: Run agent with streaming and single-step execution
+"""
 
 import sys
 import os
@@ -11,16 +38,6 @@ from envyaml import EnvYAML
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
-
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#
-#
-#  OCI's langchain client supports all oci models, but it doesnt support all the features requires for robust agents (output schema, function calling etc)
-#  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
-#  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
-#  if you have errors running sample code reach out for help in #igiu-ai-learning
-#####
 
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()

@@ -1,3 +1,32 @@
+"""
+What this file does:
+Demonstrates building a LangGraph-based agent with tool-calling capabilities for weather, city, and clothing recommendations.
+
+Documentation to reference:
+- LangGraph: https://langchain-ai.github.io/langgraph/
+- LangChain Tools: https://python.langchain.com/docs/how_to/custom_tools/
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+
+Relevant slack channels:
+ - #generative-ai-users: for questions on OCI Gen AI
+ - #igiu-innovation-lab: general discussions on your project
+ - #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run langChain/agents/langgraph_agent.py
+
+Comments to important sections of file:
+- Step 1: Load configuration and initialize OCI client
+- Step 2: Define agent tools and bind to LLM
+- Step 3: Build LangGraph workflow with nodes and edges
+- Step 4: Compile and run the agent
+"""
+
 import sys
 import os
 from typing import Any
@@ -14,30 +43,13 @@ from langchain_core.runnables import RunnableConfig
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
 
-# LangGraph agent reference: https://docs.langchain.com/oss/python/langgraph/workflows-agents#agents
-
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#
-#
-#  OCI's langchain client supports all oci models, but it doesnt support all the features requires for robust agents (output schema, function calling etc)
-#  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
-#  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
-#  if you have errors running sample code reach out for help in #igiu-ai-learning
-#####
-
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "xai.grok-4"
-# LLM_MODEL = "openai.gpt-4.1"
-# LLM_MODEL = "openai.gpt-5"
-# xai.grok-4
-# xai.grok-3
-# available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+LLM_MODEL = "xai.grok-4-fast-non-reasoning"
+# Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
-# Step 1: load config 
-
+# Step 1: Load configuration
 def load_config(config_path):
     """Load configuration from a YAML file."""
     try:
@@ -49,15 +61,13 @@ def load_config(config_path):
 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
-# Step 2: create the OpenAI LLM client using credentials and optional parameters
-
+# Step 2: Create the OpenAI LLM client using credentials and optional parameters
 openai_llm_client = OCIOpenAIHelper.get_client(
     model_name=LLM_MODEL,
     config=scfg
 )
 
-# How to build tools: https://python.langchain.com/docs/how_to/custom_tools/
-# Build some tools for the agent
+# Step 3: Build tools for the agent
 @tool
 def get_weather(zipcode:int, date:str) -> dict[str,bool | int]:
     """ Gets the weather for a given city zipcode and date in format yyyy-mm-dd """
@@ -100,11 +110,11 @@ def get_clothes(gender:str, temp:int, rain:bool) -> dict[str,list[str]]:
 
 tools = [get_weather,get_city,get_clothes]
 tools_by_name = {tool.name: tool for tool in tools}
-# Bind the tools to the client
+
+# Step 4: Bind the tools to the client
 llm_with_tools = openai_llm_client.bind_tools(tools)
 
-######### Nodes of the graph #########
-# node to call the llm
+# Step 5: Define graph nodes
 def llm_call(state: MessagesState):
     """LLM decides whether to call a tool or not"""
     # In this function, you can also use a call to a langchain agent using create_agent
