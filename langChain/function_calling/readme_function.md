@@ -101,6 +101,7 @@ Here are some ideas for projects you can build upon these examples. Focus on exp
   - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
   - [LangChain Agents and Tools](https://docs.langchain.com/oss/python/langchain/agents)
   - [MCP Specification](https://modelcontextprotocol.io/specification)
+  - [Fast MCP](https://gofastmcp.com/getting-started/welcome)
   - [LangChain MCP](https://docs.langchain.com/oss/python/langchain/mcp)
   - [OCI Python SDK](https://github.com/oracle/oci-python-sdk)
   - [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai)
