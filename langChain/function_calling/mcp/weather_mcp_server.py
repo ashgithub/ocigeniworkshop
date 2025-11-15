@@ -38,7 +38,7 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 
 # MCP Servers reference: https://modelcontextprotocol.io/docs/learn/server-concepts
-# Build an MCP server: https://modelcontextprotocol.io/docs/develop/build-server
+# Fast MCP: https://gofastmcp.com/getting-started/welcome
 
 mcp = FastMCP("weather", host="localhost",port=8000,stateless_http=True,mount_path="/mcp")
 

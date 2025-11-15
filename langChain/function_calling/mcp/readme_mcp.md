@@ -70,6 +70,7 @@ MCP (Model Context Protocol) servers expose tools and resources that can be used
 ## Resources
 
 - [MCP Specification](https://modelcontextprotocol.io/specification)
+- [Fast MCP](https://gofastmcp.com/getting-started/welcome)
 - [LangChain MCP Documentation](https://docs.langchain.com/oss/python/langchain/mcp)
 - [US National Weather Service API](https://www.weather.gov/documentation/services-web-api)
 

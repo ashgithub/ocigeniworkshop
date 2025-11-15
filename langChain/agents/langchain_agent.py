@@ -25,7 +25,7 @@ from oci_openai_helper import OCIOpenAIHelper
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "xai.grok-4"
+LLM_MODEL = "xai.grok-4-fast-non-reasoning"
 # LLM_MODEL = "openai.gpt-4.1"
 # LLM_MODEL = "openai.gpt-5"
 # xai.grok-4

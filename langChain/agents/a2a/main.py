@@ -43,7 +43,7 @@ class MainAgent:
     #  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
     #  if you have errors running sample code reach out for help in #igiu-ai-learning
     #####
-    SANDBOX_CONFIG_FILE = "C:/Users/Cristopher Hdz/ocigeniworkshop/sandbox.yaml"
+    SANDBOX_CONFIG_FILE = "sandbox.yaml"
 
     LLM_MODEL = "xai.grok-4"
     # available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
