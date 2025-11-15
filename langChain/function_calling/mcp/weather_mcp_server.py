@@ -1,5 +1,38 @@
-""" This is a complex MCP server integration that uses external API to fetch weather from US weather """
-""" Server connection is using http transport """
+"""
+What this file does:
+Demonstrates a complex MCP server that integrates with the US National Weather Service API to provide weather alerts and forecasts. This server is used by the 'langChain/function_calling/mcp/langchain_host.py' host to provide tool integration for weather data retrieval.
+
+How to run the file:
+uv run langChain/function_calling/mcp/weather_mcp_server.py
+
+Documentation to reference:
+- MCP Servers reference: https://modelcontextprotocol.io/docs/learn/server-concepts
+- Build an MCP server: https://modelcontextprotocol.io/docs/develop/build-server
+- US National Weather Service API: https://www.weather.gov/documentation/services-web-api
+
+Comments on important sections of file:
+- Step 1: Server initialization with HTTP transport on localhost:8000
+- Step 2: Helper functions for API requests and data formatting
+- Step 3: Tool definitions - get_alerts and get_forecast functions exposed to LLMs
+- Step 4: Main execution block - runs the HTTP server until interrupted
+
+Helpful notes:
+- This server demonstrates external API integration in MCP
+- Tools can be tested with queries like "give me weather alerts for CO" or "give me weather for latitude 37.7749, longitude -122.4194"
+- The server runs on HTTP transport and can be accessed remotely at http://localhost:8000/mcp
+
+Testing with cline: 
+
+    "weather": {
+      "url": "http://localhost:8000/mcp",
+      "type": "streamableHttp",
+      "disabled": false,
+      "autoApprove": []
+    },
+1. ask a question what is weather in denver.
+2. show me weather alerts for colorado
+"""
+
 from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP

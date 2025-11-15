@@ -49,6 +49,12 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
    - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents).
 
+7. **mcp/**: Model Context Protocol servers and client integration (subfolder).
+   - Key features: Demonstrates external MCP servers (weather and bill calculation), HTTP and stdio transports, tool discovery, and agent integration.
+   - Files: weather_mcp_server.py, bill_mcp_server.py, langchain_host.py, langchain_host.ipynb, readme_mcp.md.
+   - How to run: Start weather server first, then run langchain_host.py or use the notebook.
+   - Docs: [MCP Specification](https://modelcontextprotocol.io/specification), [LangChain MCP](https://docs.langchain.com/oss/python/langchain/mcp).
+
 
 ## Project Ideas
 Here are some ideas for projects you can build upon these examples. Focus on experimenting with tools, models, and pipelines to deepen your understanding:
@@ -94,6 +100,8 @@ Here are some ideas for projects you can build upon these examples. Focus on exp
 - **Documentation**:
   - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
   - [LangChain Agents and Tools](https://docs.langchain.com/oss/python/langchain/agents)
+  - [MCP Specification](https://modelcontextprotocol.io/specification)
+  - [LangChain MCP](https://docs.langchain.com/oss/python/langchain/mcp)
   - [OCI Python SDK](https://github.com/oracle/oci-python-sdk)
   - [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai)
   - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/)
@@ -102,5 +110,3 @@ Here are some ideas for projects you can build upon these examples. Focus on exp
   - **#igiu-ai-learning**: Help with sandbox environment or running code.
   - **#igiu-innovation-lab**: Discuss project ideas.
   - **#generative-ai-users**: Questions about OCI Gen AI.
-  
-
