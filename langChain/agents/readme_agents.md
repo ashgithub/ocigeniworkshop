@@ -46,3 +46,11 @@ To be able to run the A2A module, it is required that you have first running the
 The files are designed to build upon each other. Study them in this order for a progressive understanding:
 
 1. **langchain_agent.py**: basics on how to declare a tool, how to use the openai helper to build a langChain agent. Make sure to understand the difference from the agent call and model calls. This agent is independient and manages three diferent sequence tools.
+
+2. **langgraph_agent.py**: demonstrates building a LangGraph-based agent with tool-calling capabilities. Shows how to use LangGraph's StateGraph and conditional edges for more complex agent workflows compared to the simple create_agent approach.
+
+3. **langfuse_agent.py**: shows how to integrate Langfuse tracing with LangChain agents. Demonstrates basic tracing setup, metadata configuration, and how to monitor agent tool calls and responses in the Langfuse dashboard.
+
+4. **langfuse_graph.py**: advanced Langfuse integration with a complex LangGraph workflow. Shows observation decorators, manual trace updates, and multi-agent interactions with comprehensive tracing.
+
+5. **a2a/**: explore agent-to-agent communication protocols. The a2a folder contains a complete multi-agent system with specialized agents that register with a central registry and communicate through standardized A2A protocols. Start with the individual agent servers, then run the main orchestrator.

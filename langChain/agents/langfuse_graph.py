@@ -1,6 +1,35 @@
-""" Sample langfuse example with a complex step graph. This includes advanced observation features """
+"""
+What this file does:
+Sample Langfuse integration with a complex step graph including advanced observation features for tracing and monitoring agent workflows.
+
+Documentation to reference:
+- Langfuse: https://langfuse.com/integrations/frameworks/langchain
+- Langfuse observe decorator: https://langfuse.com/docs/observability/sdk/python/instrumentation
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+
+Relevant slack channels:
+ - #generative-ai-users: for questions on OCI Gen AI
+ - #igiu-innovation-lab: general discussions on your project
+ - #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run langChain/agents/langfuse_graph.py
+
+Comments to important sections of file:
+- Step 1: Load configuration and initialize Langfuse
+- Step 2: Create LLM clients and tools
+- Step 3: Build LangGraph agent with observation decorators
+- Step 4: Configure and run agent with tracing
+"""
+
 import sys
 import os
+import datetime
 from typing import Any
 
 from langchain_core.tools import tool
@@ -17,28 +46,12 @@ from langchain_core.runnables import RunnableConfig
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
 
-# Langfuse reference: https://langfuse.com/integrations/frameworks/langchain
-# observe() decorator reference: https://langfuse.com/docs/observability/sdk/python/instrumentation
-
-#####
-#make sure your sandbox.yaml file is setup for your environment. You might have to specify the full path depending on  your `cwd` 
-#
-#
-#  OCI's langchain client supports all oci models, but it doesnt support all the features requires for robust agents (output schema, function calling etc)
-#  OCI's Openai compatible api supports all the features frm OpenAI's generate API (responsys support will come in dec), but doesnt support cohere yet 
-#  Questions use #generative-ai-users  or ##igiu-innovation-lab slack channels
-#  if you have errors running sample code reach out for help in #igiu-ai-learning
-#####
-
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "xai.grok-4"
+LLM_MODEL = "xai.grok-4-fast-non-reasoning"
 SECONDARY_LLM_MODEL = "openai.gpt-4.1"
-# LLM_MODEL = "openai.gpt-5"
-# xai.grok-4
-# xai.grok-3
-# available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+# Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
 # Step 1: load config 
 
@@ -235,14 +248,14 @@ print(f"************************** Agent graph compiled ************************
 # Invoke
 MESSAGE = "What types of clothes should I wear on a trip to Oracle headquarters next week?"
 
-# Step 3: on the runnable config of the call, add the langfuse parameters
+# Step 4: Configure runnable with langfuse parameters from environment
 config:RunnableConfig = {
     "configurable": {"thread_id": "1"},                 # Add the thread for the checkpointer
     "callbacks": [langfuse_handler],                    # Add the calls back
     "metadata":{                                        # Extra metadata to use (optional, but useful)
-        "langfuse_user_id": "some_user_id",             # To differenciate across users using our applications
-        "langfuse_session_id": "session-1234",          # Store all the traces in one single session for multiturn conversations
-        "langfuse_tags": ["workshop", "langfuse-test"]  # Add tags to filter in the console
+        "langfuse_user_id": os.getenv("MY_PREFIX", "default_user"),             # To differenciate across users using our applications
+        "langfuse_session_id": datetime.datetime.now().strftime("%Y-%m-%d_%H-%M"),          # Store all the traces in one single session for multiturn conversations
+        "langfuse_tags": ["workshop", os.getenv("MY_PREFIX", "user-name")]      # Add tags to filter in the console. TODO: Add your own identificator to filter later on on the web interface
     }}
 
 # Step 4: invoke the agent as normal, the traces are auto
