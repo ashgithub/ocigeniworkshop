@@ -1,153 +1,159 @@
-""" Helper file to perform the a2a call """
-from uuid import uuid4
-from typing import Any
+"""
+What this file does:
+Provides optimized A2A (Agent-to-Agent) communication functionality for the main agent to call specialized agents. Uses client caching for maximum performance with global timeout configuration.
+
+Documentation to reference:
+- A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+
+Relevant slack channels:
+ - #generative-ai-users: for questions on OCI Gen AI
+ - #igiu-innovation-lab: general discussions on your project
+ - #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+This file is not run directly, but imported by main.py for A2A agent communication.
+
+Comments to important sections of file:
+- Step 1: Global configuration and client caching setup
+- Step 2: Registry integration for dynamic agent discovery
+- Step 3: Optimized A2A client creation and caching
+- Step 4: Streamlined message sending with cached clients
+
+Registry URL: http://localhost:9990
+"""
+
 import httpx
-from a2a.client import A2ACardResolver, ClientFactory, ClientConfig, ClientCallContext, A2AClient
-from a2a.types import (
-    AgentCard,
-    TransportProtocol,
-    Message,
-    Role,
-    Part,
-    TextPart,
-    SendMessageRequest,
-    MessageSendParams
+import asyncio
+from a2a.client import (
+    Client,
+    ClientConfig,
+    ClientFactory,
 )
-import logging
+from a2a.types import TransportProtocol, AgentCard
+from a2a.utils.message import get_message_text
+from typing import Optional, Dict
+from contextlib import asynccontextmanager
 
-logger = logging.getLogger(name=f"A2A_CALLS.{__name__}")
+# Global timeout configuration
+GLOBAL_TIMEOUT = httpx.Timeout(
+    timeout=30.0,    # total timeout
+    connect=5.0,     # connection timeout
+    read=25.0,       # read timeout
+    write=5.0        # write timeout
+)
 
-# All availble agent servers
-# TODO: !Important Make sure to match the ports with the running ports of the weather, clothes, city agent.
-remote_addresses = {
-        'weather_agent':'http://localhost:9999/',
-        'clothes_agent':'http://localhost:9998/',
-        'city_agent':'http://localhost:9997/',
-    }
+# Registry configuration
+REGISTRY_URL = "http://localhost:9990"
 
-# this function uses the url and agent name to fetch the response from the agent
-async def call_a2a_agent(agent_name:str,message:str)->str:
-    print("\n\nCalling the agent via A2A:")
-    print(agent_name)
-    PUBLIC_AGENT_CARD_PATH = '/.well-known/agent.json'
-    EXTENDED_AGENT_CARD_PATH = '/agent/authenticatedExtendedCard'
+# Global httpx client for all cached A2A clients
+_shared_httpx_client: Optional[httpx.AsyncClient] = None
 
-    logger.debug("\na2a call function ===================")
+# Cache for client objects to avoid repeated creation
+_client_cache: Dict[str, Client] = {}
 
-    # find the agent remote URL
+@asynccontextmanager
+async def _get_shared_httpx_client():
+    """Get or create the shared httpx client."""
+    global _shared_httpx_client
+    if _shared_httpx_client is None:
+        _shared_httpx_client = httpx.AsyncClient(timeout=GLOBAL_TIMEOUT)
     try:
-        if agent_name not in remote_addresses.keys():
-            return f"Wrong agent name, agent names are: {remote_addresses.keys()}"
+        yield _shared_httpx_client
+    except Exception:
+        # If client fails, reset it for next use
+        if _shared_httpx_client:
+            await _shared_httpx_client.aclose()
+        _shared_httpx_client = None
+        raise
+
+async def _get_cached_client(agent_name: str) -> Optional[Client]:
+    """Get cached client or create new one from registry."""
+    # Check cache first
+    if agent_name in _client_cache:
+        return _client_cache[agent_name]
+
+    # Fetch agent card from registry
+    try:
+        async with _get_shared_httpx_client() as httpx_client:
+            response = await httpx_client.get(f"{REGISTRY_URL}/registry/agents")
+            response.raise_for_status()
+            agents = response.json()
+
+            # Find agent by name and create client
+            for agent_data in agents:
+                if agent_data.get('name') == agent_name:
+                    agent_card = AgentCard(**agent_data)
+
+                    # Create A2A client
+                    config = ClientConfig(
+                        httpx_client=httpx_client,
+                        supported_transports=[
+                            TransportProtocol.jsonrpc,
+                            TransportProtocol.http_json,
+                        ],
+                        streaming=agent_card.capabilities.streaming or False,
+                    )
+                    client = ClientFactory(config).create(agent_card)
+
+                    # Cache the client
+                    _client_cache[agent_name] = client
+                    return client
+
+            return None
+    except Exception:
+        return None
+
+async def call_a2a_agent(agent_name: str, message: str) -> str:
+    """
+    High-performance A2A agent call using client caching and global timeout configuration.
+
+    Args:
+        agent_name: Name of the agent to call (city_agent, clothes_agent, weather_agent)
+        message: The message/query to send to the agent
+
+    Returns:
+        str: Agent response or error message
+    """
+    try:
+        # Step 1: Get cached client (creates if needed)
+        client = await _get_cached_client(agent_name)
+        if not client:
+            return f"Agent '{agent_name}' not found in registry"
+
+        # Step 2: Send message using cached client (maximum performance)
+        from a2a.client import create_text_message_object
+        request = create_text_message_object(content=message)
+
+        # Collect all response parts (simple approach like test client)
+        response_parts = []
+        async for response in client.send_message(request):
+            response_parts.append(str(response))
+
+        return " ".join(response_parts) if response_parts else "No response received"
+
     except Exception as e:
-        logger.debug(e)
-    
-    base_url = remote_addresses[agent_name]
+        # Clear failed client from cache to force recreation on next call
+        _client_cache.pop(agent_name, None)
+        return f"Error calling {agent_name}: {str(e)}"
 
-    async with httpx.AsyncClient() as httpx_client:
-        # Build the card resolver
-        resolver = A2ACardResolver(
-            httpx_client=httpx_client,
-            base_url=base_url,
-        )
-        final_agent_card_to_use: AgentCard | None = None
+async def cleanup_clients():
+    """Cleanup cached clients and shared httpx client."""
+    global _shared_httpx_client
+    _client_cache.clear()
+    if _shared_httpx_client:
+        await _shared_httpx_client.aclose()
+        _shared_httpx_client = None
 
-        # Fetch the remote agent cards
-        try:
-            _public_card = (await resolver.get_agent_card())
-            final_agent_card_to_use = _public_card
-            logger.info('\nUsing PUBLIC agent card for client initialization (default).')
-
-            if _public_card.supports_authenticated_extended_card:
-                try:
-                    auth_headers_dict = {
-                        'Authorization': 'Bearer dummy-token-for-extended-card'
-                    }
-                    # Resolver fetch card
-                    _extended_card = await resolver.get_agent_card(
-                        relative_card_path=EXTENDED_AGENT_CARD_PATH,
-                        http_kwargs={'headers': auth_headers_dict},
-                    )
-                    final_agent_card_to_use = (_extended_card)
-                    logger.info('\nUsing AUTHENTICATED EXTENDED agent card for client')
-                except Exception as e_extended:
-                    logger.warning(
-                        f'Failed to fetch extended agent card: {e_extended}. '
-                        'Will proceed with public card.',
-                        exc_info=True,
-                    )
-            elif (_public_card):
-                logger.info('\nPublic card does not indicate support for an extended card. Using public card.')
-
-        except Exception as e:
-            logger.error(f'Critical error fetching public agent card: {e}', exc_info=True)
-            raise RuntimeError('Failed to fetch the public agent card. Cannot continue.') from e
-
-        # TODO: possible solution if in future A2AClient is removed by library updates
-        # config = ClientConfig(
-        #     httpx_client=httpx_client,
-        #     supported_transports=[
-        #         TransportProtocol.http_json,
-        #         TransportProtocol.jsonrpc
-        #     ]
-        # )
-        # factory = ClientFactory(config)
-        # client = factory.create(final_agent_card_to_use)
-
-        # request_message = Message(
-        #     role=Role.user,
-        #     parts=[Part(root=TextPart(text=message))],
-        #     message_id=str(uuid4())
-        # )
-
-        # ans = []
-        # try:
-        #     async for chunk in client.send_message(request_message, request_metadata={'timeout':300}):
-        #         if isinstance(chunk,Message):
-        #             print(chunk.parts[-1].root.text) #type: ignore
-        #             ans.extend(str(chunk.parts[-1].root.text))#type: ignore
-        # except Exception as e:
-        #     print("Error in streaming response")
-        #     print(e)
-
-        # build the connection client using the a2a card found on previous step
-        client = A2AClient(httpx_client=httpx_client, agent_card=final_agent_card_to_use)
-        logger.info('A2AClient initialized.')
-        # Reasonable timeout for agent on the other side response
-        timeout = 50.0
-        
-        # Message for the remote model
-        send_message_payload: dict[str, Any] = {
-            'message': {
-                'role': 'user',
-                'parts': [
-                    {'kind': 'text', 'text': message}
-                ],
-                'message_id': uuid4().hex,
-            },
-        }
-        # Building the message task request
-        request = SendMessageRequest(
-            id=str(uuid4()), params=MessageSendParams(**send_message_payload)
-        )
-
-        print("Starting A2A response stream...\n")
-        # Sending the message via client connection, awaits for the JSON response
-        try:
-            response = await client.send_message(request, http_kwargs={"timeout": timeout})
-            ans = response.model_dump(mode='json', exclude_none=True)
-            print("A2A response:")
-            print(ans)
-        except Exception as e:
-            ans = f"Error in response: {e}"
-                
-        # Final answer after a2a call that gets back to the main agent
-        return str(ans)
-    
 async def test():
-    response = await call_a2a_agent("city_agent","What is the city where are most piramids?")
-
+    """Test function for development."""
+    response = await call_a2a_agent("city_agent", "What is the city where are most pyramids?")
     print(response)
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(test())
