@@ -1,4 +1,31 @@
-""" Agent executor is in charge of receiving the request and call the agent as needed """
+"""
+What this file does:
+Implements the agent executor for the clothes agent, handling A2A requests and executing clothing recommendation logic.
+
+Documentation to reference:
+- A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+
+Relevant slack channels:
+ - #generative-ai-users: for questions on OCI Gen AI
+ - #igiu-innovation-lab: general discussions on your project
+ - #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+This file is not run directly, but used by clothes_server.py
+
+Comments to important sections of file:
+- Step 1: Define agent tool
+- Step 2: Implement ClothesAgent class with config and LLM setup
+- Step 3: Define invoke method for agent execution
+- Step 4: Implement ClothesAgentExecutor with execute and cancel methods
+"""
+
 import sys
 import os
 
@@ -15,37 +42,62 @@ from langchain.messages import HumanMessage
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from oci_openai_helper import OCIOpenAIHelper
 
-# Sample remote agent tool
+# Step 1: Define agent tool
 @tool
-def get_clothes(gender:str, temp:int, rain:bool) -> dict[str,list[str]]:
+def get_clothes(gender: str, temp: int, rain: bool) -> dict[str, list[str]]:
     """ Tool to suggest best clothes depending on the city weather, temperature and genders """
-
     # Hardcoded data, could use any other user details
-    clothes = {
-        "clothes": ["ran coat", "jeans", "formal chemise"],
-        "accessories": ["watch","umbrella", "boots"]
+    clothes = []
+    accessories = []
+
+    # Base on temperature
+    if temp < 50:
+        clothes.extend(["heavy coat", "sweater", "jeans", "boots"])
+        accessories.extend(["scarf", "gloves"])
+    elif temp < 70:
+        clothes.extend(["jacket", "long-sleeve shirt", "pants"])
+        accessories.extend(["watch"])
+    else:
+        clothes.extend(["t-shirt", "shorts", "sneakers"])
+        accessories.extend(["sunglasses"])
+
+    # Adjust for rain
+    if rain:
+        clothes.append("rain coat")
+        accessories.extend(["umbrella", "rain boots"])
+
+    # Adjust for gender (simple assumptions)
+    if gender.lower() == "male":
+        clothes.extend(["polo shirt"])
+    elif gender.lower() == "female":
+        clothes.extend(["dress", "blouse"])
+    else:
+        clothes.extend(["casual shirt"])
+
+    return {
+        "clothes": clothes,
+        "accessories": accessories
     }
 
-    return clothes
-
-# --8<-- [start:ClothesAgent]
-# This is the remote agent, built as any other normal agent
+# Step 2: Implement ClothesAgent class with config and LLM setup
 class ClothesAgent:
     """Clothes Agent."""
     def __init__(self):
         SANDBOX_CONFIG_FILE = "sandbox.yaml"
+        LLM_MODEL = "xai.grok-4-fast-non-reasoning"
+        # Alternative models: openai.gpt-4.1, openai.gpt-4o, xai.grok-3
+        # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
-        LLM_MODEL = "xai.grok-4"
-        # LLM_MODEL = "openai.gpt-4.1"
-        # LLM_MODEL = "openai.gpt-5"
-        # xai.grok-4
-        # xai.grok-3
-        # available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+        # Step 2.1: Load configuration
         scfg = self.load_config(SANDBOX_CONFIG_FILE)
+
+        # Step 2.2: Create LLM client
         self.model = OCIOpenAIHelper.get_client(
             model_name=LLM_MODEL,
             config=scfg
         )
+
+        # Step 2.3: Create agent with tools
         self.agent = create_agent(
             model=self.model,
             tools=[get_clothes],
@@ -53,57 +105,41 @@ class ClothesAgent:
         )
 
     def load_config(self, config_path):
-            """Load configuration from a YAML file."""
-            try:
-                with open(config_path, 'r') as f:
-                    return EnvYAML(config_path)
-            except FileNotFoundError:
-                print(f"Error: Configuration file '{config_path}' not found.")
-                return None
+        """Load configuration from a YAML file."""
+        try:
+            with open(config_path, 'r') as f:
+                return EnvYAML(config_path)
+        except FileNotFoundError:
+            print(f"Error: Configuration file '{config_path}' not found.")
+            return None
 
-    # Helper invokation method to call the agent
-    async def invoke(self,context:RequestContext) -> str:
+    # Step 3: Define invoke method for agent execution
+    async def invoke(self, context: RequestContext) -> str:
         user_input = context.get_user_input()
         print(user_input)
-        
-        # Actual agent call using langchain agent
+
         response = self.agent.invoke(
-            input={"messages":[HumanMessage(str(user_input))]}
+            input={"messages": [HumanMessage(str(user_input))]}
         )
 
         print(response)
-
         final_response = response['messages'][-1].content
-
         return str(final_response)
 
-# --8<-- [end:ClothesAgent]
-
-# --8<-- [start:ClothesAgentExecutor_init]
-# Agent executor to manage requests
+# Step 4: Implement ClothesAgentExecutor with execute and cancel methods
 class ClothesAgentExecutor(AgentExecutor):
-    """Test AgentProxy Implementation."""
+    """Clothes Agent Executor Implementation."""
 
     def __init__(self):
         self.agent = ClothesAgent()
 
-    # --8<-- [end:ClothesAgentExecutor_init]
-    # --8<-- [start:ClothesAgentExecutor_execute]
-    # Execution function that uses the agent class to perform the model call
     async def execute(
-        self,
-        context: RequestContext,
-        event_queue: EventQueue,
+        self, context: RequestContext, event_queue: EventQueue,
     ) -> None:
         result = await self.agent.invoke(context)
         await event_queue.enqueue_event(new_agent_text_message(result))
 
-    # --8<-- [end:ClothesAgentExecutor_execute]
-
-    # --8<-- [start:ClothesAgentExecutor_cancel]
     async def cancel(
         self, context: RequestContext, event_queue: EventQueue
     ) -> None:
         raise Exception('cancel not supported')
-
-    # --8<-- [end:ClothesAgentExecutor_cancel]
