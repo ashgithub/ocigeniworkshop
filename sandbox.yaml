@@ -29,12 +29,12 @@ bucket:
   prefix: $MY_PREFIX                                  # your oracle cuid like asagarw, thi sis used to create unique tables & bucket to to avoid conflicts with other users
 
 langfuse:
-  langfuse_pk: ${LANGFUSE_PK}          # will be provided at workshop
-  langfuse_sk: ${LANGFUSE_SK}          # will be provided at workshop
-  langfuse_host: ${LANGFUSE_HOST}      # will be provided at workshop
+  langfuse_pk: $LANGFUSE_PK          # will be provided at workshop
+  langfuse_sk: $LANGFUSE_SK          # will be provided at workshop
+  langfuse_host: $LANGFUSE_HOST|http://129.146.168.187:3000      # will be provided at workshop
 
 aia:
-  idcs_url: ${AIA_IDCS_URL}           # get these values from AIA team, only used for reranking,omit if not using it 
-  client_id: ${AIA_CLIENT_ID}         # get these values from AIA team, only used for reranking,omit if not using it 
-  client_secret: ${AIA_CLIENT_SECRET_OCID} # get these values from AIA team  (OCID of secret, id stored in vault ), only used for reranking,omit if not using it 
-  auth_scope: ${AIA_AUTH_SCOPE}       # # get these values from AIA team, only used for reranking,omit if not using it  
+  idcs_url: $AIA_IDCS_URL           # get these values from AIA team, only used for reranking,omit if not using it 
+  client_id: $AIA_CLIENT_ID         # get these values from AIA team, only used for reranking,omit if not using it 
+  client_secret: $AIA_CLIENT_SECRET_OCID # get these values from AIA team  (OCID of secret, id stored in vault ), only used for reranking,omit if not using it 
+  auth_scope: $AIA_AUTH_SCOPE       # # get these values from AIA team, only used for reranking,omit if not using it  
