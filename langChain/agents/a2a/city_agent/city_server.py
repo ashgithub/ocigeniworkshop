@@ -1,4 +1,35 @@
+"""
+What this file does:
+Main A2A server for the city agent that provides city recommendation functionality and handles agent discovery
+
+Documentation to reference:
+- A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+
+Relevant slack channels:
+ - #generative-ai-users: for questions on OCI Gen AI
+ - #igiu-innovation-lab: general discussions on your project
+ - #igiu-ai-learning: help with sandbox environment or help with running this code
+
+Env setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Load environment variables (e.g., API keys if needed).
+
+How to run the file:
+uv run langChain/agents/a2a/city_agent/city_server.py
+
+Comments to important sections of file:
+- Step 1: Define agent skill
+- Step 2: Create public agent card
+- Step 3: Register with central registry
+- Step 4: Set up request handler and server
+- Step 5: Start server
+"""
+
+import asyncio
 import uvicorn
+import httpx
 
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
@@ -10,8 +41,27 @@ from a2a.types import (
 )
 from agent_executor import CityAgentExecutor
 
+# Constants
+REGISTRY_URL = "http://localhost:9990"
+AGENT_URL = "http://localhost:9997/"
+
+async def register_with_registry(agent_card: AgentCard):
+    """Register the agent with the central registry at startup."""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{REGISTRY_URL}/registry/register",
+                json=agent_card.model_dump()
+            )
+            if response.status_code == 201:
+                print(f"Successfully registered {agent_card.name} with registry")
+            else:
+                print(f"Failed to register {agent_card.name}: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"Error registering {agent_card.name} with registry: {e}")
+
 if __name__ == '__main__':
-    # --8<-- [start:AgentSkill]
+    # Step 1: Define agent skill
     skill = AgentSkill(
         id='get_city',
         name='get_city',
@@ -19,22 +69,23 @@ if __name__ == '__main__':
         tags=['place','city'],
         examples=['city where Oracle started'],
     )
-    # --8<-- [end:AgentSkill]
 
-    # --8<-- [start:AgentCard]
-    # This will be the public-facing agent card
+    # Step 2: Create public agent card
     public_agent_card = AgentCard(
         name="city_agent",
-        url='http://localhost:9997/',
-        skills=[skill],  # Only the basic skill for the public card
+        url=AGENT_URL,
+        skills=[skill],
         default_input_modes=['text'],
         default_output_modes=['text'],
         description='Gets the city given some criteria',
         version='1.0.0',
         capabilities=AgentCapabilities(streaming=True),
     )
-    # --8<-- [end:AgentCard]
 
+    # Step 3: Register with central registry
+    asyncio.run(register_with_registry(public_agent_card))
+
+    # Step 4: Set up request handler and server
     request_handler = DefaultRequestHandler(
         agent_executor=CityAgentExecutor(),
         task_store=InMemoryTaskStore(),
@@ -45,4 +96,5 @@ if __name__ == '__main__':
         http_handler=request_handler
     )
 
+    # Step 5: Start server
     uvicorn.run(server.build(), host='0.0.0.0', port=9997)
