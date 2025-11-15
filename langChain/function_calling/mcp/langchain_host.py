@@ -53,7 +53,7 @@ async def build_oci_model():
                     # TODO: Make sure to update to the full absolute path to your
                     # local run file
                     # bill_server.py file
-                    "args": ["C:/users/cristopher hdz/ocigeniworkshop/langChain/function_calling/mcp/bill_mcp_server.py"],
+                    "args": ["./langChain/function_calling/mcp/bill_mcp_server.py"],
                     "transport": "stdio",
                 },
             }
