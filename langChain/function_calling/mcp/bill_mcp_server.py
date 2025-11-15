@@ -4,8 +4,7 @@ Demonstrates a simple MCP server that exposes a bill projection tool. This serve
 
 Documentation to reference:
 - MCP Servers reference: https://modelcontextprotocol.io/docs/learn/server-concepts
-- Build an MCP server: https://modelcontextprotocol.io/docs/develop/build-server
-
+- Fast MCP: https://gofastmcp.com/getting-started/welcome
 Comments on important sections of file:
 - Step 1: Server initialization with stdio transport (automatically launched by langchain_host.py)
 - Step 2: Tool definition - get_projection_bill function exposed to LLMs
