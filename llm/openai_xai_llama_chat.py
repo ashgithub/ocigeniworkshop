@@ -47,7 +47,7 @@ load_dotenv()
 # Meta Llama models:
 # meta.llama-4-maverick-17b-128e-instruct-fp8, meta.llama-4-scout-17b-16e-instruct
 # meta.llama-3.2-90b-vision-instruct (used in this example)
-CHAT_MODEL = "meta.llama-3.2-90b-vision-instruct"
+CHAT_MODEL = "xai.grok-4"
 
 # OCI Generative AI service endpoint for US Chicago region
 SERVICE_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
