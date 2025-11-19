@@ -108,6 +108,7 @@ uv.lock
 speech/text*.mp3
 speech/voice*.srt 
 speech/voice*.json
+scratch/*
 
 validate_*urls.py
 
