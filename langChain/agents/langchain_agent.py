@@ -114,7 +114,8 @@ tools = [get_weather,get_city,get_clothes]
 agent = create_agent(
     model=openai_llm_client,
     tools=tools,
-    system_prompt="You are a helpful assistant, infer the details missing from the user",
+#    system_prompt="You are a helpful assistant, infer the details missing from the user",
+     system_prompt="answer the questions using the provided tools, you may have to use multiple tools",
     # response_format=<Pydantic class, provide as class to agent response format>
 )
 print(f"************************** Agent ready **************************")
