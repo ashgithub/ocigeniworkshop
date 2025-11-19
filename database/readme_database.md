@@ -41,8 +41,8 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: Execute in SQL client connected to 23ai database.
    - Docs: [Select AI Documentation](https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html)
 
-5. **selectai_demo.py**: Demonstrates Oracle SELECT AI functionality using the Python select-ai library. It runs natural language queries on the WORKSHOP_ADMIN.STUDENTS table to showcase student profile information, providing a Python alternative to SQL-based SELECT AI queries.
-   - Key features: Uses Python select-ai library for programmatic access to SELECT AI; includes example queries and interactive query loop.
+5. **selectai_demo.py**: Demonstrates Oracle SELECT AI functionality using the Python select-ai library. It showcases various Profile methods (narrate, show_sql, explain_sql, run_sql, chat, generate, get_attributes, list) with examples adapted for the WORKSHOP_ADMIN.STUDENTS table, providing a comprehensive Python alternative to SQL-based SELECT AI queries.
+   - Key features: Demonstrates all major Profile methods programmatically; includes comprehensive examples and interactive query loop.
    - How to run: `uv run database/selectai_demo.py`.
 
 6. **rag.sql**: Full RAG implementation in 23ai using embeddings, similarity search, and citations.

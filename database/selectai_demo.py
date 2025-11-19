@@ -23,8 +23,9 @@ uv run database/selectai_demo.py
 Comments to important sections of file:
 - Step 1: Load config and initialize database connection.
 - Step 2: Set up SELECT AI profile.
-- Step 3: Run example queries on student profiles.
-- Step 4: Interactive query loop for custom questions.
+- Step 3: Demonstrate Profile methods (narrate, show_sql, explain_sql, run_sql, chat, generate, get_attributes, list).
+- Step 4: Additional examples with Profile.run_sql().
+- Step 5: Interactive query loop for custom questions.
 """
 
 import sys
@@ -82,31 +83,113 @@ def main():
         profile = select_ai.Profile(profile_name=profile_name)
         print("Profile created!")
 
-        # Example queries demonstrating student profile capabilities
-        # Adapted for WORKSHOP_ADMIN.STUDENTS table
-        queries = [
+        # Comprehensive demonstration of Profile methods
+        # Adapted from selectai.sql examples for WORKSHOP_ADMIN.STUDENTS table
+
+        print("\n" + "="*60)
+        print("DEMONSTRATING PROFILE METHODS")
+        print("="*60)
+
+        # 1. Profile.narrate() - Returns natural language answers
+        print("\n1. Profile.narrate() - Natural language answers")
+        print("-" * 50)
+        try:
+            result = profile.narrate(prompt="How many students exist?")
+            print(f"Result: {result}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+        # 2. Profile.show_sql() - Shows the generated SQL without executing
+        print("\n2. Profile.show_sql() - Show generated SQL")
+        print("-" * 50)
+        try:
+            sql = profile.show_sql(prompt="How many students are from Austin?")
+            print(f"Generated SQL: {sql}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+        # 3. Profile.explain_sql() - Explains the generated SQL
+        print("\n3. Profile.explain_sql() - Explain SQL execution plan")
+        print("-" * 50)
+        try:
+            explanation = profile.explain_sql(prompt="List students who have completed their team introductions")
+            print(f"Explanation: {explanation}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+        # 4. Profile.run_sql() - Execute SQL and return results (DataFrame)
+        print("\n4. Profile.run_sql() - Execute and return results")
+        print("-" * 50)
+        try:
+            df = profile.run_sql(prompt="What are the different teams and how many students are in each?")
+            print(f"Columns: {list(df.columns)}")
+            print(f"Results ({len(df)} rows):")
+            print(df.to_string(index=False))
+        except Exception as e:
+            print(f"Error: {e}")
+
+        # 5. Profile.chat() - Conversational queries
+        print("\n5. Profile.chat() - Conversational interface")
+        print("-" * 50)
+        try:
+            response = profile.chat(prompt="How many students have acknowledged the workshop?")
+            print(f"Chat response: {response}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+        # 6. Profile.generate() - Generate content based on data
+        print("\n6. Profile.generate() - Generate content")
+        print("-" * 50)
+        try:
+            generated = profile.generate(prompt="Create a report about student locations")
+            print(f"Generated content: {generated}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+        # 7. Profile.get_attributes() - Get profile configuration
+        print("\n7. Profile.get_attributes() - Get profile attributes")
+        print("-" * 50)
+        try:
+            attrs = profile.get_attributes()
+            print(f"Profile attributes: {attrs}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+        # 8. Profile.list() - List available profiles (class method)
+        print("\n8. Profile.list() - List available profiles")
+        print("-" * 50)
+        try:
+            profiles = profile.list()
+            print(f"Available profiles: {profiles}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+        # Additional examples with Profile.run_sql()
+        print("\n" + "="*60)
+        print("ADDITIONAL EXAMPLES WITH Profile.run_sql()")
+        print("="*60)
+
+        additional_queries = [
             "Show me all student profiles with their names and locations",
-            "How many students are from Austin?",
-            "List students who have completed their team introductions",
-            "What are the different teams and how many students are in each?",
-            "Show me students with their introduction text",
-            "How many students have acknowledged the workshop?",
-            "List students by location and show their team information"
+            "List students by location and show their team information",
+            "Find students who have not completed introductions",
         ]
 
-        print("\nRunning example queries...\n")
-
-        for i, query in enumerate(queries, 1):
-            print(f"{i}. {query}")
-            print("-" * 40)
+        for i, query in enumerate(additional_queries, 10):
+            print(f"\n{i}. Profile.run_sql(): {query}")
+            print("-" * 50)
             try:
                 df = profile.run_sql(prompt=query)
                 print(f"Columns: {list(df.columns)}")
                 print(f"Results ({len(df)} rows):")
-                print(df.to_string(index=False))
+                if len(df) > 0:
+                    print(df.head().to_string(index=False))  # Show first 5 rows
+                    if len(df) > 5:
+                        print(f"... and {len(df) - 5} more rows")
+                else:
+                    print("No results found")
             except Exception as e:
                 print(f"Error executing query: {e}")
-            print("\n")
 
         # Interactive query loop
         print("Enter natural language queries about student profiles (or 'quit' to exit):")
