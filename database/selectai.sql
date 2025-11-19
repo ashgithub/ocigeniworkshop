@@ -22,18 +22,24 @@
 -- How to run the file:
 -- 1. Update the credential details below with your OCI information
 -- 2. Execute this script in SQL*Plus or SQL Developer connected to your 23ai database
--- 3. Test the various AI query examples
+-- 3. The script will clean up existing credentials and profiles before creating new ones
+-- 4. Test the various AI query examples
 
 -- Step 1: Verify database connection
 SELECT USER FROM DUAL;
 
--- Step 2: Create OCI credential for GenAI access
+-- Step 2: Clean up and create OCI credential for GenAI access
 -- IMPORTANT: Replace the placeholder values below with your actual OCI credentials
 -- You can find these details in your ~/.oci/config file and private key file
 -- NOTE: This is your PRIVATE key, not the public key referenced in the config
 BEGIN
+    DBMS_CLOUD.DROP_CREDENTIAL('your_oracle_id_CRED');
+END;
+/
+
+BEGIN
     DBMS_CLOUD.CREATE_CREDENTIAL(
-        credential_name => 'OCI_GENAI_CRED',
+        credential_name => 'your_oracle_id_CRED',
         user_ocid => 'your-user-ocid-here',
         tenancy_ocid => 'your-tenancy-ocid-here',
         private_key => '-----BEGIN PRIVATE KEY-----
@@ -59,7 +65,7 @@ BEGIN
         profile_name => 'genaish',
         attributes => '{
             "provider": "oci",
-            "credential_name": "OCI_GENAI_CRED",
+            "credential_name": "your_oracle_id_CRED",
             "model": "meta.llama-4-scout-17b-16e-instruct",
             "comments": "true",
             "object_list": [{"owner": "SH"}]
