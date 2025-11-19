@@ -41,7 +41,11 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: Execute in SQL client connected to 23ai database.
    - Docs: [Select AI Documentation](https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html)
 
-5. **rag.sql**: Full RAG implementation in 23ai using embeddings, similarity search, and citations.
+5. **selectai_demo.py**: Demonstrates Oracle SELECT AI functionality using the Python select-ai library. It runs natural language queries on the WORKSHOP_ADMIN.STUDENTS table to showcase student profile information, providing a Python alternative to SQL-based SELECT AI queries.
+   - Key features: Uses Python select-ai library for programmatic access to SELECT AI; includes example queries and interactive query loop.
+   - How to run: `uv run database/selectai_demo.py`.
+
+6. **rag.sql**: Full RAG implementation in 23ai using embeddings, similarity search, and citations.
    - Key features: Demonstrates database-centric RAG with vector operations and LLM integration.
    - How to run: Execute in SQL client connected to 23ai database.
    - Docs: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/overview-ai-vector-search.html).
@@ -79,6 +83,7 @@ Here are some ideas for projects you can build upon these examples:
   - [Select AI](https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html)
   - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/overview-ai-vector-search.html)
   - [Python-oracledb](https://python-oracledb.readthedocs.io/)
+  - [SelectAi python](https://github.com/oracle/python-select-ai)
 
 - **Slack Channels**:
   - **#generative-ai-users**: Questions about OCI Gen AI.
