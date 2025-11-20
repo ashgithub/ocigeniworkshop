@@ -74,6 +74,7 @@ print(response)
 
 # Step 4: Model performance comparison with timing
 selected_llms = [
+    "openai.gpt-oss-20b",
     "openai.gpt-4.1",
     "openai.gpt-5",
     # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
