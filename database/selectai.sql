@@ -33,7 +33,8 @@ SELECT USER FROM DUAL;
 -- You can find these details in your ~/.oci/config file and private key file
 -- NOTE: This is your PRIVATE key, not the public key referenced in the config
 BEGIN
-    DBMS_CLOUD.DROP_CREDENTIAL('your_oracle_id_CRED');
+    SELECT credential_name, username, comments FROM all_credentials;
+    DBMS_CLOUD.DROP_CREDENTIAL('workshop_cred');
 END;
 /
 
@@ -65,7 +66,7 @@ BEGIN
         profile_name => 'genaish',
         attributes => '{
             "provider": "oci",
-            "credential_name": "your_oracle_id_CRED",
+            "credential_name": "AISANDBOX_CRED",
             "model": "meta.llama-4-scout-17b-16e-instruct",
             "comments": "true",
             "object_list": [{"owner": "SH"}]

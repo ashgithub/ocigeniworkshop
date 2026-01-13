@@ -127,6 +127,7 @@ async def call_manual_agent():
     """ This is the same method as langchain_multistep_manual.py file """
 
     prompt = "Which will be my projected bill? I'm in San Francisco, and I have oven. My past bill was $45"
+    #prompt = "what is the weather in the capital of US, are there any weather alerts"
     messages = [HumanMessage(prompt)]
 
     # Get the tooled model and the tool names list

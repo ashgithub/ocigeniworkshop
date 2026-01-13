@@ -46,7 +46,8 @@ from oci_openai_helper import OCIOpenAIHelper
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "xai.grok-4-fast-non-reasoning"
+LLM_MODEL = "xai.grok-4-fast-reasoning"
+#LLM_MODEL = "xai.grok-4-fast-non-reasoning"
 # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
 # Step 1: Load configuration

@@ -27,37 +27,54 @@ MCP (Model Context Protocol) servers expose tools and resources that can be used
    - Provides `get_projection_bill` tool
    - How to run: Started automatically by langchain_host.py
 
-3. **langchain_host.py**: LangChain client that connects to MCP servers
+3. **langchain_host_responses.py**: Modern LangChain client using OpenAI Responses API
+   - Demonstrates MCP integration with `responses.create()` method
+   - Uses OCI Generative AI with direct MCP server calling
+   - How to run: `uv run langChain/function_calling/mcp/langchain_host_responses.py`
+
+4. **langchain_host.py**: Legacy LangChain client with manual agent execution
    - Demonstrates manual agent execution with MCP tools
    - Shows tool discovery and binding
    - How to run: `uv run langChain/function_calling/mcp/langchain_host.py`
 
-4. **langchain_host.ipynb**: Jupyter notebook version of the MCP integration
+5. **langchain_host.ipynb**: Jupyter notebook version of the MCP integration
    - Interactive cells demonstrating MCP setup and usage
    - Includes exercises for experimentation
    - How to run: Open in Jupyter/VS Code and run cells sequentially
 
 ## Running the Examples
 
+### Modern Approach (Recommended)
 1. **Start the weather server** (in background):
    ```bash
    uv run langChain/function_calling/mcp/weather_mcp_server.py
    ```
 
-2. **Run the host client**:
+2. **Set up ngrok tunnel** (for remote access):
+   ```bash
+   ngrok http 8000 --host-header=localhost:8000
+   ```
+
+3. **Run the modern host client** (uses OpenAI Responses API):
+   ```bash
+   uv run langChain/function_calling/mcp/langchain_host_responses.py
+   ```
+
+### Legacy Approach
+1. **Run the legacy host client** (manual agent execution):
    ```bash
    uv run langChain/function_calling/mcp/langchain_host.py
    ```
 
-3. **Or use the notebook**:
-   - Open `langchain_host.ipynb` in Jupyter
-   - Run cells in order
+### Interactive Approach
+- **Use the notebook**: Open `langchain_host.ipynb` in Jupyter/VS Code and run cells sequentially
 
 ## Key Concepts Demonstrated
 
 - **Multiple Transport Types**: HTTP (remote) vs stdio (local) servers
+- **Modern Responses API**: Direct MCP integration with `responses.create()` method
 - **Tool Discovery**: Automatic detection of available tools from servers
-- **Manual Agent Execution**: Step-by-step tool calling with MCP tools
+- **Manual Agent Execution**: Step-by-step tool calling with MCP tools (legacy approach)
 - **Error Handling**: Connection and tool execution error management
 
 ## Learning Tips

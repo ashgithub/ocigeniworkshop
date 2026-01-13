@@ -15,7 +15,7 @@ dependencies = [
     "mcp>=1.21.0",
     "nbformat>=5.10.4",
     "oci>=2.150.2",
-    "oci-openai>=0.2.1",
+    "oci-openai==0.2.1",
     "oracledb>=3.4.0",
     "pypdf>=6.1.3",
     "requests>=2.32.5",
