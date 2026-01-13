@@ -102,7 +102,7 @@ def get_clothes(gender:str, temp:int, rain:bool) -> dict[str,list[str]]:
 
     # Hardcoded data, could use any other user details
     clothes = {
-        "clothes": ["ran coat", "jeans", "formal chemise"],
+        "clothes": ["rain coat", "jeans", "formal chemise"],
         "accessories": ["watch","umbrella", "boots"]
     }
 

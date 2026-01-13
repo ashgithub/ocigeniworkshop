@@ -1,6 +1,6 @@
 from envyaml import EnvYAML
 from langchain_openai import ChatOpenAI
-from oci_openai import OciUserPrincipalAuth, AsyncOciOpenAI
+from oci_openai import OciUserPrincipalAuth, AsyncOciOpenAI, OciOpenAI
 from pydantic import SecretStr
 import httpx
 
@@ -62,7 +62,34 @@ class OCIOpenAIHelper:
         
         return client
     
-    
+   
+   
+    @staticmethod
+    def get_sync_native_client(config, **kwargs):
+        """
+        Returns a ChatOpenAI client initialized from OCI config YAML or env vars.
+
+        Args:
+            model_name (str): The model, e.g. "xai.grok-4-fast-reasoning"
+            config  (EnvYAML):  OCI YAML config (sandbox.yaml or similar)
+            **kwargs: Passed through to ChatOpenAI
+
+        Returns:
+            ChatOpenAI: Initialized with OCI config, model name and base_url
+        """
+
+        # OCI-compatible base URL—hardcoded per requirements
+        service_endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+
+        client = OciOpenAI(
+            
+            service_endpoint=service_endpoint,
+            auth=OciUserPrincipalAuth(profile_name=config['oci']['profile']),
+            compartment_id=config['oci']['compartment'],
+            **kwargs
+        )
+        
+        return client 
 ##### test ######
 if __name__ == "__main__":
     from dotenv import load_dotenv
