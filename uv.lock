@@ -2138,7 +2138,7 @@ requires-dist = [
     { name = "mcp", specifier = ">=1.21.0" },
     { name = "nbformat", specifier = ">=5.10.4" },
     { name = "oci", specifier = ">=2.150.2" },
-    { name = "oci-openai", specifier = ">=0.2.1" },
+    { name = "oci-openai", specifier = "==0.2.1" },
     { name = "oracledb", specifier = ">=3.4.0" },
     { name = "pypdf", specifier = ">=6.1.3" },
     { name = "requests", specifier = ">=2.32.5" },
