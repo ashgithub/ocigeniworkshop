@@ -135,10 +135,10 @@ def load_config(config_path):
 
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
-llm_client = OCIOpenAIHelper.get_client(
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=scfg
-)
+)   
 
 # Step 3: Demonstrate simple JSON schema output
 print("**************************Chat Response with JSON output**************************")

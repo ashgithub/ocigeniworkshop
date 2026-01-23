@@ -1,13 +1,13 @@
 # MCP (Model Context Protocol) Servers
 
-This folder demonstrates how to create and use MCP servers with LangChain agents. MCP allows LLMs to interact with external tools and services through standardized protocols.
+This folder demonstrates how to create and use MCP servers with OCI-hosted LLM clients. MCP allows LLMs to interact with external tools and services through standardized protocols.
 
 ## What are MCP Servers?
 
 MCP (Model Context Protocol) servers expose tools and resources that can be used by AI agents. This folder contains examples of:
 - **Weather Server**: HTTP-based server providing weather alerts and forecasts from the US National Weather Service
 - **Bill Server**: Local stdio server for bill projection calculations
-- **Host Integration**: LangChain client that connects to MCP servers and uses their tools
+- *Remote MCP Servers Integration**: client that connects to remote MCP servers and uses their tools
 
 ## Environment Setup
 
@@ -27,17 +27,17 @@ MCP (Model Context Protocol) servers expose tools and resources that can be used
    - Provides `get_projection_bill` tool
    - How to run: Started automatically by langchain_host.py
 
-3. **langchain_host_responses.py**: Modern LangChain client using OpenAI Responses API
-   - Demonstrates MCP integration with `responses.create()` method
-   - Uses OCI Generative AI with direct MCP server calling
-   - How to run: `uv run langChain/function_calling/mcp/langchain_host_responses.py`
+3. **openai_responses_mcp.py**: Modern OCI Responses API sample
+- Demonstrates MCP integration with `responses.create()` method
+- Uses OCI Generative AI with direct MCP server calling
+- How to run: `uv run langChain/function_calling/mcp/openai_responses_mcp.py`
 
-4. **langchain_host.py**: Legacy LangChain client with manual agent execution
+4. **langchain_mcp.py**: Legacy LangChain client with manual agent execution
    - Demonstrates manual agent execution with MCP tools
    - Shows tool discovery and binding
-   - How to run: `uv run langChain/function_calling/mcp/langchain_host.py`
+- How to run: `uv run langChain/function_calling/mcp/langchain_mcp_manual.py`
 
-5. **langchain_host.ipynb**: Jupyter notebook version of the MCP integration
+5. **langchain_mcp.ipynb**: Jupyter notebook version of the MCP integration
    - Interactive cells demonstrating MCP setup and usage
    - Includes exercises for experimentation
    - How to run: Open in Jupyter/VS Code and run cells sequentially
@@ -67,7 +67,7 @@ MCP (Model Context Protocol) servers expose tools and resources that can be used
    ```
 
 ### Interactive Approach
-- **Use the notebook**: Open `langchain_host.ipynb` in Jupyter/VS Code and run cells sequentially
+- **Use the notebook**: Open `langchain_mcp.ipynb` in Jupyter/VS Code and run cells sequentially
 
 ## Key Concepts Demonstrated
 

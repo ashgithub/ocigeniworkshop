@@ -130,7 +130,7 @@ embeddings = embed_response.data.embeddings
 print(f"Generated {len(embeddings)} embeddings.")
 
 # Step 4: Set up Oracle DB connection and create vector table
-llm_client = OCIOpenAIHelper.get_client(
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=scfg
 )

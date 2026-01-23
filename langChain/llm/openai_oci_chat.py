@@ -62,7 +62,7 @@ def load_config(config_path):
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: Create OpenAI LLM client using credentials and optional parameters
-llm_client = OCIOpenAIHelper.get_client(
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=scfg
 )
@@ -76,7 +76,7 @@ print(response)
 selected_llms = [
     "openai.gpt-oss-20b",
     "openai.gpt-4.1",
-    "openai.gpt-5",
+    "openai.gpt-5.2",
     # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
     # "cohere.command-r-08-2024",      # Cohere doesn't support OpenAI compatible APIs yet
     "meta.llama-4-maverick-17b-128e-instruct-fp8",

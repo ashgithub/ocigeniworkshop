@@ -65,7 +65,7 @@ class CityAgent:
         scfg = self.load_config(SANDBOX_CONFIG_FILE)
 
         # Step 2.2: Create LLM client
-        llm_client = OCIOpenAIHelper.get_client(
+        llm_client = OCIOpenAIHelper.get_langchain_openai_client(
             model_name=LLM_MODEL,
             config=scfg
         )

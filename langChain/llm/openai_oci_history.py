@@ -41,7 +41,7 @@ load_dotenv()
 
 # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 LLM_MODEL = "xai.grok-4-fast-non-reasoning"
-
+#LLM_MODEL = "openai.gpt-4.1"
 # Step 1: Load config and initialize client
 def load_config(config_path):
     """Load configuration from a YAML file."""
@@ -84,8 +84,9 @@ def demonstrate_conversation_with_history(client, questions):
         print(f"\nUSER {idx+1}: {q}")
         print(f"RESPONSE {idx+1}: {getattr(response, 'content', response)}")
 
+        
 if __name__ == "__main__":
-    client = OCIOpenAIHelper.get_client(
+    client = OCIOpenAIHelper.get_langchain_openai_client(
         model_name=LLM_MODEL,
         config=scfg
     )

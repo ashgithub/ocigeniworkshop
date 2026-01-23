@@ -82,7 +82,7 @@ for model_id in MODEL_LIST:
     print(f"\n{banner}\nRESULTS FOR MODEL: {model_id}\n{banner}")
     start_time = time.time()
 
-    llm_client = OCIOpenAIHelper.get_client(
+    llm_client = OCIOpenAIHelper.get_langchain_openai_client(
         model_name=model_id,
         config=sandbox_config
         )

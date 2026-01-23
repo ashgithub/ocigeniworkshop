@@ -18,7 +18,7 @@ Env setup:
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
-uv run langChain/function_calling/mcp/langchain_host.py
+uv run langChain/function_calling/mcp/langchain_mcp_manual.py
 
 Comments to important sections of file:
 - Step 1: Load configuration and initialize OCI client
@@ -61,7 +61,7 @@ def load_config(config_path):
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Build the OCI client
-llm_client = OCIOpenAIHelper.get_client(
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=scfg
 )
@@ -87,32 +87,6 @@ async def build_oci_model():
         )
 
     tools = await client.get_tools()
-
-    """ 
-    TODO:
-    Important notice: Async calls using langchain are in process for oci_openai library, 
-    when solved, from here, you can use the following snippet instead of the call_manual_agent function:
-
-    ```python
-        from langchain.agents import create_agent
-        agent = create_agent(
-            model=llm_client,
-            tools=tools
-        )
-
-        response = await agent.ainvoke(
-            input={'messages':[HumanMessage("Which will be my projected bill? I'm in San Francisco, and I have oven. My past bill was $45")]}
-        )
-
-        for message in response:
-            print(message)
-    ```
-
-    call_manual_agent is a temporary solution given the ainvoke method is yet not supported by oci_openai client
-    Error present (11/14/2025)
-    `openai.BadRequestError: Error code: 400 - {'code': '400', 'message': 'The given api key not found'}`
-    """
-    
     tooled_model = llm_client.bind_tools(tools)
     tools_by_name = {tool.name: tool for tool in tools}
 
