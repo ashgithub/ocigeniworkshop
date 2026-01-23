@@ -95,7 +95,7 @@ def pretty_print(response):
 scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: create the OpenAI LLM client using credentials and optional parameters
-llm_client = OCIOpenAIHelper.get_client(
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=scfg, use_responses_api=True
 )

@@ -9,7 +9,8 @@ oci:
   configFile: $OCI_CONFIG_FILE|~/.oci/config  # Path to your OCI CLI config
   profile: $OCI_PROFILE|DEFAULT               # Profile inside the OCI config file that has access to AI-Sandbox
   compartment: $OCI_COMPARTMENT_OCID|ocid1.compartment.oc1..aaaaaaaaboqoghc43bbqvei5y4pmnzia36wuh7fpcxn6fia7pfyelyg4rj7a          # OCID of compartment you have access to in AI sandbox
-
+  conversation_store: $OCI_CONVERSATION_STORE|ocid1.generativeaiconversationstore.oc1.us-chicago-1.amaaaaaaghwivzaabyfso4wrzvt63ttivxmnglbjk2o2dun4h5ntwnos7p6a          # OCID of the conversation store
+  api_key: $OCI_AI_API_KEY
 db:
   dsn: $DB_DSN|aisandboxadw_medium                    # this is the default database that everyone has access to 
   username: $DB_USER|aisandboxuser                    # same user is shared by everyone

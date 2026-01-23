@@ -75,7 +75,7 @@ langfuse = Langfuse(
 langfuse_handler = CallbackHandler()
 
 # Simple model to do the tracing
-openai_llm_client = OCIOpenAIHelper.get_client(
+openai_llm_client = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=scfg
 )

@@ -47,7 +47,8 @@ load_dotenv()
 # Meta Llama models:
 # meta.llama-4-maverick-17b-128e-instruct-fp8, meta.llama-4-scout-17b-16e-instruct
 # meta.llama-3.2-90b-vision-instruct (used in this example)
-CHAT_MODEL = "xai.grok-4"
+#CHAT_MODEL = "xai.grok-3"
+CHAT_MODEL = "google.gemini-2.5-pro"
 
 # OCI Generative AI service endpoint for US Chicago region
 SERVICE_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
@@ -87,7 +88,7 @@ def create_chat_request(message_text):
     chat_request.max_tokens = 500  # Maximum tokens to generate
     chat_request.temperature = 0.75  # Higher values mean more random; default = 0.0
     chat_request.top_p = 0.7  # Only tokens with total probability p considered
-    chat_request.top_k = -1  # -1 disables top_k sampling
+#    chat_request.top_k = -1  # -1 disables top_k sampling
     chat_request.frequency_penalty = 1.0  # Reduces token repetition
 
     return chat_request

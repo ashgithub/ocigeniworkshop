@@ -321,7 +321,7 @@ class MainAgent:
 
         # Step 5.2: Initialize LLM client
         print("Step 2: Initializing LLM client...")
-        self.openai_llm_client = OCIOpenAIHelper.get_client(
+        self.openai_llm_client = OCIOpenAIHelper.get_langchain_openai_client(
             model_name=self.LLM_MODEL,
             config=self.scfg,
             use_responses_api=True

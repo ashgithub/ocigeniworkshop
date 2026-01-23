@@ -89,7 +89,7 @@ print(response.content)
 # Step 4: Model performance comparison with timing
 selected_llms = [
     "openai.gpt-4.1",
-    "openai.gpt-5",
+    "openai.gpt-5.2",
     "cohere.command-a-03-2025",
     "cohere.command-r-08-2024",
     "meta.llama-4-maverick-17b-128e-instruct-fp8",

@@ -55,7 +55,7 @@ messages = [
 ]
 
 # Step 3: Initialize client with reasoning parameters
-llm = OCIOpenAIHelper.get_client(
+llm = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=config,
     use_responses_api=True,

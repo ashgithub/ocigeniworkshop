@@ -77,7 +77,7 @@ selected_llms = [
 async def call_ainvoke(client, model_id, message):
     """Perform async non-streaming LLM call."""
     start = time.perf_counter()
-    response = await client.responses.create(model=model_id, input=message)
+    response = await client.responses.create(model=model_id, input=message, store=False)
     print(f"\n**************************Async Chat Result (ainvoke) for {model_id} **************************")
     print(response.output_text)
     print(f"ainvoke done in {time.perf_counter() - start:.2f}s")
@@ -88,7 +88,7 @@ async def call_astream(client, model_id, message):
     """Perform async streaming LLM call."""
     start = time.perf_counter()
     print(f"\n**************************Async Chat Stream (astream) for {model_id} **************************")
-    async for event in await client.responses.create(model=model_id, input=message, stream=True):
+    async for event in await client.responses.create(model=model_id, input=message, stream=True,store=False):
         if event.type == "response.output_text.delta":
             print(f"{event.delta}", end="", flush=True)
         elif event.type == "response.error":
@@ -101,7 +101,7 @@ async def sequential_run():
     """Execute async calls sequentially for each model."""
     print(f"\n\n*************** Sequential Run ***************\n")
     for llm_id in selected_llms:
-        client = OCIOpenAIHelper.get_async_native_client(config=scfg)
+        client = OCIOpenAIHelper.get_async_openai_client(config=scfg)
         await call_ainvoke(client, llm_id, MESSAGE)
         await call_astream(client, llm_id, MESSAGE)
 
@@ -111,7 +111,7 @@ async def gather_run():
     print(f"\n\n*************** Gather Run (Concurrent) ***************\n")
     tasks = []
     for llm_id in selected_llms:
-        client = OCIOpenAIHelper.get_async_native_client(config=scfg)
+        client = OCIOpenAIHelper.get_async_openai_client(config=scfg)
         tasks.append(call_ainvoke(client, llm_id, MESSAGE))
         tasks.append(call_astream(client, llm_id, MESSAGE))
     await asyncio.gather(*tasks)

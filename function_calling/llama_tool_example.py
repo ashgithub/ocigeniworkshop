@@ -147,7 +147,7 @@ step = 1
 response_message = chat_response.data.chat_response.choices[0].message
 #bug that context cannot be null
 
-while len(response_message.tool_calls) > 0:
+while response_message.tool_calls and len(response_message.tool_calls) > 0:
     # add the tool request message to list of messages
     response_message.content = [oci.generative_ai_inference.models.TextContent(text="")]
     chat_request.messages.append(response_message)

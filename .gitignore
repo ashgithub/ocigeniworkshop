@@ -109,7 +109,8 @@ speech/text*.mp3
 speech/voice*.srt 
 speech/voice*.json
 scratch/*
-
+test*.py
+test*.ipynb
 validate_*urls.py
 
 **/todo

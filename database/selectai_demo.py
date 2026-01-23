@@ -68,7 +68,7 @@ def main():
         # Connect to Oracle using existing database credentials
         print("Connecting to Oracle database...")
         select_ai.connect(
-            user="WORKSHOP_ADMIN",
+            user=db_cfg["username"],
             password=db_cfg["password"],
             dsn=db_cfg["dsn"],
             config_dir=wallet_path,
@@ -79,9 +79,9 @@ def main():
 
         # Create AI profile
         profile_name = 'workshop_app_profile'
-        print(f"\nCreating AI profile '{profile_name}'...")
+        print(f"\nSelected AI profile '{profile_name}'...")
         profile = select_ai.Profile(profile_name=profile_name)
-        print("Profile created!")
+        print("Profile selected!")
 
         # Comprehensive demonstration of Profile methods
         # Adapted from selectai.sql examples for WORKSHOP_ADMIN.STUDENTS table
