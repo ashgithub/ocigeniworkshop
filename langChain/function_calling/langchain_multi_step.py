@@ -51,7 +51,7 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 # Try experimenting with different models to see how they handle multi-step reasoning. Try different LLM families as well as reasoning and non reasoning models
-LLM_MODEL = "openai.gpt-5"
+LLM_MODEL = "openai.gpt-5-mini"
 
 # meta.llama-3.1-405b-instruct
 # meta.llama-3.3-70b-instruct
@@ -95,7 +95,7 @@ scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: create the OpenAI LLM client using credentials and optional parameters
 
-llm_client = OCIOpenAIHelper.get_client(
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=scfg, 
     use_responses_api=True,

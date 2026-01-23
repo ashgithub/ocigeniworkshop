@@ -51,7 +51,9 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 # change LLMs to see how the differ, try both reasoning and non reasoning models and different families
-LLM_MODEL = "openai.gpt-4.1"
+#LLM_MODEL = "xai.grok-4-1-fast-reasoning"
+#LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
+LLM_MODEL = "google.gemini-2.5-pro"
 
 # meta.llama-3.1-405b-instruct
 # meta.llama-3.3-70b-instruct
@@ -95,7 +97,7 @@ scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Step 2: create the OpenAI LLM client using credentials and optional parameters
 
-llm_client = OCIOpenAIHelper.get_client(
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
     model_name=LLM_MODEL,
     config=scfg, use_responses_api=True
 )

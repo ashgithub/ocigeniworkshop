@@ -39,7 +39,8 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 # Available OpenAI-compatible models
-CHAT_MODEL = "meta.llama-3.3-70b-instruct"
+#CHAT_MODEL = "meta.llama-3.3-70b-instruct"
+CHAT_MODEL = "xai.grok-4-1-fast-reasoning"
 SERVICE_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 # Global conversation history (maintains context across interactions)

@@ -59,7 +59,7 @@ MESSAGE = """
 # Step 2: Define supported models for testing
 selected_llms = [
     "openai.gpt-4.1",
-    "openai.gpt-5",
+    "openai.gpt-5.2",
     # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
     # "cohere.command-r-08-2024",      # Cohere doesn't support OpenAI compatible APIs yet
     "meta.llama-4-maverick-17b-128e-instruct-fp8",
@@ -92,7 +92,7 @@ def test_stream_method(client, model_id, message):
 # Step 5: Compare performance between invoke and stream
 if __name__ == "__main__":
     for model_id in selected_llms:
-        client = OCIOpenAIHelper.get_client(
+        client = OCIOpenAIHelper.get_langchain_openai_client(
             model_name=model_id,
             config=scfg
         )
