@@ -8,7 +8,7 @@ In this module, we will explore the following capabilities:
 3. Streaming responses for real-time processing.
 4. Structured output using JSON schemas and Pydantic models.
 5. Asynchronous operations for concurrent processing.
-6. Model performance comparison across different LLM providers.
+6. Use of oci's responses api features: reasoning & stateful conversations
 
 OCI Gen AI provides OpenAI-compatible APIs that support advanced features like structured output, function calling, and reasoning. The module demonstrates both the OCI OpenAI-compatible library (best for OpenAI features) and LangChain OCI library (broader model support).
 
@@ -58,7 +58,12 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: `uv run langChain/llm/openai_oci_reasoning.py`.
    - Docs: [OpenAI Reasoning API](https://platform.openai.com/docs/guides/reasoning), [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai).
 
-8. **openai_oci_llm.ipynb**: A Jupyter notebook variation demonstrating comprehensive usage of OpenAI-compatible LLMs via LangChain. Covers basic chat, model performance comparison, batching, streaming, conversation history, structured output, and reasoning capabilities.
+8. **openai_oci_responses_stateful.py**: Demonstrates use of responses api for stateful conversion multi multi turn & persistent via oci hosted conversation stores
+   - Key features: use of `response_id` & `conversation stores.
+   - How to run: `uv run langChain/llm/openai_oci_responses_stateful.py.py`.
+   - Docs: [OpenAI conversatte state support](https://developers.openai.com/api/docs/guides/conversation-state)
+
+9. **openai_oci_llm.ipynb**: A Jupyter notebook variation demonstrating comprehensive usage of OpenAI-compatible LLMs via LangChain. Covers basic chat, model performance comparison, batching, streaming, conversation history, structured output, and reasoning capabilities.
    - Key features: Interactive tutorial; step-by-step examples; hands-on exercises and experimentation.
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
    - Docs: [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview)
@@ -98,8 +103,7 @@ Here are some ideas for projects you can build upon these examples:
   - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
   - [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview)
   - [OpenAI API Reference](https://platform.openai.com/docs/api-reference)
-  - [Pydantic Models](https://docs.pydantic.dev/latest/)
-
+  
 - **Slack Channels**:
   - **#igiu-innovation-lab**: Discuss project ideas and share implementations.
   - **#igiu-ai-learning**: Help with sandbox environment or running code.

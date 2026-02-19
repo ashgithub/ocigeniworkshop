@@ -73,7 +73,7 @@ def main():
     if not user_weather_url:
         print(f"Using default Weather MCP URL: {weather_mcp_url}\n")
 
-    llm_client = OCIOpenAIHelper.get_sync_openai_client(
+    llm_client = OCIOpenAIHelper.get_sync_openai_key_client(
         config=config,
     )
 

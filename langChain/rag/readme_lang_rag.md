@@ -9,7 +9,7 @@ In this module, we will explore the following capabilities:
 4. Full RAG example integrating OCI Gen AI for embeddings and LLM to answer user queries.
 
 
-Oracle AI database is used in this module. Refer to [this page](https://confluence.oraclecorp.com/confluence/display/D2OPS/AISandbox#AISandbox-ToAccessADW).
+Oracle AI database is used in this module. Refer to [this page](https://confluence.oraclecorp.com/confluence/display/D2OPS/AISandbox#AISandbox-ToAccessADW). 
 - The database requires the wallet to be downloaded.
 - Remember to update the database section per your setup in `sandbox.yaml`.
 - As the database schema is shared, set a unique `prefix` in the database section of `sandbox.yaml`. Your Oracle user ID is a good choice.
@@ -59,28 +59,21 @@ Here are some ideas for projects you can build upon these examples:
 
 1. Create a "talk to my document" application:
    - Allow users to upload documents.
-   - Parse and chunk documents using various strategies (e.g., semantic chunking – search for libraries like `langchain_experimental` for advanced splitters).
+   - Parse and chunk documents using various strategies (e.g., semantic chunking, recursive chunking, fixed length etc).
    - Experiment with similarity algorithms (COSINE is popular, but try Euclidean or DOT product).
    - Add rerankers (e.g., using Cohere or cross-encoders) to reorder retrieved documents.
    - Include citations in responses for transparency.
-   - Resources: [Semantic Chunking Guide](https://docs.langchain.com/docs/guides/semantic-chunking), 
 2. Build a chatbot with custom knowledge base:
    - Extend the RAG example to handle multiple document types (e.g., PDFs, text files).
    - Implement conversation history using LangChain's memory modules.
    - Add evaluation metrics (e.g., BLEU or ROUGE) to assess answer quality.
    - Resources: [LangChain Memory](https://docs.langchain.com/oss/python/langchain/memory) 
 
-3. Optimize for production:
-   - Implement caching for embeddings to avoid recomputation.
-   - Use streaming for LLM responses in the RAG pipeline.
-   - Integrate with a web UI (e.g., Streamlit or Gradio).
-   - Resources: [LangChain Caching](https://docs.langchain.com/oss/python/langchain/caching), [Streamlit Docs](https://docs.streamlit.io/).
-
-4. Build a production-ready RAG application using the AIA toolkit:
+3. Build a production-ready RAG application using the AIA toolkit:
    - Integrate AIA's reranking capabilities into your existing RAG pipeline.
    - Use the toolkit's pre-built components for document ingestion, embedding, and retrieval.
    - Experiment with  AIA's features like evaluation and guardrail.
-   - Resources: [AIA Toolkit Capabilities](https://gbuconfluence.oraclecorp.com/display/AIAcc/I-GIU+AI+Accelerator+Toolkit+Capabilities).
+   - Resources: #iip-iat-users
 
 ## Resources and Links
 - **Documentation**:

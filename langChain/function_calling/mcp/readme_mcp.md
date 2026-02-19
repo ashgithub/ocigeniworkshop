@@ -32,7 +32,7 @@ MCP (Model Context Protocol) servers expose tools and resources that can be used
 - Uses OCI Generative AI with direct MCP server calling
 - How to run: `uv run langChain/function_calling/mcp/openai_responses_mcp.py`
 
-4. **langchain_mcp.py**: Legacy LangChain client with manual agent execution
+4. **langchain_mcp.py**: LangChain client with manual agent execution
    - Demonstrates manual agent execution with MCP tools
    - Shows tool discovery and binding
 - How to run: `uv run langChain/function_calling/mcp/langchain_mcp_manual.py`

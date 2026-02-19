@@ -39,7 +39,7 @@ To be able to run the A2A module, it is required that you have first running the
     - `uv run langChain/agents/a2a/clothes_agent/clothes_server.py`
 2. Once the servers are running, checkout the running ports are the same as indicated in the `remote_addresses` dictionary from `remote_agent_connections.py`
     - This is important, if the weather port does not match, host agent will not be able to reach the remote.
-3. Run the main agent with `uv run langChain/agents/a2a/main.py`
+3. Run the main agent with `uv run langChain/agents/a2a/langgraph_a2a_agent.py`
 
 ## Suggested Study Order and File Descriptions
 

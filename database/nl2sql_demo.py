@@ -140,7 +140,7 @@ SCHEMA_DESCRIPTION = textwrap.dedent(
       SALES.channel_id     = CHANNELS.channel_id
       SALES.time_id        = TIMES.time_id
 
-    Always prefix tables with SH. Return valid SQL only. Your oput will be directly fed to the oracle database.
+    Always prefix tables with SH. Return valid SQL only. Your output will be directly fed to the oracle database.
     dont include backquotes as they would interfere
     """
 )

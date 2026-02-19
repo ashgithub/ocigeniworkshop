@@ -1,0 +1,33 @@
+todo.txt
+----
+0. structure 
+     - read me etc
+     - timing 
+     - exercise 
+Day1     
+1. LLM : ok 
+2. SLM:
+    - deck 
+
+Day2 RAG
+   AIA toolkit
+
+dasy 3
+   - mcp servers
+
+day 4 : 
+   - . mutimodel
+    - code
+    - jupyter
+    - deck 
+
+
+4. dev productivity
+    - jira
+    - confluence 
+    - codex
+    - skills
+    - hooks
+    
+
+Product_AI_workshop_morning.mp4

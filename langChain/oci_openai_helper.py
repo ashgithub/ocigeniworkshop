@@ -1,5 +1,5 @@
 from envyaml import EnvYAML
-from langchain_oci import ChatOCIOpenAI
+from langchain_oci import ChatOCIOpenAI,ChatOCIGenAI
 from langchain_openai import ChatOpenAI
 from oci_openai import OciOpenAI, AsyncOciOpenAI
 from oci_openai import OciUserPrincipalAuth
@@ -32,7 +32,26 @@ Env setup:
 """
 
 class OCIOpenAIHelper:
-    
+  
+    @staticmethod 
+    def get_langchain_ocigenai_client(model_name, config, store=False, **kwargs):
+        region = "us-chicago-1"
+
+        client = ChatOCIGenAI(
+            
+            model_id=model_name,
+            service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
+            auth_profile=config['oci']['profile'],
+            compartment_id= config['oci']['compartment'],
+            model_kwargs={
+              "modalities": ["text", "audio"],
+              "audio": {"voice": "alloy", "format": "wav"},
+            },
+            
+            **kwargs
+        )
+        return client
+     
     
     @staticmethod
     def get_langchain_ociopenai_client(model_name, config, store=False, **kwargs):
@@ -283,6 +302,26 @@ class OCIOpenAIHelper:
 
 ##### test ######
 
+
+def test_langchain_ocigenai_audio(model_name="openai.gpt-audio", question="who are you ? answer in one sentence"):
+    print("############################################################")
+    print(f"# Testing LangChain OCIGenAi Audio Chat: {model_name}")
+    print("############################################################")
+    test_messages = [HumanMessage(content=question)]
+    sync_llm = OCIOpenAIHelper.get_langchain_ociopenai_client(model_name=model_name,config=load_config(SANDBOX_CONFIG_FILE))
+    sync_msg = sync_llm.invoke(test_messages)
+    print("sync responses output:", sync_msg.model_dump_json(indent=2))
+    
+
+def test_langchain_ocigenai_sync_chat(model_name="google.gemini-2.5-flash-lite", question="who are you ? answer in one sentence"):
+    print("############################################################")
+    print(f"# Testing LangChain OCIGenAI Sync Chat: {model_name}")
+    print("############################################################")
+    test_messages = [HumanMessage(content=question)]
+    sync_llm = OCIOpenAIHelper.get_langchain_ocigenai_client(model_name=model_name,config=load_config(SANDBOX_CONFIG_FILE),provider="generic")
+    sync_msg = sync_llm.invoke(test_messages)
+    print("sync responses output:", sync_msg.model_dump_json(indent=2))
+    
 
 def test_langchain_ociopenai_sync_chat(model_name="openai.gpt-4.1", question="who are you ? answer in one sentence"):
     print("############################################################")
@@ -582,6 +621,10 @@ if __name__ == "__main__":
         ("human", "I love programming."),
     ]
 
+    #test_langchain_ocigenai_sync_chat(model_name="google.gemini-2.5-flash-lite", question="where is paris? ")
+    test_langchain_ocigenai_audio(model_name="openai.gpt-audio", question="where is paris? ") 
+    
+    
 #    test_langchain_ociopenai_sync_chat(model_name="openai.gpt-4.1",question="where is paris?")
 #    test_langchain_ociopenai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
 
@@ -598,8 +641,8 @@ if __name__ == "__main__":
 
 #    asyncio.run(test_langchain_ociopenai_async_chat())
 #    asyncio.run(test_langchain_ociopenai_async_responses())
-    asyncio.run(test_langchain_openai_async_chat())
-    asyncio.run(test_langchain_openai_async_responses())
+#    asyncio.run(test_langchain_openai_async_chat())
+#    asyncio.run(test_langchain_openai_async_responses())
 #    asyncio.run(test_ociopenai_async_chat())
 #    asyncio.run(test_ociopenai_async_responses())
 #    asyncio.run(test_openai_async_chat())
