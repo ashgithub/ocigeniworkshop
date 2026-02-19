@@ -45,7 +45,11 @@ The files are designed to build upon each other. Study them in this order for a 
    - Key features: Demonstrates all major Profile methods programmatically; includes comprehensive examples and interactive query loop.
    - How to run: `uv run database/selectai_demo.py`.
 
-6. **rag.sql**: Full RAG implementation in 23ai using embeddings, similarity search, and citations.
+6. **selectai_demo.ipynb**: A Jupyter notebook variation of the selectai_demo.py script, demonstrating the various ways to use Select AI from Python.
+   - Key features: Demonstrates all major Profile methods programmatically; includes comprehensive examples and an interactive query loop.
+   - How to run: Open in Jupyter or VS Code and run cells sequentially.
+
+7. **rag.sql**: Full RAG implementation in 23ai using embeddings, similarity search, and citations.
    - Key features: Demonstrates database-centric RAG with vector operations and LLM integration.
    - How to run: Execute in SQL client connected to 23ai database.
    - Docs: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/overview-ai-vector-search.html).

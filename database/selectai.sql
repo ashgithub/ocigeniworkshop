@@ -5,7 +5,7 @@
 -- Shows different AI query modes (narrate, showsql, explainsql, chat) and how they work with the SH schema.
 
 -- Documentation to reference:
--- - Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/
+-- - Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html
 -- - Select AI Examples: https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/select-ai-examples.html
 -- - DBMS_CLOUD_AI Package: https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/DBMS_CLOUD_AI.html
 
@@ -32,15 +32,16 @@ SELECT USER FROM DUAL;
 -- IMPORTANT: Replace the placeholder values below with your actual OCI credentials
 -- You can find these details in your ~/.oci/config file and private key file
 -- NOTE: This is your PRIVATE key, not the public key referenced in the config
+
+-- SELECT credential_name, username, comments FROM all_credentials;
 BEGIN
-    SELECT credential_name, username, comments FROM all_credentials;
-    DBMS_CLOUD.DROP_CREDENTIAL('workshop_cred');
+    DBMS_CLOUD.DROP_CREDENTIAL('workshop_cred2');
 END;
 /
 
 BEGIN
     DBMS_CLOUD.CREATE_CREDENTIAL(
-        credential_name => 'your_oracle_id_CRED',
+        credential_name => 'workshop_cred',
         user_ocid => 'your-user-ocid-here',
         tenancy_ocid => 'your-tenancy-ocid-here',
         private_key => '-----BEGIN PRIVATE KEY-----
@@ -66,7 +67,7 @@ BEGIN
         profile_name => 'genaish',
         attributes => '{
             "provider": "oci",
-            "credential_name": "AISANDBOX_CRED",
+            "credential_name": "workshop_cred",
             "model": "meta.llama-4-scout-17b-16e-instruct",
             "comments": "true",
             "object_list": [{"owner": "SH"}]

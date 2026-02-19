@@ -144,5 +144,5 @@ if __name__ == "__main__":
         config=scfg
     )
 
-    #demonstrate_stateful_conversation(client, questions)
-    demonstrate_conversation_store(client, questions)
+    demonstrate_stateful_conversation(client, questions)
+    #demonstrate_conversation_store(client, questions)

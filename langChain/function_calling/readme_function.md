@@ -2,49 +2,45 @@
 In this module, we will experiment with the LLMs' ability to call functions. Function calling is synonymous with using tools, where an agent can be given a set of tools and decompose problems to solve them using those tools.
 
 In this module, we will explore the following capabilities:
-1. Single-step tool: LLM invoking a single function/tool.
-2. Multi-step tool: LLM orchestrating a sequence of functions/tools.
-
-
-Note:
-- OCI GenAI supports function calling for Cohere models, and through the OCI OpenAI compatible SDK, it supports OpenAI, XAI, and Meta models (including Llama).
-- There are streaming and non-streaming versions of code. Streaming can be fragile, so start with non-streaming.
+1. Single-step & multi step tools: LLM invoking a single function/tool vs orcestrating a sequence of tool calls
+2. Manual vs automated tool call: Different ways of handling LLM tool call requests 
 
 
 ## Environment Setup
-- `sandbox.yaml`: Contains OCI config, compartment, DB details (for cache), and wallet path.
-- `.env`: Load environment variables (e.g., API keys if needed, DB password).
+- `sandbox.yaml`: Contains OCI config, compartment
+- `.env`:  environment variables for secrets
 - Ensure you have access to OCI Generative AI services.
 
 ## Suggested Study Order and File Descriptions
 The files are designed to build upon each other. Study them in this order for a progressive understanding:
 
-1. **single_step_demo.py**: Demonstrates basic single-step function calling where the LLM calls one tool to answer a query.
-   - Key features: Binds a single tool to the LLM and invokes it directly.
-   - How to run: `uv run function_calling/single_step_demo.py`.
-   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/), [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm).
+1. **langchain_single_manual.py**: Demonstrates basic single-step function calling where the LLM requests a single tool toolcall to answer a query.
+   - Key features: Binds a single tool to the LLM 
+   - How to run: `uv run langChain/function_calling/langchain_single_manual.py`.
+   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
 
-2. **single_step_demo_streaming.py**: Demonstrates single-step function calling with streaming responses from the LLM.
-   - Key features: Similar to single_step_demo.py but with streaming output; note streaming can be less stable.
-   - How to run: `uv run function_calling/single_step_demo_streaming.py`.
-   - Docs: [LangChain Streaming](https://python.langchain.com/docs/how_to/streaming/), [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm).
+2. **langchain_multi_manual.py**: Demonstrates llm requesting multiple tool calls to answer a query
+   - Key features: Similar to langchain_single_manual.py but with multiple tool requests 
+   - How to run: `uv run langChain/function_calling/langchain_multi_manual.py`.
+   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
 
-3. **multi_step_demo.py**: Demonstrates multi-step function calling where the LLM orchestrates multiple tools in sequence.
-   - Key features: Uses a loop to handle tool calls and responses iteratively.
-   - How to run: `uv run function_calling/multi_step_demo.py`.
-   - Docs: [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents), [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm).
+3. **langchain_single_auto.py**: Demonstrates basic single-step function calling where langchaiun automatically handles the toolcall to answer a query.
+   - Key features: use of langChain agents for automaticl call toolcall handling
+   - How to run: `uv run langChain/function_calling/langchain_single_auto.py`.
+   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
 
-4. **multi_step_demo_streaming.py**: Demonstrates multi-step function calling with streaming.
-   - Key features: Multi-step orchestration with streaming; experimental and potentially fragile.
-   - How to run: `uv run function_calling/multi_step_demo_streaming.py`.
-   - Docs: [LangChain Streaming](https://python.langchain.com/docs/how_to/streaming/), [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm).
+4. **langchain_multi_manual.py**: Demonstrates how multiple tool call can be handled automatically by langchain
+   - Key features: use of langChain agents for automaticl call toolcall handling
+   - How to run: `uv run langChain/function_calling/langchain_multi_auto.py`.
+   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
 
-5. **singlestep_tool.ipynb**: A Jupyter notebook variation of single_step_demo.py, demonstrating single-step tool calling with interactive cells and explanations.
+
+5. **singlestep_tool.ipynb**: A Jupyter notebook variation of single step tool calling demonstrating single-step tool calling with interactive cells and explanations.
    - Key features: Mirrors the Python script; includes markdown for understanding, experiments with models and prompts.
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
    - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/).
 
-6. **multistep_tool.ipynb**: A Jupyter notebook variation of multi_step_demo.py, demonstrating multi-step tool orchestration with interactive cells and explanations.
+6. **multistep_tool.ipynb**: A Jupyter notebook variation of  demonstrating multi-step tool orchestration with interactive cells and explanations.
    - Key features: Mirrors the Python script; includes markdown, encourages experimentation with tools and prompts.
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
    - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents).

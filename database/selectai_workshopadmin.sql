@@ -5,24 +5,24 @@
 -- Shows different AI query modes (narrate, showsql, explainsql, chat) and how they work with the SH schema.
 
 -- Documentation to reference:
--- - Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/
+-- - Oracle Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/
 -- - Select AI Examples: https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/select-ai-examples.html
 -- - DBMS_CLOUD_AI Package: https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/DBMS_CLOUD_AI.html
 
 -- Relevant slack channels:
--- - #adb-select-ai-users: questions about Oracle 23ai Select AI
+-- - #adb-select-ai-users: questions about Oracle Select AI
 -- - #igiu-innovation-lab: general discussions on your project
 -- - #igiu-ai-learning: help with sandbox environment or help with running this code
 
 -- Prerequisites:
--- 1. Oracle 23ai Autonomous Database with Select AI enabled
--- 2. Access to the SH (Sales History) sample schema
+-- 1. Oracle Autonomous Database (23ai or later) with Select AI enabled
+-- 2. Access to the WORKSHOP_ADMIN schema
 -- 3. OCI credentials configured for GenAI access
 
 -- How to run the file:
--- 1. Update the credential details below with your OCI information
--- 2. Execute this script in SQL*Plus or SQL Developer connected to your 23ai database
--- 3. Test the various AI query examples
+-- 1. Update the credential details below with your OCI information.
+-- 2. Execute this script in SQL*Plus or SQL Developer connected to your database.
+-- 3. Test the various AI query examples.
 
 -- Step 1: Verify database connection
 SELECT USER FROM DUAL;
@@ -32,19 +32,20 @@ SELECT USER FROM DUAL;
 -- You can find these details in your ~/.oci/config file and private key file
 -- NOTE: This is your PRIVATE key, not the public key referenced in the config
 BEGIN
-
     DBMS_CLOUD.DROP_CREDENTIAL(
-        credential_name => 'AISANDBOX_CRED'
+        credential_name => 'AISANDBOX_CRED2'
     );
+END;
+
 BEGIN
     DBMS_CLOUD.CREATE_CREDENTIAL(
-        credential_name => 'your_oracle_id_CRED',
-        user_ocid => 'your-user-ocid-here',
-        tenancy_ocid => 'your-tenancy-ocid-here',
+        credential_name => 'AISANDBOX_CRED',
+        user_ocid => 'user_useer_ocid',
+        tenancy_ocid => 'your tenancy_ocid',
         private_key => '-----BEGIN PRIVATE KEY-----
-your-private-key-content-here
+      <key file content>
 -----END PRIVATE KEY-----',
-        fingerprint => 'your-key-fingerprint-here'
+        fingerprint => 'key fingerprint'
     );
 END;
 
@@ -64,9 +65,9 @@ BEGIN
         attributes => '{
             "provider": "oci",
             "credential_name": "AISANDBOX_CRED",
-            "model": "meta.llama-4-scout-17b-16e-instruct",
+            "model": "xai.grok-4-fast-reasoning",
             "comments": "true",
-            "object_list": [{"owner": "WORKSHOP_ADMIN"}]
+            "object_list": [{"owner": "MDC_WORKSHOP"}]
         }'
     );
 END;
@@ -86,14 +87,14 @@ SET WRAP ON
 -- Step 7: Sample Select AI queries demonstrating different modes
 
 -- Basic AI query - returns natural language answer
-SELECT AI 'how many students exist';
+SELECT AI 'how many attendees exist';
 
 -- Show the SQL that would be executed
-SELECT AI showsql 'how many students have completed omnboarding tasks, by number of tasks in descentimng order'
-SELECT AI explainsql 'how many students have completed omnboarding tasks, by number of tasks in descentimng order'
-SELECT AI runsql 'how many students have completed omnboarding tasks, group by number of tasks in descentimng order, show me number of tasks completed and how many students completed that many tasjk. '
-SELECT AI narrate 'how many students have completed omnboarding tasks, by number of tasks in descentimng order'
-SELECT AI 'how many students have completed omnboarding tasks, by number of tasks in descentimng order'
+SELECT AI showsql 'how many attendees have completed onboarding tasks, by number of tasks in descending order'
+SELECT AI explainsql 'how many attendees have completed onboarding tasks, by number of tasks in descending order'
+SELECT AI runsql 'how many attendees have completed onboarding tasks, group by number of tasks in descending order, show me number of tasks completed and how many students completed that many tasks.'
+SELECT AI narrate 'how many attendees have completed onboarding tasks, by number of tasks in descending order'
+SELECT AI 'how many attendees have completed onboarding tasks, by number of tasks in descending order'
 
 -- Explain the SQL that would be executed
 SELECT AI explainsql 'how many customers exist';
@@ -114,4 +115,3 @@ SELECT AI showsql 'how many customers in San Francisco are married';
 -- Business intelligence style queries
 SELECT AI 'find top 3 baby boomer big spenders';
 SELECT AI showsql 'find top 3 baby boomer big spenders';
-
