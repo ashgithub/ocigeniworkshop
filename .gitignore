@@ -113,8 +113,15 @@ test*.py
 test*.ipynb
 validate_*urls.py
 
+# Ignore any files prefixed with "hide" (local-only / sensitive)
+hide*
+**/hide*
+
 **/todo
 
 # sqlcl
 sqlcl-latest.zip
 sqlcl/*
+#codex
+.codex/*
+AGENTS.md

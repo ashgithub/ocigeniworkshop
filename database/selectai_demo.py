@@ -3,7 +3,7 @@ What this file does:
 Demonstrates Oracle SELECT AI functionality using the Python select-ai library. It runs natural language queries on the WORKSHOP_ADMIN.STUDENTS table to showcase student profile information, providing a Python alternative to SQL-based SELECT AI queries.
 
 Documentation to reference:
-- Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/
+- Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html
 - Python Select AI Library: https://github.com/oracle/python-select-ai
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci
 
@@ -53,7 +53,7 @@ def load_config():
 
 def main():
     """Main demonstration function."""
-    print("Oracle SELECT AI Demonstration - Student Profiles")
+    print("Oracle SELECT AI Demonstration")
     print("=" * 50)
 
     # Load configuration
@@ -78,7 +78,7 @@ def main():
         print("Connected successfully!")
 
         # Create AI profile
-        profile_name = 'workshop_app_profile'
+        profile_name = 'genaish'
         print(f"\nSelected AI profile '{profile_name}'...")
         profile = select_ai.Profile(profile_name=profile_name)
         print("Profile selected!")
@@ -94,7 +94,7 @@ def main():
         print("\n1. Profile.narrate() - Natural language answers")
         print("-" * 50)
         try:
-            result = profile.narrate(prompt="How many students exist?")
+            result = profile.narrate(prompt="How many customers exist?")
             print(f"Result: {result}")
         except Exception as e:
             print(f"Error: {e}")
@@ -103,7 +103,7 @@ def main():
         print("\n2. Profile.show_sql() - Show generated SQL")
         print("-" * 50)
         try:
-            sql = profile.show_sql(prompt="How many students are from Austin?")
+            sql = profile.show_sql(prompt="whicih cities have placed orders")
             print(f"Generated SQL: {sql}")
         except Exception as e:
             print(f"Error: {e}")
@@ -112,7 +112,7 @@ def main():
         print("\n3. Profile.explain_sql() - Explain SQL execution plan")
         print("-" * 50)
         try:
-            explanation = profile.explain_sql(prompt="List students who have completed their team introductions")
+            explanation = profile.explain_sql(prompt="List the products by sales")
             print(f"Explanation: {explanation}")
         except Exception as e:
             print(f"Error: {e}")
@@ -121,7 +121,7 @@ def main():
         print("\n4. Profile.run_sql() - Execute and return results")
         print("-" * 50)
         try:
-            df = profile.run_sql(prompt="What are the different teams and how many students are in each?")
+            df = profile.run_sql(prompt="How many customers are from different generations (baby boomers etc)?")
             print(f"Columns: {list(df.columns)}")
             print(f"Results ({len(df)} rows):")
             print(df.to_string(index=False))
@@ -132,16 +132,16 @@ def main():
         print("\n5. Profile.chat() - Conversational interface")
         print("-" * 50)
         try:
-            response = profile.chat(prompt="How many students have acknowledged the workshop?")
+            response = profile.chat(prompt="How many customers are there ")
             print(f"Chat response: {response}")
         except Exception as e:
             print(f"Error: {e}")
 
-        # 6. Profile.generate() - Generate content based on data
-        print("\n6. Profile.generate() - Generate content")
+        # 6. Profile.generate() - generate text
+        print("\n6. Profile.generate() - generate content")
         print("-" * 50)
         try:
-            generated = profile.generate(prompt="Create a report about student locations")
+            generated = profile.generate(prompt="how many customers are there ", action="runsql")
             print(f"Generated content: {generated}")
         except Exception as e:
             print(f"Error: {e}")
@@ -170,9 +170,9 @@ def main():
         print("="*60)
 
         additional_queries = [
-            "Show me all student profiles with their names and locations",
-            "List students by location and show their team information",
-            "Find students who have not completed introductions",
+            "how me all the top three products by sales",
+            "show me region with most orders",
+            "show me the top 5 order by sales",
         ]
 
         for i, query in enumerate(additional_queries, 10):
