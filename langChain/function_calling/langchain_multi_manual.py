@@ -1,39 +1,41 @@
 """
 What this file does:
-Demonstrates manual multi-step function calling with custom tools using OCI Generative AI for LLM.
+Demonstrates manual multi-step function calling with custom tools by using OCI
+Generative AI through the OpenAI-compatible client.
 
 Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - LangChain: https://docs.langchain.com/oss/python/langchain/agents
-- How to build tools: https://python.langchain.com/docs/how_to/custom_tools/
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API 
-- OCI langchain SDK: https://github.com/oracle-devrel/langchain-oci-genai  note: as of Nov 2025 it is not compatible with langchain v1.0. supports all OCI models including Cohere
+- How to build tools: https://docs.langchain.com/oss/python/langchain/tools
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+- OCI LangChain SDK: https://github.com/oracle-devrel/langchain-oci-genai
 - OCI GenAI SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI 
- - #igiu-innovation-lab: general discussions on your project 
- - #igiu-ai-learning: help with sandbox environment or help with running this code 
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+- .env: Loads environment variables if needed.
 
 How to run the file:
 uv run langChain/function_calling/langchain_multi_manual.py
 
-Comments to important sections of file:
-- Step 1: Load the config file 
-- Step 2: create the OpenAI LLM client using credentials and optional parameters
-- Step 3: Add some messages to the context list
-- Step 4: map the tools for easier invokation over the loop
-- Step 5: bind the tools available to the model
-- Step 6: start the loop
+Important sections:
+- Step 1: Load the configuration
+- Step 2: Create the LLM client
+- Step 3: Add initial messages to the context list
+- Step 4: Map the tools for easier invocation in the loop
+- Step 5: Bind the tools to the model
+- Step 6: Run the manual multi-step loop
 """
 
-import sys, os
+import os
+import sys
 from langchain.tools import tool
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
@@ -41,7 +43,7 @@ from envyaml import EnvYAML
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
 
-# How to build tools: https://python.langchain.com/docs/how_to/custom_tools/
+# How to build tools: https://docs.langchain.com/oss/python/langchain/tools
 # NEW langchain version: https://docs.langchain.com/oss/python/langchain/agents
 # Version langchain 1.0.0 not compatible with langchain_oci current version 0.1.5
 
@@ -76,11 +78,10 @@ def get_projection_bill(current_weather: int, gas_oven: bool) -> int:
 
 tools = [get_weather, get_projection_bill]
 
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
@@ -104,7 +105,7 @@ llm_client = OCIOpenAIHelper.get_langchain_openai_client(
 # meta-llama models are eager to have errors when handling multiple or parallel tool calls, try making one request per time
 messages = [HumanMessage("Which will be my projected bill? I'm in San Francisco, and I have oven. My past bill was $45")]
 
-# Step 4: map the tools for easier invokation over the loop
+# Step 4: Map the tools for easier invocation in the loop
 tool_map = {t.name.lower(): t for t in tools}
 
 # Step 5: bind the tools available to the model
