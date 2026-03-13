@@ -1,14 +1,17 @@
-## Welcome to the LangChain LLM Module
+# Welcome to the LangChain LLM Module
 
-In this module, we will experiment with Large Language Model (LLM) capabilities using OCI's OpenAI-compatible API and LangChain. We will explore basic chat interactions, advanced features like streaming and structured output, and best practices for integrating LLMs into applications.
+This module explores Large Language Model (LLM) capabilities by using OCI's OpenAI-compatible API together with LangChain. It covers basic chat interactions, streaming, structured output, async execution, reasoning, and stateful conversation patterns.
 
-In this module, we will explore the following capabilities:
-1. Basic chat completion using both OCI OpenAI-compatible and LangChain APIs.
-2. Conversation history management for multi-turn interactions.
-3. Streaming responses for real-time processing.
-4. Structured output using JSON schemas and Pydantic models.
-5. Asynchronous operations for concurrent processing.
-6. Use of oci's responses api features: reasoning & stateful conversations
+## What You Will Learn
+
+In this module, you will learn how to:
+
+1. Use basic chat completion with both OCI OpenAI-compatible and LangChain APIs
+2. Maintain conversation history for multi-turn interactions
+3. Stream responses for real-time processing
+4. Generate structured output with JSON schemas and Pydantic models
+5. Run asynchronous operations for concurrent processing
+6. Use OCI-hosted Responses API features such as reasoning and stateful conversations
 
 OCI Gen AI provides OpenAI-compatible APIs that support advanced features like structured output, function calling, and reasoning. The module demonstrates both the OCI OpenAI-compatible library (best for OpenAI features) and LangChain OCI library (broader model support).
 
@@ -58,15 +61,16 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: `uv run langChain/llm/openai_oci_reasoning.py`.
    - Docs: [OpenAI Reasoning API](https://platform.openai.com/docs/guides/reasoning), [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai).
 
-8. **openai_oci_responses_stateful.py**: Demonstrates use of responses api for stateful conversion multi multi turn & persistent via oci hosted conversation stores
-   - Key features: use of `response_id` & `conversation stores.
-   - How to run: `uv run langChain/llm/openai_oci_responses_stateful.py.py`.
-   - Docs: [OpenAI conversatte state support](https://developers.openai.com/api/docs/guides/conversation-state)
+8. **openai_oci_responses_stateful.py**: Demonstrates stateful responses and persistent multi-turn conversations by using OCI-hosted conversation stores.
+   - Key features: Uses `previous_response_id` and conversation stores for persistent context.
+   - How to run: `uv run langChain/llm/openai_oci_responses_stateful.py`.
+   - Docs: [OpenAI Conversation State Support](https://developers.openai.com/api/docs/guides/conversation-state)
 
 9. **openai_oci_llm.ipynb**: A Jupyter notebook variation demonstrating comprehensive usage of OpenAI-compatible LLMs via LangChain. Covers basic chat, model performance comparison, batching, streaming, conversation history, structured output, and reasoning capabilities.
    - Key features: Interactive tutorial; step-by-step examples; hands-on exercises and experimentation.
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
    - Docs: [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview)
+
 ## Project Ideas
 
 Here are some ideas for projects you can build upon these examples:

@@ -1,7 +1,7 @@
 """
 What this file does:
-Demonstrates basic chat functionality using LangChain's ChatOCIGenAI client for OCI Generative AI models. Shows single calls, batch processing, parameter tuning, model performance comparison, and different prompt types.
-
+Demonstrates basic chat functionality using LangChain's `ChatOCIGenAI`
+client for OCI Generative AI models.
 
 Documentation to reference:
 - OCI Gen AI Chat Models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
@@ -9,29 +9,28 @@ Documentation to reference:
 - LangChain OCI GenAI GitHub: https://github.com/oracle-devrel/langchain-oci-genai
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment details.
-- .env: Load environment variables (e.g., API keys if needed).
-- Note: This file uses `langchain_oci` library which is not compatible with LangChain v1.0.0 as of November 2025. The code will not work without downgrading LangChain to 0.3.x.
+Environment setup:
+- sandbox.yaml: Contains OCI config and compartment details.
+- .env: Loads environment variables if needed.
+- Note: This file uses `langchain_oci`, which is not compatible with LangChain v1.0.0 as of November 2025.
 
 How to run the file:
 uv run langChain/llm/langchain_oci_chat.py
 
-Comments to important sections of file:
-- Step 1: Load config and initialize client.
-- Step 2: Single LLM call demonstration.
-- Step 3: Model performance comparison with timing.
-- Step 4: Batch processing example.
-- Step 5: Max tokens parameter demonstration.
-- Step 6: System and user prompt types.
+Important sections:
+- Step 1: Load configuration and initialize the client
+- Step 2: Demonstrate a single LLM call
+- Step 3: Compare model performance with timing
+- Step 4: Demonstrate batch processing
+- Step 5: Demonstrate token limits
+- Step 6: Demonstrate system and user prompt roles
 """
 
-import json
 import time
 from langchain_oci.chat_models import ChatOCIGenAI
 from dotenv import load_dotenv
@@ -54,11 +53,10 @@ MESSAGE = """
 """
 
 # Step 1: Load config and initialize client
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
@@ -89,7 +87,7 @@ print(response.content)
 # Step 4: Model performance comparison with timing
 selected_llms = [
     "openai.gpt-4.1",
-    "openai.gpt-5.2",
+    "openai.gpt-5.4",
     "cohere.command-a-03-2025",
     "cohere.command-r-08-2024",
     "meta.llama-4-maverick-17b-128e-instruct-fp8",

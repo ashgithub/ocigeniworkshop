@@ -8,12 +8,12 @@ Documentation to reference:
 - OpenAI API Reference: https://platform.openai.com/docs/api-reference
 - Python Asyncio: https://docs.python.org/3/library/asyncio.html
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment details.
 - .env: Load environment variables (e.g., API keys if needed).
 - Note: Uses OpenAI native client for async operations as LangChain async is not fully compatible with OCI clients.
@@ -21,7 +21,7 @@ Env setup:
 How to run the file:
 uv run langChain/llm/openai_oci_async.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and initialize clients.
 - Step 2: Define async invoke function.
 - Step 3: Define async streaming function.
@@ -50,11 +50,10 @@ MESSAGE = """
 """
 
 # Step 1: Load config and initialize clients
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
@@ -64,7 +63,7 @@ scfg = load_config(SANDBOX_CONFIG_FILE)
 # Supported models for async operations (OpenAI-compatible models only)
 selected_llms = [
     "openai.gpt-4.1",
-    "openai.gpt-5",
+    "openai.gpt-5.2",
     # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
     # "cohere.command-r-08-2024",      # Cohere doesn't support OpenAI compatible APIs yet
     # "meta.llama-4-maverick-17b-128e-instruct-fp8",

@@ -8,19 +8,19 @@ Documentation to reference:
 - OpenAI API Reference: https://platform.openai.com/docs/api-reference
 - LangChain Chat Models: https://docs.langchain.com/oss/python/langchain/chat_models
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment details.
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
 uv run langChain/llm/openai_oci_chat.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and initialize client.
 - Step 2: Create OpenAI LLM client.
 - Step 3: Single LLM call demonstration.
@@ -50,11 +50,10 @@ MESSAGE = """
 """
 
 # Step 1: Load config and initialize client
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
