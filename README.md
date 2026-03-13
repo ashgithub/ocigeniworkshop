@@ -1,71 +1,274 @@
-## Welcome to the AI Developer learning path.
+# OCI AI Developer Learning Path
 
-This learning path  is desigend to work our AI sandbox. See instructions in #igiu-ai-learning slack channel.
+This repository is a structured, hands-on learning path for Python developers who want to explore OCI AI services, LangChain, Oracle Database 23ai/26ai, and related multimodal and agentic workflows.
 
+It is designed to work with the AI sandbox environment and includes:
 
-## Setup for running code locally
-The examples are based on Python 3.13+. Both Python scripts and Jupyter notebooks are available. We use UV for dependency management and execution.
+- Python script examples
+- Jupyter notebooks for guided learning
+- module-level READMEs with setup notes, study order, and project ideas
+- progressive examples that move from basic LLM usage to RAG, tool calling, agents, multimodal workflows, and database-centric AI patterns
 
-1. Request access to sandbox `#igiu-ai-learning`.
-   - Set up API keys and DB access based on the document [here](https://gbuconfluence.oraclecorp.com/display/D2OPS/AISandbox#AISandbox-ToAccessADW)
-   - Update the `sandbox.yaml` file per your environment (you can change the yaml file itself, or use the `.env` file. You can base it off `.example.env` ).
-  
-2. AI sandbox gives you access to two regions:
-   1. Chicago: AI services, AI Playground, and Gen AI Agents are in this region.
-   2. Phoenix: 26 AI Database, object buckets, and compute (if available) will be in this region.
+If you need sandbox access or help with setup, use the `#igiu-ai-learning` Slack channel.
 
-3. Resources in the sandbox are shared:
-   3. Object bucket in `chicago` is a read-only replica, so any files you drop in `phoenix` will show up in Chicago automatically.
-   4. Same bucket is shared by all users of AI sandbox; thus, best to use your Oracle User ID as `prefix` for your objects (configure it in `sandbox.yaml`).
-   5. Same schema in 26ai will be shared by all users; thus, best to use your tables with your Oracle User ID as `prefix` for table names (configure in `sandbox.yaml`).
-   - For DB examples: Download the 26ai wallet, unzip locally, and update `sandbox.yaml` with path, user, service name, password (or via `.env`).
+## Who This Repository Is For
 
-3. Setup UV environment:
-    - Install UV: https://docs.astral.sh/uv/getting-started/installation/
-    - `uv sync` to install dependencies (`oci`, `oracledb`, `python-dotenv`, etc.) from `pyproject.toml`.
-    - Run `uv run AISandboxEnvCheck.py` to verify setup.
-    - To run scripts: `uv run <path/to/script>` (e.g., `uv run langChain/llm/langchain_oci_chat.py`).
-    - For notebooks: Open via  Jupyter plugin in VS Code. Note you will have to set up the `cwd` see any noteboox for instructions
+This repository is intended for:
 
-4. We recommend following this progressive learning path, starting with core concepts and building to advanced integrations. Each module includes Python scripts, Jupyter notebooks, and detailed readmes with run instructions, docs, and project ideas.
+- Python developers who are new to OCI AI services
+- developers learning LangChain and agentic workflows
+- engineers exploring Oracle Database + AI patterns
+- workshop users who want runnable examples and guided notebooks
 
-   ** OCI supported LLMs via Langchain**
-   - **langChain/llm**: LLM interactions with chat, history, streaming, structured output, async, reasoning via OCI GenAI.
-   - **langChain/rag**: RAG with document chunking, OCI embeddings, Oracle DB vector search, AIA reranking.
-   - **langChain/function_calling**:  Tool calling & MCP  using langchain.
-   - **langChain/agents**: Aadvanced agent workflows with A2A & LangGraph examples 
-   -**langChain/multimodal**: Vision & Speech using multimodal LLMs via langchain
+## Quick Start
 
-   ** OCI Supported LLMs via OCI APIs :**
-   - **oci_genai/llm**: Introduction to OCI Generative AI APIs using Cohere and OpenAI-compatible models (chat, streaming, structured output, history, OCI Language NLP).
-   - **oci_genai/rag**: Retrieval-Augmented Generation with OCI Agents, document citations, and home-grown pipelines using embeddings and Oracle DB.
-   - **oci_genai/function_calling**: Function calling (tools) for single/multi-step agentic workflows with Cohere and Llama models, including classification.
+If you want the fastest path to a working local setup:
 
-   **Other OCI AI Services:**
-   - **oci_genai/speech**: Text-to-Speech (TTS) and Speech-to-Text (STT) using OCI Speech with Oracle and Whisper models.
-   - **oci_genai/vision**: Image/video analysis with OCI Vision (object/text detection) and Document Understanding (OCR, extraction), plus multimodal LLMs.
-   - **database**: AI in Oracle Autonomous Database 26ai – NL2SQL, Select AI, database-centric RAG, semantic caching.
+1. Request sandbox access through `#igiu-ai-learning`.
+2. Configure `sandbox.yaml` and `.env` for your environment.
+3. Install dependencies with `uv sync`.
+4. Run:
 
+   ```bash
+   uv run AISandboxEnvCheck.py
+   ```
 
-   Refer to each module's readme for setup, study order, experiments, and Slack channels. Join #igiu-ai-learning for help.
+5. Start with one of these:
+   - `langChain/llm/readme_langchain_llm.md`
+   - `langChain/agents/readme_agents.md`
+   - `langChain/agents/agents.ipynb`
 
-5. OCI commands to manage your files in object buckets (replace `NAMESPACE`, `BUCKET`, `PREFIX` with your values from `sandbox.yaml`):
-   - List objects: `oci os object list --all --fields name,timeCreated --namespace NAMESPACE --bucket-name BUCKET --prefix PREFIX`
-   - Upload file: `oci os object put --namespace NAMESPACE --bucket-name BUCKET --prefix PREFIX --file your_file.txt`
-   - Bulk delete: `oci os object bulk-delete --namespace NAMESPACE --bucket-name BUCKET --prefix PREFIX`
+## Environment and Sandbox Setup
+
+### 1. Request sandbox access
+
+Request access through `#igiu-ai-learning`.
+
+- Set up API keys and database access based on the sandbox instructions available [here](https://gbuconfluence.oraclecorp.com/display/D2OPS/AISandbox#AISandbox-ToAccessADW).
+- Update `sandbox.yaml` for your environment.
+- You can either edit `sandbox.yaml` directly or reference sensitive values through `.env`.
+- Use `.example.env` as a starting point where helpful.
+
+### 2. Understand the sandbox regions
+
+The AI sandbox provides access to two OCI regions:
+
+1. **Chicago**
+   - AI services
+   - AI Playground
+   - Gen AI Agents
+
+2. **Phoenix**
+   - 26 AI Database
+   - Object Storage buckets
+   - Compute resources (if available)
+
+### 3. Understand shared resources
+
+Some sandbox resources are shared across users:
+
+- The Object Storage bucket in **Chicago** is a read-only replica of the bucket in **Phoenix**.
+  - Files uploaded in Phoenix will appear in Chicago automatically.
+- The bucket is shared across users.
+  - Use your Oracle user ID as your object `prefix` in `sandbox.yaml`.
+- The 26ai database schema is also shared.
+  - Use your Oracle user ID as your table-name `prefix` in `sandbox.yaml`.
+- For database examples:
+  - download the 26ai wallet
+  - unzip it locally
+  - update `sandbox.yaml` with the wallet path, user, service name, and password
+  - optionally inject sensitive values through `.env`
+
+### 4. Set up the local environment with UV
+
+This repository uses **UV** for dependency management and execution.
+
+1. Install UV:
+   - https://docs.astral.sh/uv/getting-started/installation/
+
+2. Sync dependencies:
+
+   ```bash
+   uv sync
+   ```
+
+3. Verify your setup:
+
+   ```bash
+   uv run AISandboxEnvCheck.py
+   ```
+
+## Running Code
+
+### Running Python scripts
+
+Use:
+
+```bash
+uv run <path/to/script>
+```
+
+Example:
+
+```bash
+uv run langChain/llm/langchain_oci_chat.py
+```
+
+### Running notebooks
+
+Open notebooks in VS Code with the Jupyter extension (or use JupyterLab).
+
+Some notebooks expect the working directory to be the repository root. If needed, follow the notebook-specific setup guidance for notebook root / `cwd` configuration.
+
+## Recommended Learning Paths
+
+This repository supports two main learning paths.
+
+### Path 1: LangChain-first learning path
+
+This is the recommended path if you want to learn modern LLM application patterns first.
+
+- **`langChain/llm`**
+  - Chat, history, streaming, structured output, async, reasoning, and stateful responses
+
+- **`langChain/function_calling`**
+  - Tool calling and MCP with LangChain
+
+- **`langChain/agents`**
+  - Basic agents, LangGraph workflows, Langfuse tracing, and A2A examples
+
+- **`langChain/rag`**
+  - Chunking, embeddings, Oracle DB vector search, and reranking
+
+- **`langChain/multimodal`**
+  - Vision and speech workflows using multimodal LLMs
+
+- **`database`**
+  - NL2SQL, Select AI, database-centric RAG, and semantic caching in Oracle Database
+
+### Path 2: OCI-native learning path
+
+This path is best if you want to learn OCI AI services through OCI SDKs and platform APIs directly.
+
+- **`oci_genai/llm`**
+- **`oci_genai/function_calling`**
+- **`oci_genai/rag`**
+- **`oci_genai/speech`**
+- **`oci_genai/vision`**
+
+## Module Index
+
+### LangChain-based modules
+
+- **`langChain/llm`**
+  - LLM interactions with chat, history, streaming, structured output, async, reasoning, and stateful responses
+
+- **`langChain/function_calling`**
+  - Single-step and multi-step tool calling
+  - Manual vs automatic orchestration
+  - MCP integrations
+
+- **`langChain/agents`**
+  - Basic agents
+  - LangGraph workflows
+  - Langfuse tracing
+  - A2A communication
+
+- **`langChain/rag`**
+  - Document chunking
+  - Embeddings
+  - Semantic search
+  - Full RAG workflows
+  - Optional AIA reranking
+
+- **`langChain/multimodal`**
+  - Text → image
+  - Text → speech
+  - Speech → text
+  - Image → text
+
+### OCI-native modules
+
+- **`oci_genai/llm`**
+- **`oci_genai/function_calling`**
+- **`oci_genai/rag`**
+- **`oci_genai/speech`**
+- **`oci_genai/vision`**
+
+### Database module
+
+- **`database`**
+  - AI in Oracle Autonomous Database 26ai
+  - NL2SQL
+  - Select AI
+  - Database-centric RAG
+  - Semantic caching
+
+Refer to each module’s README for setup details, study order, experiments, and Slack references.
+
+## OCI Object Storage Helper Commands
+
+Use these commands to manage files in Object Storage.
+
+Replace `NAMESPACE`, `BUCKET`, and `PREFIX` with your values from `sandbox.yaml`.
+
+- List objects:
+
+  ```bash
+  oci os object list --all --fields name,timeCreated --namespace NAMESPACE --bucket-name BUCKET --prefix PREFIX
+  ```
+
+- Upload a file:
+
+  ```bash
+  oci os object put --namespace NAMESPACE --bucket-name BUCKET --prefix PREFIX --file your_file.txt
+  ```
+
+- Bulk delete:
+
+  ```bash
+  oci os object bulk-delete --namespace NAMESPACE --bucket-name BUCKET --prefix PREFIX
+  ```
 
 ## Environment Variables
-Create a `.env` file at the project root for sensitive values referenced in `sandbox.yaml` (e.g., DB_PASSWORD).
 
-Example `.env`:
-```
+Create a `.env` file at the project root for sensitive values referenced by `sandbox.yaml`.
+
+Typical examples include:
+- database passwords
+- user prefixes
+- optional API keys or tracing settings
+
+Example:
+
+```env
 MY_PREFIX=your_oracle_id
 DB_PASSWORD=your_db_password
 ```
 
-## Additional Notes
-- This workshop focuses
-  -  OCI GenAI python sdk  (https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models)
-  -  OCI Open AI sdk (https://github.com/oracle-samples/oci-openai)
-  -  Ocacle Langchain sdk (https://github.com/oracle/langchain-oracle/tree/main)
-- For issues, use #igiu-ai-learning Slack.
+## Repository Conventions
+
+This repository follows a few important conventions:
+
+- `sandbox.yaml` stores configuration data
+- `.env` stores sensitive values referenced by config
+- `uv` is the standard way to run scripts
+- each module has its own README
+- many modules include both Python scripts and notebooks
+- notebooks are intended to be guided, teaching-oriented assets rather than raw script dumps
+
+## Primary SDKs and Libraries Used
+
+This workshop focuses primarily on:
+
+- [OCI Generative AI Python SDK](https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models)
+- [OCI OpenAI-Compatible SDK](https://github.com/oracle-samples/oci-openai)
+- [Oracle LangChain integration](https://github.com/oracle/langchain-oracle/tree/main)
+
+## Need Help?
+
+If you run into issues or want help deciding where to start:
+
+- **`#igiu-ai-learning`**: sandbox setup, execution help, workshop support
+- **`#generative-ai-users`**: OCI Generative AI questions
+- **`#igiu-innovation-lab`**: project ideas and general discussion
