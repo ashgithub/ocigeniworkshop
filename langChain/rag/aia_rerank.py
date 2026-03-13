@@ -1,33 +1,34 @@
 """
 What this file does:
-Demonstrates reranking using AIA services with Cohere models.
+Demonstrates document reranking by using AIA services with a Cohere reranking
+model.
 
-Disclaimer: Reranking requires:
-1. AIA client to be installed : aia_common_sdk-1.2b44-py3-none-any.whl or newer
-2. Access to AIA services : client code /secret to be requested from AIA team 
-3. The access is to dev DAC, thus you need to be on corporate VPN
-4 Note: this code stores the secret in OCI vault
+Important notes:
+1. The AIA client must be installed (`aia_common_sdk` or newer).
+2. Access to the AIA service and credentials must be requested from the AIA team.
+3. Access currently depends on the relevant internal environment and may require VPN connectivity.
+4. This example retrieves the client secret from OCI Vault.
 
 Documentation to reference:
 - AIA Rerank Service Details: https://gbuconfluence.oraclecorp.com/display/AIAcc/Technical+Design+-+AIA+Services+APIs#:~:text=%7D-,AIA%20Service%20Endpoints%20Details,-Service
 - AIA SDK: https://artifactory.oci.oraclecorp.com/igiu-aia-dev-pypi-local/aia-common/
 - Cohere Reranking: https://docs.cohere.com/docs/rerank
 
-Relevant slack channels:
- - #igiu-innovation-lab: general discussions on your project 
- - #igiu-ai-learning: help with sandbox environment or help with running this code 
- - #igiu-ai-accelerator-collab:  AIA collaboration channel 
+Relevant Slack channels:
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
+- #igiu-ai-accelerator-collab: AIA collaboration channel
 
-Env setup:
-- Requires AIA client installation and VPN for AIA services.
+Environment setup:
+- Requires AIA client installation and network access to the AIA services.
 
 How to run the file:
 uv run langChain/rag/aia_rerank.py
 
-Comments to important sections of file:
-- Step 1: Load config and set up authentication.
-- Step 2: Prepare payload for reranking request.
-- Step 3: Send request and display results.
+Important sections:
+- Step 1: Load configuration and set up authentication
+- Step 2: Prepare the reranking payload
+- Step 3: Send the request and display the results
 """
 
 import os
@@ -43,11 +44,10 @@ import requests
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
@@ -57,7 +57,7 @@ scfg = load_config(SANDBOX_CONFIG_FILE)
 auth_config = {"auth_type": "API_KEY", "auth_profile": scfg["oci"]["profile"]}
 executor_token_config = scfg["aia"]
 
-# get the secret from vault, 
+# Get the secret from the OCI Vault.
 oci_secrets_helper = OCISecretsHelper(OCIAuthConfig(**auth_config))
 
 idcs_url = executor_token_config["idcs_url"]
@@ -71,7 +71,7 @@ headers = token_provider.auth_header()
 print(headers)
 
 # Step 2: Prepare payload for reranking request
-url = " https://puo3dsaj7csiorw4sylcndmjbe.apigateway.us-phoenix-1.oci.customer-oci.com/api/v1/aia/eceu/dac/reranker"
+url = "https://puo3dsaj7csiorw4sylcndmjbe.apigateway.us-phoenix-1.oci.customer-oci.com/api/v1/aia/eceu/dac/reranker"
 model_id = "cohere.rerank-v3.5"
 
 payload = {

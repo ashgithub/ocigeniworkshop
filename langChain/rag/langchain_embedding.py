@@ -1,30 +1,31 @@
 """
 What this file does:
-Demonstrates embedding generation using OCI Generative AI for chunks from a PDF document.
+Demonstrates embedding generation for PDF-derived chunks by using OCI
+Generative AI embeddings.
 
 Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - LangChain: https://docs.langchain.com/oss/python/langchain/overview
-- OCI langchain SDK: https://github.com/oracle-devrel/langchain-oci-genai  note: as of Nov 2025 it is not compatible with langchain v1.0. supports all OCI models including Cohere
+- OCI LangChain SDK: https://github.com/oracle-devrel/langchain-oci-genai
 - OCI GenAI SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI 
- - #igiu-innovation-lab: general discussions on your project 
- - #igiu-ai-learning: help with sandbox environment or help with running this code 
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+- .env: Loads environment variables if needed.
 
 How to run the file:
 uv run langChain/rag/langchain_embedding.py
 
-Comments to important sections of file:
-- Step 1: Load config and initialize clients.
-- Step 2: Load and chunk the PDF document.
-- Step 3: Generate embeddings for chunks.
-- Step 4: Display results.
+Important sections:
+- Step 1: Load configuration and initialize the embedding client
+- Step 2: Load and chunk the PDF document
+- Step 3: Generate embeddings for the chunks
+- Step 4: Display the embedding results
 """
 
 import os
@@ -67,11 +68,10 @@ def get_embed_payload(chunks, embed_type):
     return embed_text_detail
 
 # Step 1: Load config and initialize clients
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
@@ -115,7 +115,7 @@ print(f"Created {len(splits)} text chunks for embedding.")
 # embeddings = llm_embed_client.embed_documents(texts)
 
 
-# we will use the oci apis for embedding
+# Use the OCI APIs directly for embeddings.
 embed_payload = get_embed_payload(texts, EmbedTextDetails.INPUT_TYPE_SEARCH_DOCUMENT)
 embed_response = embed_client.embed_text(embed_payload)
 embeddings = embed_response.data.embeddings
