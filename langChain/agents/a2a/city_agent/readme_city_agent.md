@@ -1,83 +1,116 @@
 # City Agent
 
-This folder contains the City Agent, an A2A (Agent-to-Agent) server that provides intelligent city recommendation functionality using structured output from OCI Generative AI.
+## Overview
 
-## What is the City Agent?
+The City Agent is an A2A (agent-to-agent) service that recommends cities based on user goals or preferences. In this workshop, it is the structured-output example in the A2A system: instead of relying on a traditional tool call, it uses a typed Pydantic schema to generate a consistent response.
 
-The City Agent analyzes user requests and provides thoughtful city recommendations with detailed information including location data, population, and reasoning for the recommendation. Instead of using traditional tools, it leverages structured output to generate consistent, typed responses.
+## Role in the A2A System
 
-## Environment Setup
+This agent is one of the specialized services used by the main orchestrator.
 
-- `sandbox.yaml`: Contains OCI config, compartment, DB details, and wallet path.
-- `.env`: Load environment variables (e.g., API keys if needed).
+- It registers itself with the shared registry at startup.
+- It exposes an A2A endpoint that other agents can call.
+- It is typically discovered and used by `langgraph_a2a_agent.py`.
+- Default local port: `9997`
 
-## Files in this Folder
+## Files in This Folder
 
-1. **agent_executor.py**: Core agent logic using structured output
-   - Implements CityAgent class with LLM integration
-   - Defines CityRecommendation Pydantic model
-   - Handles A2A request/response processing
-   - How to run: Used by city_server.py (not run directly)
+- `agent_executor.py`
+  - Builds the city recommendation agent.
+  - Defines the structured response schema and request-handling logic.
 
-2. **city_server.py**: A2A server implementation
-   - FastAPI-based server on port 9997
-   - Registers with central registry on startup
-   - Handles incoming A2A messages
-   - How to run: `uv run langChain/agents/a2a/city_agent/city_server.py`
+- `city_server.py`
+  - Starts the A2A server.
+  - Publishes the agent card and registers with the central registry.
 
-3. **test_client.py**: Test client for development
-   - Tests agent functionality with sample queries
-   - Uses modern A2A client library
-   - Demonstrates structured response handling
-   - How to run: `uv run langChain/agents/a2a/city_agent/test_client.py`
+- `test_client.py`
+  - Sends a local test request to the running City Agent.
+  - Useful for verifying server connectivity and response behavior.
 
-## Running the Agent
+## How the Agent Works
 
-1. **Start the agent server**:
-   ```bash
-   uv run langChain/agents/a2a/city_agent/city_server.py
-   ```
+1. A request reaches the City Agent through the A2A server.
+2. The server forwards the request to `CityAgentExecutor`.
+3. The executor passes the user input to a structured-output LLM workflow.
+4. The model returns a typed city recommendation shaped by the `CityRecommendation` schema.
+5. The result is returned to the caller as the A2A response.
 
-2. **Test the agent** (in another terminal):
-   ```bash
-   uv run langChain/agents/a2a/city_agent/test_client.py
-   ```
+## Prerequisites
 
-3. **Use with main agent**:
-   - Ensure registry server is running on port 9990
-   - Start main agent: `uv run langChain/agents/a2a/main.py`
-   - Query like: "Recommend a city for a tech conference"
+Before running this agent, make sure:
+
+- `sandbox.yaml` is configured correctly.
+- Any required environment variables are available in `.env`.
+- The central registry is running if you want this agent to register itself.
+
+Start the registry with:
+
+```bash
+uv run langChain/agents/a2a/agent_registry.py
+```
+
+## How to Run
+
+### Start the agent server
+
+```bash
+uv run langChain/agents/a2a/city_agent/city_server.py
+```
+
+### Test the agent directly
+
+In another terminal:
+
+```bash
+uv run langChain/agents/a2a/city_agent/test_client.py
+```
+
+### Use it through the main orchestrator
+
+If the registry and all remote agents are running:
+
+```bash
+uv run langChain/agents/a2a/langgraph_a2a_agent.py
+```
+
+## Example Queries
+
+Try prompts such as:
+
+- "Recommend a city for a tech conference"
+- "Suggest a city for winter sports"
+- "What city would be good for outdoor activities?"
 
 ## Key Concepts Demonstrated
 
-- **Structured Output**: Using Pydantic models for consistent responses
-- **A2A Protocol**: Agent-to-agent communication via HTTP
-- **Registry Integration**: Automatic registration on startup
-- **LLM Integration**: OCI Generative AI for intelligent recommendations
-- **Type Safety**: Pydantic validation for response data
+- **Structured Output**: Use of a Pydantic model for predictable responses
+- **A2A Protocol**: Agent-to-agent communication over HTTP
+- **Registry Registration**: Automatic discovery through the shared registry
+- **LLM Orchestration**: Turning free-form requests into typed outputs
+- **Type Safety**: Response validation through schema-driven generation
 
-## Sample Queries
+## Troubleshooting
 
-The agent responds to queries like:
-- "Recommend a city for a tech conference"
-- "What city would be good for outdoor activities?"
-- "Suggest a city for winter sports"
+- **Agent does not appear in the orchestrator**
+  - Make sure `agent_registry.py` is running before you start `city_server.py`.
 
+- **Port 9997 is already in use**
+  - Stop the conflicting process or change the configured port in `city_server.py`.
 
-## Learning Tips
+- **Configuration errors**
+  - Confirm that `sandbox.yaml` exists and contains valid OCI settings.
 
-- Start with the test client to understand agent responses
-- Modify the CityRecommendation model to add more fields
-- Experiment with different LLM models in agent_executor.py
-- Test error scenarios and fallback responses
+- **Unexpected or weak recommendations**
+  - Try changing the model in `agent_executor.py` or adjusting the prompt.
 
 ## Resources
 
 - [A2A Protocol](https://a2a-protocol.org/latest/topics/key-concepts/)
 - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
+- [Structured Output](https://python.langchain.com/docs/how_to/structured_output/)
 
 ## Slack Channels
 
-- **#generative-ai-users**: For OCI Gen AI questions
+- **#generative-ai-users**: OCI Generative AI questions
 - **#igiu-innovation-lab**: General project discussions
-- **#igiu-ai-learning**: Help with environment setup
+- **#igiu-ai-learning**: Help with environment setup and workshop examples

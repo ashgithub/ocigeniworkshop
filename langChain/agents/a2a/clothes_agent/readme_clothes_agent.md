@@ -1,84 +1,116 @@
 # Clothes Agent
 
-This folder contains the Clothes Agent, an A2A (Agent-to-Agent) server that provides clothing recommendation functionality using LangChain tools with OCI Generative AI.
+## Overview
 
-## What is the Clothes Agent?
+The Clothes Agent is an A2A (agent-to-agent) service that recommends clothing and accessories based on conditions such as temperature, rain, and user preference. In this workshop, it serves as a tool-based recommendation example inside the A2A system.
 
-The Clothes Agent analyzes weather conditions and user preferences to provide appropriate clothing recommendations. It uses traditional LangChain tools to handle the logic of determining suitable clothing based on temperature, weather conditions, and user gender preferences.
+## Role in the A2A System
 
-## Environment Setup
+This agent is one of the specialized services used by the main orchestrator.
 
-- `sandbox.yaml`: Contains OCI config, compartment, DB details, and wallet path.
-- `.env`: Load environment variables (e.g., API keys if needed).
+- It registers itself with the shared registry at startup.
+- It exposes an A2A endpoint that other agents can call.
+- It is typically discovered and used by `langgraph_a2a_agent.py`.
+- Default local port: `9998`
 
-## Files in this Folder
+## Files in This Folder
 
-1. **agent_executor.py**: Core agent logic using LangChain tools
-   - Implements ClothesAgent class with LLM integration
-   - Defines get_clothes tool for clothing recommendations
-   - Handles A2A request/response processing
-   - How to run: Used by clothes_server.py (not run directly)
+- `agent_executor.py`
+  - Builds the clothes recommendation agent.
+  - Defines the clothing recommendation tool and request-handling logic.
 
-2. **clothes_server.py**: A2A server implementation
-   - FastAPI-based server on port 9998
-   - Registers with central registry on startup
-   - Handles incoming A2A messages
-   - How to run: `uv run langChain/agents/a2a/clothes_agent/clothes_server.py`
+- `clothes_server.py`
+  - Starts the A2A server.
+  - Publishes the agent card and registers with the central registry.
 
-3. **test_client.py**: Test client for development
-   - Tests agent functionality with sample queries
-   - Uses modern A2A client library
-   - Demonstrates response handling
-   - How to run: `uv run langChain/agents/a2a/clothes_agent/test_client.py`
+- `test_client.py`
+  - Sends a local test request to the running Clothes Agent.
+  - Useful for verifying server connectivity and response behavior.
 
-## Running the Agent
+## How the Agent Works
 
-1. **Start the agent server**:
-   ```bash
-   uv run langChain/agents/a2a/clothes_agent/clothes_server.py
-   ```
+1. A request reaches the Clothes Agent through the A2A server.
+2. The server forwards the request to `ClothesAgentExecutor`.
+3. The executor passes the user input to a LangChain agent with a clothing recommendation tool.
+4. The tool generates sample clothing and accessory suggestions.
+5. The result is returned to the caller as the A2A response.
 
-2. **Test the agent** (in another terminal):
-   ```bash
-   uv run langChain/agents/a2a/clothes_agent/test_client.py
-   ```
+## Prerequisites
 
-3. **Use with main agent**:
-   - Ensure registry server is running on port 9990
-   - Start main agent: `uv run langChain/agents/a2a/main.py`
-   - Query like: "What clothes should I wear for a rainy day?"
+Before running this agent, make sure:
+
+- `sandbox.yaml` is configured correctly.
+- Any required environment variables are available in `.env`.
+- The central registry is running if you want this agent to register itself.
+
+Start the registry with:
+
+```bash
+uv run langChain/agents/a2a/agent_registry.py
+```
+
+## How to Run
+
+### Start the agent server
+
+```bash
+uv run langChain/agents/a2a/clothes_agent/clothes_server.py
+```
+
+### Test the agent directly
+
+In another terminal:
+
+```bash
+uv run langChain/agents/a2a/clothes_agent/test_client.py
+```
+
+### Use it through the main orchestrator
+
+If the registry and all remote agents are running:
+
+```bash
+uv run langChain/agents/a2a/langgraph_a2a_agent.py
+```
+
+## Example Queries
+
+Try prompts such as:
+
+- "What clothes should I wear for a rainy day?"
+- "Recommend clothing for cold weather"
+- "What should I wear in hot sunny conditions?"
 
 ## Key Concepts Demonstrated
 
-- **LangChain Tools**: Traditional tool-based agent implementation
-- **A2A Protocol**: Agent-to-agent communication via HTTP
-- **Registry Integration**: Automatic registration on startup
-- **LLM Integration**: OCI Generative AI for clothing recommendations
-- **Tool Calling**: Function calling with structured parameters
+- **LangChain Tools**: Tool-based recommendation flow
+- **A2A Protocol**: Agent-to-agent communication over HTTP
+- **Registry Registration**: Automatic discovery through the shared registry
+- **Tool Calling**: Passing structured arguments into a recommendation function
+- **Orchestrated Assistance**: Acting as a specialist used by another agent
 
-## Sample Queries
+## Troubleshooting
 
-The agent responds to queries like:
-- "What clothes should I wear for a rainy day?"
-- "Recommend clothing for cold weather"
-- "What to wear in hot sunny conditions?"
+- **Agent does not appear in the orchestrator**
+  - Make sure `agent_registry.py` is running before you start `clothes_server.py`.
 
+- **Port 9998 is already in use**
+  - Stop the conflicting process or change the configured port in `clothes_server.py`.
 
-## Learning Tips
+- **Configuration errors**
+  - Confirm that `sandbox.yaml` exists and contains valid OCI settings.
 
-- Start with the test client to understand agent responses
-- Modify the get_clothes tool logic for different recommendations
-- Experiment with different LLM models in agent_executor.py
-- Test various weather conditions and user preferences
+- **Recommendations seem too simplistic**
+  - This example uses demo logic in `agent_executor.py`; update the tool if you want richer behavior.
 
 ## Resources
 
 - [A2A Protocol](https://a2a-protocol.org/latest/topics/key-concepts/)
 - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
-- [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
+- [LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
 
 ## Slack Channels
 
-- **#generative-ai-users**: For OCI Gen AI questions
+- **#generative-ai-users**: OCI Generative AI questions
 - **#igiu-innovation-lab**: General project discussions
-- **#igiu-ai-learning**: Help with environment setup
+- **#igiu-ai-learning**: Help with environment setup and workshop examples

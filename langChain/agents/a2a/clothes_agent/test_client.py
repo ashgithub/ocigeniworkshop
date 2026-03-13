@@ -1,24 +1,25 @@
 """
 What this file does:
-Sample test client for the clothes agent, demonstrating how to interact with the A2A agent using A2A client.
+Provides a simple test client for the clothes A2A agent.
 
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - A2A samples: https://github.com/a2aproject/a2a-samples/tree/main/samples/python/agents/travel_planner_agent
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI
- - #igiu-innovation-lab: general discussions on your project
- - #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
 
 How to run the file:
 uv run langChain/agents/a2a/clothes_agent/test_client.py
 
-This test client was adopted from https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/travel_planner_agent/loop_client.py
+This test client was adapted from:
+https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/travel_planner_agent/loop_client.py
 """
 
 import asyncio
@@ -26,7 +27,6 @@ import httpx
 
 from a2a.client import (
     A2ACardResolver,
-    Client,
     ClientConfig,
     ClientFactory,
     create_text_message_object,
