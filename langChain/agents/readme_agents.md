@@ -1,56 +1,80 @@
-## Welcome to the LangChain + LangGraph agent module
+# LangChain Agents Module
 
-In this module, we will work formally with agents (LLMs using tools) with capabilities to solve complex user queries. Also we are exploring the LangFuse tracer to have better experience with debug and information from the develop side. Finally, and add-on of A2A protocol module to showcase the example of different agents communicating
+This directory contains examples that demonstrate how to build agents with LangChain and LangGraph using OCI Generative AI models. It also includes Langfuse tracing examples and an A2A (agent-to-agent) communication module.
 
-In this module, we will explore the following capabilities:
-1. Basic tool declaration and integration with the LangChain `create_agent` method
-2. LangGraph agent method, inclusing conditions and workflows to the LLM
-3. LangFuse tracing examples, from basic configuration along LangChain, to advanced features using a full LangGraph workflow
-4. A2A communication capabilites, to connect three different agents that will inform the main orchestrator
+## What You Will Learn
 
-OCI Gen AI provides OpenAI-compatible APIs that support advanced features like structured output, function calling, and reasoning. The module demonstrates both the OCI OpenAI-compatible library (best for OpenAI features) and LangChain OCI library (broader model support).
+This module covers the following topics:
+
+1. Creating a basic LangChain agent with custom tools by using `create_agent`
+2. Building LangGraph workflows with conditional routing and tool execution
+3. Integrating Langfuse tracing with both LangChain agents and LangGraph workflows
+4. Exploring A2A communication between multiple specialized agents
+
+OCI Generative AI provides OpenAI-compatible APIs that support features such as structured output, function calling, and reasoning. These examples primarily use the OCI OpenAI-compatible helper to access those capabilities.
 
 ## Environment Setup
 
-- `sandbox.yaml`: Contains OCI config, compartment details.
-- `.env`: Load environment variables (e.g., API keys if needed).
-- Ensure you have access to OCI Generative AI services and proper authentication configured.
-- Follow the instructions bellow to obtain the LangFuse keys:
+- `sandbox.yaml`: Contains OCI configuration and related workshop settings.
+- `.env`: Loads environment variables that may be required by some examples.
+- Ensure you have access to OCI Generative AI services and valid authentication before running the examples.
 
-### LangFuse Setup:
-1. Set the LANGFUSE_HOST env variable to the provided instance IP: http://129.146.168.187:3000/
-2. Go to the browser and access the instance URL provided, you should see a login page
-3. Create a new user account with **corporation email**. **Make sure to use workshop_2025 as password**
-4. Find **OciGenAIWorkshop** organization and accept memeber invitation. This could be in the messages / inbox profile section.
-    - After you accept the invitation, you can navigate the org and look for the tracing, sessions, users and other features
-    - If you don't have access, you can always create your own sample organization and project to use this features
-5. Go to the **OciGenAIWorkshop** organization settings and find the API key field.
-6. Create your own new API key. This will **display only once** the host, public and secret keys. **Make sure to have them the first time**
-7. Use the generated keys to set the `.env` variables and you are ready to go!
-    - To differenciate your tracings from other users, make sure to add a unique identificator over the tags metadata section.
-    - `"langfuse_tags": ["workshop", "user-name"]      # Add tags to filter in the console. TODO: Add your own identificator to filter later on on the web interface`
-    - Details on `langfuse_agent.py` on how to add tags and user information
+## Langfuse Setup
 
-### Important A2A setup
-To be able to run the A2A module, it is required that you have first running the remote agents.
-1. To run the available sample servers:
-    - `uv run langChain/agents/a2a/weather_agent/weather_server.py`
-    - `uv run langChain/agents/a2a/city_agent/city_server.py`
-    - `uv run langChain/agents/a2a/clothes_agent/clothes_server.py`
-2. Once the servers are running, checkout the running ports are the same as indicated in the `remote_addresses` dictionary from `remote_agent_connections.py`
-    - This is important, if the weather port does not match, host agent will not be able to reach the remote.
-3. Run the main agent with `uv run langChain/agents/a2a/langgraph_a2a_agent.py`
+Some examples in this folder use Langfuse for tracing.
+1. create an account at https://langfuse.com/?tab=metrics
+2. create an demo org & project
+3. create your API keys 
+4. Set the `.env` file  variables: `LANGFUSE_HOST`, `LANGFUSE_SK`, `LANGFUSE_PK`
+5. Optionally add a unique user identifier or tag in the tracing metadata so you can find your runs more easily.
+6. refer to https://langfuse.com/integrations/frameworks/langchain for details
 
-## Suggested Study Order and File Descriptions
+See `langfuse_agent.py` and `langfuse_graph.py` for examples of trace metadata and callback configuration.
 
-The files are designed to build upon each other. Study them in this order for a progressive understanding:
+## A2A Setup
 
-1. **langchain_agent.py**: basics on how to declare a tool, how to use the openai helper to build a langChain agent. Make sure to understand the difference from the agent call and model calls. This agent is independient and manages three diferent sequence tools.
+To run the A2A examples, start the registry and remote agents before running the main orchestrator.
 
-2. **langgraph_agent.py**: demonstrates building a LangGraph-based agent with tool-calling capabilities. Shows how to use LangGraph's StateGraph and conditional edges for more complex agent workflows compared to the simple create_agent approach.
+1. Start the sample remote agents:
+   - `uv run langChain/agents/a2a/weather_agent/weather_server.py`
+   - `uv run langChain/agents/a2a/city_agent/city_server.py`
+   - `uv run langChain/agents/a2a/clothes_agent/clothes_server.py`
+2. Confirm that the running ports match the `remote_addresses` configuration in `langChain/agents/a2a/remote_agent_connections.py`.
+3. Run the main orchestrator:
+   - `uv run langChain/agents/a2a/langgraph_a2a_agent.py`
 
-3. **langfuse_agent.py**: shows how to integrate Langfuse tracing with LangChain agents. Demonstrates basic tracing setup, metadata configuration, and how to monitor agent tool calls and responses in the Langfuse dashboard.
+## Suggested Study Order
 
-4. **langfuse_graph.py**: advanced Langfuse integration with a complex LangGraph workflow. Shows observation decorators, manual trace updates, and multi-agent interactions with comprehensive tracing.
+The examples are designed to build on one another.
 
-5. **a2a/**: explore agent-to-agent communication protocols. The a2a folder contains a complete multi-agent system with specialized agents that register with a central registry and communicate through standardized A2A protocols. Start with the individual agent servers, then run the main orchestrator.
+1. **`agents.ipynb`**
+   - Guided notebook walkthrough of the core agent patterns in this module
+   - Covers basic LangChain agents, LangGraph workflows, Langfuse tracing, and advanced traced graph concepts
+   - Best starting point if you want a notebook-based learning path
+
+2. **`langchain_agent.py`**
+   - Introduces custom tools and a simple LangChain agent created with `create_agent`
+   - Shows streaming output, a single invocation, and inspection of the final message state
+
+3. **`langgraph_agent.py`**
+   - Demonstrates how to build a LangGraph workflow with tool-calling nodes and conditional edges
+   - Useful for understanding graph-based orchestration compared with a single LangChain agent
+
+4. **`langfuse_agent.py`**
+   - Shows how to add Langfuse tracing to a LangChain agent
+   - Demonstrates callback configuration and trace metadata
+
+5. **`langfuse_graph.py`**
+   - Demonstrates Langfuse tracing in a more advanced LangGraph workflow
+   - Includes observation decorators and manual trace updates
+
+6. **`a2a/`**
+   - Contains a multi-agent example with specialized services and a LangGraph-based orchestrator
+   - Start by reviewing the individual agent folders, then run the orchestrator
+   - This part of the workshop is intentionally more script-driven because it requires multiple cooperating services to run in parallel
+
+## Slack Channels
+
+- `#generative-ai-users`: Questions about OCI Generative AI
+- `#igiu-innovation-lab`: General project discussions
+- `#igiu-ai-learning`: Help with the sandbox environment or workshop examples

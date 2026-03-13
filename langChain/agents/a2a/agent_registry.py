@@ -1,20 +1,21 @@
 """
 What this file does:
-Creates a simple in-memory AI Agents registry server using A2A protocol. Agents register themselves at startup for automatic discovery.
+Provides a simple in-memory A2A agent registry server. Agents register at
+startup so the main orchestrator can discover them dynamically.
 
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI
- - #igiu-innovation-lab: general discussions on your project
- - #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
 
 How to run the file:
 uv run langChain/agents/a2a/agent_registry.py
@@ -23,26 +24,23 @@ Sample commands:
 - http localhost:9990/registry/agents
 - http localhost:9990/health
 
-Comments to important sections of file:
-- Registry storage: Simple in-memory dict for agent cards
-- Endpoints: Register, list agents, health check, get agent by URL
-- Server startup: Runs on port 9990 for agent registration
-
-- Agents that register themselves: city_agent, clothes_agent, weather_agent
-
-
+Important sections:
+- Step 1: Registry storage using an in-memory dictionary for agent cards
+- Step 2: API endpoints for register, list, health check, and get-by-URL
+- Step 3: Server startup on port 9990 for A2A agent registration
 """
 
 
-import logging
+from typing import List, Optional, Dict
+
 import uvicorn
 from fastapi import FastAPI, HTTPException
-from typing import List, Optional, Dict
 from a2a.types import AgentCard
 
-# Simple in-memory registry using dict
+# Step 1: Simple in-memory registry using a dictionary
 agents: Dict[str, AgentCard] = {}
 
+# Step 2: Create the FastAPI application and endpoints
 app = FastAPI(title="A2A Agent Registry Server", description="Simple FastAPI server for agent discovery")
 
 @app.post("/registry/register", response_model=AgentCard, status_code=201)
@@ -73,5 +71,5 @@ async def get_agent(url: str):
     raise HTTPException(status_code=404, detail=f"Agent with URL '{url}' not found")
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    # Step 3: Start the registry server
     uvicorn.run(app, host="0.0.0.0", port=9990)

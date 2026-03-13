@@ -1,30 +1,31 @@
 """
 What this file does:
-Main A2A server for the weather agent that provides weather information functionality and handles agent discovery
+Runs the A2A weather agent server, publishes its agent card, and registers the
+service with the central registry.
 
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI
- - #igiu-innovation-lab: general discussions on your project
- - #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
 
 How to run the file:
 uv run langChain/agents/a2a/weather_agent/weather_server.py
 
-Comments to important sections of file:
-- Step 1: Define agent skill
-- Step 2: Create public agent card
-- Step 3: Register with central registry
-- Step 4: Set up request handler and server
-- Step 5: Start server
+Important sections:
+- Step 1: Define the agent skill metadata
+- Step 2: Build the public agent card
+- Step 3: Register with the central registry
+- Step 4: Configure the request handler and server
+- Step 5: Start the server
 """
 
 import asyncio
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     skill = AgentSkill(
         id='get_weather',
         name='get_weather',
-        description='Gets the weather for a given city',
+        description='Provide weather details for a city or zipcode',
         tags=['weather'],
         examples=['get Chicago Weather'],
     )
@@ -77,7 +78,7 @@ if __name__ == '__main__':
         skills=[skill],
         default_input_modes=['text'],
         default_output_modes=['text'],
-        description='Gets the weather for a given city',
+        description='Provide weather details for the supplied location',
         version='1.0.0',
         capabilities=AgentCapabilities(streaming=True),
     )
