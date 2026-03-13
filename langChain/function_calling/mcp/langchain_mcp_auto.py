@@ -10,19 +10,19 @@ Documentation to reference:
 - LangChain MCP clients: https://docs.langchain.com/oss/python/langchain/mcp#model-context-protocol-mcp
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI tenancy, compartment, and wallet details.
 - .env: Load environment variables (e.g., API keys) consumed by load_dotenv.
 
 How to run the file:
 uv run langChain/function_calling/mcp/langchain_mcp_auto.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load configuration and initialize OCI client
 - Step 2: Set up MCP client with weather and bill projection servers
 - Step 3: Create the async agent workflow (uses ainvoke now that it is supported)
@@ -64,8 +64,7 @@ def load_config(config_path: str) -> EnvYAML:
     """Load sandbox configuration from YAML or raise if unavailable."""
 
     try:
-        with open(config_path, "r", encoding="utf-8"):
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError as exc:
         raise FileNotFoundError(
             f"Configuration file '{config_path}' not found."
