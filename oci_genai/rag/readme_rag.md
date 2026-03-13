@@ -1,8 +1,10 @@
 ## Welcome to the RAG (Retrieval-Augmented Generation) Module
 
-In this module, we will experiment with the LLM's ability to answer questions using proprietary data, focusing on OCI Generative AI services.
+This module explores how to build Retrieval-Augmented Generation (RAG) workflows by using OCI Generative AI services, OCI Agents, and Oracle Database vector search.
 
-In this module, we will explore the following capabilities:
+## What You Will Learn
+
+In this module, you will learn how to:
 1. Passing documents to OCI GenAI API for responses with citations.
 2. Using OCI Agents for out-of-the-box RAG functionality.
 3. Building a home-grown RAG solution using OCI embeddings, Oracle DB for vector storage, and Cohere models.
@@ -13,7 +15,7 @@ Oracle 26ai database is used in some examples; refer to [this page](https://conf
 - Remember to update the database section per your setup in `sandbox.yaml`.
 - As the database schema is shared, set a unique `prefix` in the database section of `sandbox.yaml`. Your Oracle user ID is a good choice.
 
-Example code in this module is available both as Jupyter notebooks and Python scripts. They are very similar and build progressively:
+The examples in this module are available as both Python scripts and Jupyter notebooks. They build progressively from simple citation-based prompting to full retrieval pipelines.
 
 ## Environment Setup
 - `sandbox.yaml`: Contains OCI config, compartment, DB details (if used), and wallet path. Ensure "oci" and "db" sections are configured.
@@ -43,7 +45,7 @@ Study in this order for progressive understanding:
    - Experiment: Try different chunk sizes/overlap, similarity metrics (COSINE/DOT/EUCLIDEAN), add reranking (see cohere docs), use real PDFs instead of mock chunks.
    - Docs: [OCI Embeddings](https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm#embed-models), [Oracle Vector Search](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/).
 
-Note: For production, consider libraries like LangChain for easier chunking/retrieval (see langChain/rag/ examples). rag_agents.md provides detailed setup for OCI Agents knowledge base.
+Note: For production workflows, libraries such as LangChain can simplify chunking and retrieval. See `langChain/rag/` for related examples. The file `rag_agents.md` provides more detailed setup guidance for OCI Agents knowledge bases.
 
 ## Project Ideas
 Here are ideas to extend these examples:

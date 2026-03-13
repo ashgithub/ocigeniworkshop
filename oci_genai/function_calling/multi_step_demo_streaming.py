@@ -7,19 +7,19 @@ Documentation to reference:
 - Cohere Command Models: https://docs.cohere.com/docs/command-r
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, and other details.
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
 uv run function_calling/multi_step_demo_streaming.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Define multiple tools and make initial streaming chat request.
 - Step 2+: Provide tool results and continue the streaming conversation with chat history.
 - Experiment: Try changing tool outputs or observing streaming behavior in multi-step scenarios.

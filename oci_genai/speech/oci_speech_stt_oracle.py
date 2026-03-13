@@ -8,18 +8,19 @@ Documentation to reference:
 • Real time:       https://github.com/oracle/oci-ai-speech-realtime-python-sdk
 • Model comparison: https://docs.oracle.com/en-us/iaas/Content/speech/using/speech.htm#compare-models
 
-Relevant slack channels:
-• Support Slack:   #oci_speech_service_users   |  #igiu-innovation-lab
-• Troubleshooting: #igiu-ai-learning
+Relevant Slack channels:
+- #oci_speech_service_users: Questions about OCI Speech
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, bucket details.
 - .env: Load environment variables if needed.
 
 How to run the file:
 uv run speech/oci_speech_stt_oracle.py --file speech/voice_sample_english.mp3 --language en-US
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and initialize clients.
 - Step 2: Upload audio file to Object Storage.
 - Step 3: Submit transcription job.

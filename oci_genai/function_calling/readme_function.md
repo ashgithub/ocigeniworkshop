@@ -1,13 +1,15 @@
-## Welcome to the Function Calling Module
+# Welcome to the Function Calling Module
 
-In this module, we will experiment with the LLMs' ability to call functions.
-Function calling ability is synonymous with using a tool. An agent can be given a set of tools, and the agent can decompose the problem and see the set of tools to solve it.
+This module explores how OCI-hosted models can use tools to solve user problems. Function calling is closely related to tool use: the model decides when to call a tool, supplies arguments, and then uses the tool result to continue reasoning.
 
-In this module, we will look at the following abilities:
-1. Single-step tool: LLM invoking a single function/using a single tool.
-2. Multi-step tool: LLM orchestrating a sequence of functions.
-3. Classification: Using LLM to classify given text. This can be used to find the right set of tools to give the LLM.
-4. Llama tool example: Function calling with Llama models using different tool definitions.
+## What You Will Learn
+
+In this module, you will learn how to:
+
+1. Handle single-step tool calls
+2. Handle multi-step tool orchestration
+3. Use classification to route or narrow tool choices
+4. Explore function-calling patterns with Llama models
 
 ## Environment Setup
 - `sandbox.yaml`: Contains OCI config and compartment details.

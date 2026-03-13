@@ -7,12 +7,12 @@ Documentation to reference:
 - Agent Runtime API: https://docs.oracle.com/en-us/iaas/api/#/en/generative-ai-agent-runtime/20240531/
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_agent_runtime
 
-Relevant slack channels:
-- #generative-ai-agent-users: For OCI Agents questions
-- #igiu-innovation-lab: Project discussions
-- #igiu-ai-learning: Environment/code help
+Relevant Slack channels:
+- #generative-ai-agent-users: Questions about OCI Agents
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Ensure "oci" and "agent" sections (configFile, profile, compartment, endpoint, session/no_session_endpoint, session flag).
 - .env: Load environment variables if needed.
 - Knowledge base: Upload docs via OCI console (see rag_agents.md for setup).
@@ -20,7 +20,7 @@ Env setup:
 How to run the file:
 uv run rag/oci_rag_agents.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and set up agent client.
 - Step 2: Create session if enabled, or use sessionless endpoint.
 - Step 3: Interactive chat loop with agent, handling citations.

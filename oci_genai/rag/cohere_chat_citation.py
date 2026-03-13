@@ -7,19 +7,19 @@ Documentation to reference:
 - Cohere Documents and Citations: https://docs.cohere.com/docs/rag-citations
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
 
-Relevant slack channels:
-- #generative-ai-users: For questions on OCI GenAI
-- #igiu-innovation-lab: General discussions on projects
-- #igiu-ai-learning: Help with sandbox environment or running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Ensure "oci" section has configFile and profile set.
 - .env: Loaded for any additional variables.
 
 How to run the file:
 uv run rag/cohere_chat_citation.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Import dependencies and define constants.
 - Step 2: Load configuration and set up OCI client.
 - Step 3: Define helper functions for chat requests and details.

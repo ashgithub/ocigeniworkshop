@@ -7,18 +7,19 @@ Documentation to reference:
 • Python SDK:    https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_speech
 • OCI Language:  https://docs.oracle.com/en-us/iaas/api/#/en/language/20221001/
 
-Relevant slack channels:
-• Slack:         #oci_speech_service_users  |  #igiu-innovation-lab
-• Troubleshoot:  #igiu-ai-learning
+Relevant Slack channels:
+- #oci_speech_service_users: Questions about OCI Speech
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment.
 - .env: Load environment variables if needed.
 
 How to run the file:
 uv run speech/oci_speech_tts.py speech/text_sample_english.txt
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and initialize clients.
 - Step 2: Read text from input file.
 - Step 3: Detect dominant language.
