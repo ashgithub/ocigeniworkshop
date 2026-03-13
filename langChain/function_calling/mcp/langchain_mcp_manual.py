@@ -1,6 +1,8 @@
 """
 What this file does:
-Demonstrates creating a LangChain agent that integrates with MCP (Model Context Protocol) servers to provide weather and bill projection tools using OCI Generative AI for LLM.
+Demonstrates manual MCP tool orchestration with OCI-hosted LangChain models.
+It connects to weather and bill servers, binds their tools to the model, and
+then executes the tool-calling loop manually.
 
 Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
@@ -8,23 +10,23 @@ Documentation to reference:
 - LangChain MCP clients: https://docs.langchain.com/oss/python/langchain/mcp#model-context-protocol-mcp
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+- .env: Loads environment variables if needed.
 
 How to run the file:
 uv run langChain/function_calling/mcp/langchain_mcp_manual.py
 
-Comments to important sections of file:
-- Step 1: Load configuration and initialize OCI client
-- Step 2: Set up MCP client with multiple servers (weather and bill projection)
-- Step 3: Create manual agent execution loop (temporary workaround for async issues)
-- Step 4: Execute the agent with tool calling capabilities
+Important sections:
+- Step 1: Load configuration and initialize the OCI client
+- Step 2: Configure MCP servers and discover tools
+- Step 3: Bind tools to the model
+- Step 4: Execute the manual tool-calling loop
 """
 
 import sys
@@ -49,11 +51,10 @@ LLM_MODEL = "openai.gpt-4.1"
 # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
 # Step 1: Load configuration and initialize OCI client
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
@@ -97,8 +98,7 @@ async def build_oci_model():
     return tooled_model, tools_by_name
 
 async def call_manual_agent():
-    """ Function to make manual call to agent with tools to substitute agent.ainvoke call"""
-    """ This is the same method as langchain_multistep_manual.py file """
+    """Make a manual MCP-enabled tool-calling loop similar to the base workshop demo."""
 
     prompt = "Which will be my projected bill? I'm in San Francisco, and I have oven. My past bill was $45"
     #prompt = "what is the weather in the capital of US, are there any weather alerts"
