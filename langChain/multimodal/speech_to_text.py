@@ -3,23 +3,23 @@ What this file does:
 Transcribes audio clips into text using OCI-hosted GPT-Audio models. Downloads an example WAV file, encodes it to base64, and sends it with a text instruction to extract a transcript.
 
 Documentation to reference:
-- Open AI Audio Support: https://developers.openai.com/api/docs/guides/audio
+- OpenAI Audio Guide: https://developers.openai.com/api/docs/guides/audio
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
-- note oci doesnt support audio -> audio just yet (as of feb 2026)
+- Note: OCI does not support audio-to-audio workflows yet (as of Feb 2026).
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, and profile details.
 - .env: Set overrides like `TRANSCRIBE_URL` if you want to point to your own audio sample.
 
 How to run the file:
 uv run langChain/multimodal/speech_to_text.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and initialize the OCI OpenAI chat client.
 - Step 2: Fetch (or reuse) the audio sample and encode it to base64.
 - Step 3: Call GPT-Audio with a transcription instruction and audio payload.
@@ -27,7 +27,8 @@ Comments to important sections of file:
 """
 
 import base64
-import os,sys
+import os
+import sys
 from pathlib import Path
 from typing import Tuple
 

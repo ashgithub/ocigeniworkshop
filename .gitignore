@@ -125,3 +125,8 @@ sqlcl/*
 #codex
 .codex/*
 AGENTS.md
+.agents/*
+
+
+#audoit 
+audit_report/*
