@@ -3,24 +3,24 @@ What this file does:
 Generates brand-new images from text prompts using OCI-hosted OpenAI GPT-Image models via LangChain. Saves the output locally so you can inspect the results and reuse them in later multimodal workflows.
 
 Documentation to reference:
-- OpenAI Image : https://developers.openai.com/api/docs/guides/images-vision
+- OpenAI Images and Vision: https://developers.openai.com/api/docs/guides/images-vision
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 - LangChain: https://docs.langchain.com/oss/python/langchain/overview
-- note: oci doesnt support image/edit end point yet. you we can only geneatyed image form text image -> image is not supported yet 
+- Note: OCI does not support the image-edit endpoint yet. This example only generates images from text; image-to-image workflows are not supported here.
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, and profile details. Make sure image bucket prefix and conversation store are configured if needed.
 - .env: Load environment variables (e.g., profile overrides) before invoking this script.
 
 How to run the file:
 uv run langChain/multimodal/text_to_image.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load sandbox config and initialize the OCI OpenAI client.
 - Step 2: Define the generation prompt, model, and output path.
 - Step 3: Call the GPT-Image model and decode the base64 payload.
@@ -28,9 +28,9 @@ Comments to important sections of file:
 """
 
 import base64
-import os,sys
+import os
+import sys
 from pathlib import Path
-from typing import Optional
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
@@ -88,7 +88,7 @@ def decode_image(image_b64: str) -> bytes:
     return base64.b64decode(image_b64)
 
 
-# Step 4: Persist the image to disk
+# Step 4: Persist the image to disk and display usage details
 def save_image(image_bytes: bytes, path: Path) -> None:
     ensure_output_dir(path)
     path.write_bytes(image_bytes)
