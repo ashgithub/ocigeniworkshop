@@ -1,29 +1,30 @@
 """
 What this file does:
-Implements the agent executor for the weather agent, handling A2A requests and executing weather information logic.
+Implements the weather agent executor, including tool-backed weather lookups and
+A2A request handling.
 
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI
- - #igiu-innovation-lab: general discussions on your project
- - #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
 
 How to run the file:
-This file is not run directly, but used by weather_server.py
+This file is not run directly. It is used by `weather_server.py`.
 
-Comments to important sections of file:
-- Step 1: Define agent tool
-- Step 2: Implement WeatherAgent class with config and LLM setup
-- Step 3: Define invoke method for agent execution
-- Step 4: Implement WeatherAgentExecutor with execute and cancel methods
+Important sections:
+- Step 1: Define the weather tool
+- Step 2: Build the weather agent and LLM client
+- Step 3: Handle agent invocation
+- Step 4: Implement the A2A executor wrapper
 """
 
 import sys
@@ -46,18 +47,16 @@ load_dotenv()
 
 # Step 1: Define agent tool
 @tool
-def get_weather(zipcode: int, date: str) -> dict[str, bool | int]:
-    """ Gets the weather for a given city zipcode and date in format yyyy-mm-dd """
-    # This is simple hardcoded data, could use zip code to fetch weather API and get real results
-    
-    print(f"tool invoked with {zipcode} {date} ")
+def get_weather(zipcode: int, date: str) -> dict[str, object]:
+    """Return sample weather data for a zipcode and date in yyyy-mm-dd format."""
+
     rain = random.choice([True, False])
     min_temperature = random.randint(40, 60)
     max_temperature = random.randint(min_temperature + 10, min_temperature + 20)
     city_weather = {
         "rain": rain,
-        "min_temperature": f"{min_temperature} f",
-        "max_temperature": f"{max_temperature} f"
+        "min_temperature": f"{min_temperature} F",
+        "max_temperature": f"{max_temperature} F",
     }
     return city_weather
 
@@ -85,11 +84,10 @@ class WeatherAgent:
             system_prompt="Answer only details about weather, provide max temperature, min temperature and rain"
         )
 
-    def load_config(self, config_path):
+    def load_config(self, config_path: str) -> EnvYAML | None:
         """Load configuration from a YAML file."""
         try:
-            with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+            return EnvYAML(config_path)
         except FileNotFoundError:
             print(f"Error: Configuration file '{config_path}' not found.")
             return None

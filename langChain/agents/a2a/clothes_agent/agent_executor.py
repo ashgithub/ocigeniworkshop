@@ -1,29 +1,30 @@
 """
 What this file does:
-Implements the agent executor for the clothes agent, handling A2A requests and executing clothing recommendation logic.
+Implements the clothes agent executor, including tool-backed clothing
+recommendations and A2A request handling.
 
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI
- - #igiu-innovation-lab: general discussions on your project
- - #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
 
 How to run the file:
-This file is not run directly, but used by clothes_server.py
+This file is not run directly. It is used by `clothes_server.py`.
 
-Comments to important sections of file:
-- Step 1: Define agent tool
-- Step 2: Implement ClothesAgent class with config and LLM setup
-- Step 3: Define invoke method for agent execution
-- Step 4: Implement ClothesAgentExecutor with execute and cancel methods
+Important sections:
+- Step 1: Define the clothing recommendation tool
+- Step 2: Build the clothes agent and LLM client
+- Step 3: Handle agent invocation
+- Step 4: Implement the A2A executor wrapper
 """
 
 import sys
@@ -45,12 +46,12 @@ from oci_openai_helper import OCIOpenAIHelper
 # Step 1: Define agent tool
 @tool
 def get_clothes(gender: str, temp: int, rain: bool) -> dict[str, list[str]]:
-    """ Tool to suggest best clothes depending on the city weather, temperature and genders """
+    """Suggest clothing and accessories based on temperature, rain, and user preference."""
     # Hardcoded data, could use any other user details
     clothes = []
     accessories = []
 
-    # Base on temperature
+    # Base recommendations on temperature
     if temp < 50:
         clothes.extend(["heavy coat", "sweater", "jeans", "boots"])
         accessories.extend(["scarf", "gloves"])
@@ -66,7 +67,7 @@ def get_clothes(gender: str, temp: int, rain: bool) -> dict[str, list[str]]:
         clothes.append("rain coat")
         accessories.extend(["umbrella", "rain boots"])
 
-    # Adjust for gender (simple assumptions)
+    # Adjust for user preference (simplified demo logic)
     if gender.lower() == "male":
         clothes.extend(["polo shirt"])
     elif gender.lower() == "female":
@@ -104,11 +105,10 @@ class ClothesAgent:
             system_prompt="Answer only details about clothes, provide the clothes and suitable accessories"
         )
 
-    def load_config(self, config_path):
+    def load_config(self, config_path: str) -> EnvYAML | None:
         """Load configuration from a YAML file."""
         try:
-            with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+            return EnvYAML(config_path)
         except FileNotFoundError:
             print(f"Error: Configuration file '{config_path}' not found.")
             return None

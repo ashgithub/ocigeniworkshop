@@ -1,56 +1,53 @@
 """
 What this file does:
-Main host agent that performs A2A calls to specialized agents based on user needs. This agent dynamically discovers available agents from a registry and intelligently routes user queries to the most appropriate specialized agents.
+Implements the main A2A host agent. It discovers specialized agents from the
+registry and routes user requests to the most appropriate remote services.
 
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 - LangGraph: https://langchain-ai.github.io/langgraph/
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI
- - #igiu-innovation-lab: general discussions on your project
- - #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
 
 How to run the file:
 uv run langChain/agents/a2a/langgraph_a2a_agent.py
 
-Comments to important sections of file:
-- Step 1: Registry interaction module for dynamic agent discovery
-- Step 2: System prompt builder module for intelligent agent routing
-- Step 3: Tool creation module for A2A agent calls
-- Step 4: LangGraph agent builder module for async tool support
-- Step 5: Main agent class orchestration
-- Step 6: Main execution and demonstration
+Important sections:
+- Step 1: Registry interaction and agent discovery
+- Step 2: System prompt construction from agent metadata
+- Step 3: Tool creation for remote A2A calls
+- Step 4: LangGraph workflow construction
+- Step 5: Main agent orchestration and initialization
+- Step 6: Demonstration entry point
 """
 
-from langchain_core.tools import tool
-from remote_agent_connections import call_a2a_agent
-
-import sys
 import os
+import sys
+from typing import Any, Dict, List
+
 import httpx
-import asyncio
-
-from langchain_core.tools import tool
-from langgraph.checkpoint.memory import InMemorySaver
-from langchain.messages import SystemMessage, ToolMessage, HumanMessage
-from langchain_core.runnables import RunnableConfig
-from langgraph.graph import MessagesState
-from langgraph.graph import StateGraph, START, END
-
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-from typing import Any, List, Dict
+from langchain.messages import HumanMessage, SystemMessage, ToolMessage
+from langchain_core.runnables import RunnableConfig
+from langchain_core.tools import tool
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import END, START, MessagesState, StateGraph
+
+from remote_agent_connections import call_a2a_agent
 
 load_dotenv()
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from oci_openai_helper import OCIOpenAIHelper
 
 # Registry configuration
@@ -359,11 +356,10 @@ class MainAgent:
         print("AGENT INITIALIZATION COMPLETE")
         print("="*90 + "\n")
 
-    def _load_config(self, config_path: str):
+    def _load_config(self, config_path: str) -> EnvYAML | None:
         """Load configuration from YAML file."""
         try:
-            with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+            return EnvYAML(config_path)
         except FileNotFoundError:
             print(f"✗ Error: Configuration file '{config_path}' not found.")
             return None
@@ -409,9 +405,12 @@ async def main():
             print(f"\n{'─' * 90}")
             print("🤖 AGENT RESPONSE:")
             print(f"{'─' * 90}")
-            try:
-                print(latest_message.content[0]['text'])
-            except:
+            if isinstance(latest_message.content, list):
+                try:
+                    print(latest_message.content[0]["text"])
+                except (KeyError, IndexError, TypeError):
+                    print(latest_message.content)
+            else:
                 print(latest_message.content)
         
         # Step 6.6: Display tool calls being made
@@ -430,5 +429,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(main())

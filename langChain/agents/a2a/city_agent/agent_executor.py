@@ -1,42 +1,44 @@
 """
 What this file does:
-Implements the agent executor for the city agent, handling A2A requests and executing city recommendation logic using structured output.
+Implements the city agent executor, including structured output generation and
+A2A request handling.
 
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 - Structured Output: https://python.langchain.com/docs/how_to/structured_output/
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI
- - #igiu-innovation-lab: general discussions on your project
- - #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
 
 How to run the file:
-This file is not run directly, but used by city_server.py
+This file is not run directly. It is used by `city_server.py`.
 
-Comments to important sections of file:
-- Step 1: Define structured output schema
-- Step 2: Implement CityAgent class with config and LLM setup
-- Step 3: Define invoke method for agent execution
-- Step 4: Implement CityAgentExecutor with execute and cancel methods
+Important sections:
+- Step 1: Define the structured output schema
+- Step 2: Build the city agent and LLM client
+- Step 3: Handle agent invocation
+- Step 4: Implement the A2A executor wrapper
 """
 
-import sys
 import os
-from pydantic import BaseModel, Field
+import sys
 from typing import Optional
 
-from envyaml import EnvYAML
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.utils import new_agent_text_message
 from dotenv import load_dotenv
+from envyaml import EnvYAML
+from pydantic import BaseModel, Field
+
 load_dotenv()
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
@@ -73,11 +75,10 @@ class CityAgent:
         # Step 2.3: Create structured output model
         self.structured_model = llm_client.with_structured_output(CityRecommendation)
 
-    def load_config(self, config_path):
+    def load_config(self, config_path: str) -> EnvYAML | None:
         """Load configuration from a YAML file."""
         try:
-            with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+            return EnvYAML(config_path)
         except FileNotFoundError:
             print(f"Error: Configuration file '{config_path}' not found.")
             return None
