@@ -1,25 +1,26 @@
 """
 What this file does:
-Demonstrates loading and chunking documents using LangChain text splitters.
+Demonstrates how to load a PDF document and split it into chunks by using
+LangChain document loaders and text splitters.
 
 Documentation to reference:
 - LangChain: https://docs.langchain.com/oss/python/langchain/overview
 - Document loaders: https://docs.langchain.com/oss/python/langchain/knowledge-base#1-documents-and-document-loaders
 - Text splitters: https://docs.langchain.com/oss/python/integrations/splitters
 
-Relevant slack channels:
- - #igiu-innovation-lab: general discussions on your project 
- - #igiu-ai-learning: help with sandbox environment or help with running this code 
+Relevant Slack channels:
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- No specific environment setup required for this file.
+Environment setup:
+- No special environment setup is required for this file beyond the project dependencies.
 
 How to run the file:
 uv run langChain/rag/langchain_chunks.py
 
-Comments to important sections of file:
-- Step 1: Load the documents.
-- Step 2: Use text splitters.
+Important sections:
+- Step 1: Load the source document
+- Step 2: Split the document into chunks
 """
 
 from langchain_community.document_loaders import PyPDFLoader
