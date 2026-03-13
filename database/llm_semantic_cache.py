@@ -1,30 +1,32 @@
 """
 What this file does:
-Demonstrates semantic caching using OCI Generative AI embeddings and Oracle Database vector search. It stores Q&A pairs as embeddings and retrieves semantically similar answers for user queries, reducing the need for repeated LLM calls.
+Demonstrates semantic caching by using OCI embeddings together with Oracle
+Database vector search. It stores question-and-answer pairs as embeddings and
+retrieves semantically similar answers for future queries.
 
 Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - Oracle DB Vectors: https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+- .env: Loads environment variables if needed.
 
 How to run the file:
 uv run database/llm_semantic_cache.py
 
-Comments to important sections of file:
-- Step 1: Load config and initialize clients.
-- Step 2: Set up Oracle DB connection and create vector table.
-- Step 3: Generate embeddings for Q&A pairs.
-- Step 4: Insert embeddings into DB.
-- Step 5: Interactive semantic search and response.
+Important sections:
+- Step 1: Load configuration and initialize OCI clients
+- Step 2: Set up the Oracle DB connection and semantic cache table
+- Step 3: Generate embeddings for Q&A pairs
+- Step 4: Insert embeddings into the database
+- Step 5: Run interactive semantic search
 """
 
 import os
@@ -92,12 +94,11 @@ qa_pairs = [
     }
 ]
 
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
-    
+
     try:
-        with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None

@@ -1,15 +1,15 @@
 
 
 -- What this file does:
--- Demonstrates Oracle 23ai Select AI capabilities for natural language database queries.
--- Shows different AI query modes (narrate, showsql, explainsql, chat) and how they work with the SH schema.
+-- Demonstrates Oracle 23ai Select AI for natural-language database queries.
+-- Shows different AI query modes (narrate, showsql, explainsql, runsql, and chat) using the workshop schema.
 
 -- Documentation to reference:
 -- - Oracle Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/
 -- - Select AI Examples: https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/select-ai-examples.html
 -- - DBMS_CLOUD_AI Package: https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/DBMS_CLOUD_AI.html
 
--- Relevant slack channels:
+-- Relevant Slack channels:
 -- - #adb-select-ai-users: questions about Oracle Select AI
 -- - #igiu-innovation-lab: general discussions on your project
 -- - #igiu-ai-learning: help with sandbox environment or help with running this code
@@ -36,18 +36,20 @@ BEGIN
         credential_name => 'AISANDBOX_CRED2'
     );
 END;
+/
 
 BEGIN
     DBMS_CLOUD.CREATE_CREDENTIAL(
         credential_name => 'AISANDBOX_CRED',
-        user_ocid => 'user_useer_ocid',
-        tenancy_ocid => 'your tenancy_ocid',
+        user_ocid => 'your-user-ocid-here',
+        tenancy_ocid => 'your-tenancy-ocid-here',
         private_key => '-----BEGIN PRIVATE KEY-----
-      <key file content>
+your-private-key-content-here
 -----END PRIVATE KEY-----',
-        fingerprint => 'key fingerprint'
+        fingerprint => 'your-key-fingerprint-here'
     );
 END;
+/
 
 -- Step 3: Clean up existing profile
 BEGIN
@@ -90,28 +92,28 @@ SET WRAP ON
 SELECT AI 'how many attendees exist';
 
 -- Show the SQL that would be executed
-SELECT AI showsql 'how many attendees have completed onboarding tasks, by number of tasks in descending order'
-SELECT AI explainsql 'how many attendees have completed onboarding tasks, by number of tasks in descending order'
-SELECT AI runsql 'how many attendees have completed onboarding tasks, group by number of tasks in descending order, show me number of tasks completed and how many students completed that many tasks.'
-SELECT AI narrate 'how many attendees have completed onboarding tasks, by number of tasks in descending order'
-SELECT AI 'how many attendees have completed onboarding tasks, by number of tasks in descending order'
+SELECT AI showsql 'how many attendees have completed onboarding tasks, by number of tasks in descending order';
+SELECT AI explainsql 'how many attendees have completed onboarding tasks, by number of tasks in descending order';
+SELECT AI runsql 'how many attendees have completed onboarding tasks, grouped by task count in descending order, and show how many students completed each count of tasks';
+SELECT AI narrate 'how many attendees have completed onboarding tasks, by number of tasks in descending order';
+SELECT AI 'how many attendees have completed onboarding tasks, by number of tasks in descending order';
 
 -- Explain the SQL that would be executed
-SELECT AI explainsql 'how many customers exist';
+SELECT AI explainsql 'how many attendees exist';
 
 -- Run the SQL and return results
-SELECT AI runsql 'how many customers exist';
+SELECT AI runsql 'how many attendees exist';
 
 -- Narrative answer (same as basic AI query)
-SELECT AI narrate 'how many customers exist';
+SELECT AI narrate 'how many attendees exist';
 
 -- Chat mode for conversational queries
-SELECT AI chat 'how many customers exist';
-SELECT AI chat 'why is the sky blue';
+SELECT AI chat 'how many attendees exist';
+SELECT AI chat 'summarize the attendee count result for me';
 
 -- Complex queries with filtering
-SELECT AI showsql 'how many customers in San Francisco are married';
+SELECT AI showsql 'how many attendees are from Austin?';
 
 -- Business intelligence style queries
-SELECT AI 'find top 3 baby boomer big spenders';
-SELECT AI showsql 'find top 3 baby boomer big spenders';
+SELECT AI 'find the top 3 teams with the most completed onboarding tasks';
+SELECT AI showsql 'find the top 3 teams with the most completed onboarding tasks';

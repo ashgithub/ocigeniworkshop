@@ -1,31 +1,33 @@
 """
 What this file does:
-Demonstrates Oracle SELECT AI functionality using the Python select-ai library. It runs natural language queries on the WORKSHOP_ADMIN.STUDENTS table to showcase student profile information, providing a Python alternative to SQL-based SELECT AI queries.
+Demonstrates Oracle SELECT AI functionality by using the Python `select-ai`
+library. It shows how to run natural-language queries through a configured
+profile as a Python alternative to SQL-based SELECT AI usage.
 
 Documentation to reference:
 - Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html
 - Python Select AI Library: https://github.com/oracle/python-select-ai
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci
 
-Relevant slack channels:
-- #adb-select-ai-users: questions about Oracle 23ai Select AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #adb-select-ai-users: Questions about Oracle Select AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
-- Ensure python-select-ai library is installed: pip install oracle-select-ai
+- .env: Loads environment variables if needed.
+- Ensure `python-select-ai` is installed before running this script.
 
 How to run the file:
 uv run database/selectai_demo.py
 
-Comments to important sections of file:
-- Step 1: Load config and initialize database connection.
-- Step 2: Set up SELECT AI profile.
-- Step 3: Demonstrate Profile methods (narrate, show_sql, explain_sql, run_sql, chat, generate, get_attributes, list).
-- Step 4: Additional examples with Profile.run_sql().
-- Step 5: Interactive query loop for custom questions.
+Important sections:
+- Step 1: Load configuration and initialize the database connection
+- Step 2: Set up the SELECT AI profile
+- Step 3: Demonstrate core `Profile` methods
+- Step 4: Run additional `Profile.run_sql()` examples
+- Step 5: Use the interactive query loop
 """
 
 import sys
@@ -34,7 +36,6 @@ sys.path.append(os.path.dirname(__file__))
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-import oracledb
 import select_ai
 
 # Load environment variables
@@ -43,7 +44,7 @@ load_dotenv()
 # Configuration
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 
-def load_config():
+def load_config() -> EnvYAML | None:
     """Load configuration from sandbox.yaml."""
     try:
         return EnvYAML(SANDBOX_CONFIG_FILE)
@@ -103,7 +104,7 @@ def main():
         print("\n2. Profile.show_sql() - Show generated SQL")
         print("-" * 50)
         try:
-            sql = profile.show_sql(prompt="whicih cities have placed orders")
+            sql = profile.show_sql(prompt="Which cities have placed orders?")
             print(f"Generated SQL: {sql}")
         except Exception as e:
             print(f"Error: {e}")
@@ -141,7 +142,7 @@ def main():
         print("\n6. Profile.generate() - generate content")
         print("-" * 50)
         try:
-            generated = profile.generate(prompt="how many customers are there ", action="runsql")
+            generated = profile.generate(prompt="How many customers are there?", action="runsql")
             print(f"Generated content: {generated}")
         except Exception as e:
             print(f"Error: {e}")
@@ -170,9 +171,9 @@ def main():
         print("="*60)
 
         additional_queries = [
-            "how me all the top three products by sales",
-            "show me region with most orders",
-            "show me the top 5 order by sales",
+            "Show me the top three products by sales",
+            "Show me the region with the most orders",
+            "Show me the top 5 orders by sales",
         ]
 
         for i, query in enumerate(additional_queries, 10):

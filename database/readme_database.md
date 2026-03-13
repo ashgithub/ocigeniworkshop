@@ -1,15 +1,15 @@
-## Welcome to the Database Module
+# Welcome to the Database Module
 
-In this module, we will explore how Oracle Autonomous Database (23ai) and **Select AI** enable Large Language Model (LLM) workflows directly inside the database and how to combine them with Retrieval-Augmented Generation (RAG).
+This module explores how Oracle Autonomous Database (23ai), Select AI, vector search, and OCI Generative AI can be combined to support database-centric LLM workflows.
 
-## What you will learn
+## What You Will Learn
 
-In this module, we will explore the following capabilities:
+In this module, you will learn how to:
 
-1. **Natural-Language-to-SQL (NL2SQL)** – Ask questions in plain English and let the database generate and execute the SQL for you.
-2. **Select AI** – Compare "inline LLM" SQL (`SELECT AI …`) with external LLM calls.
-3. **Database-centric RAG** – Use SQL and Embeddings stored in the database to build a full RAG pipeline that returns citations.
-4. **Semantic Caching** – Cache answers and retrieve them based on similar questions using vector embeddings.
+1. Use Natural-Language-to-SQL (NL2SQL) to translate plain English questions into executable SQL
+2. Compare inline Select AI SQL with external LLM-driven workflows
+3. Build database-centric RAG with vector search and citations
+4. Implement semantic caching with embeddings stored in Oracle Database
 
 ## Environment Setup
 
@@ -36,16 +36,16 @@ The files are designed to build upon each other. Study them in this order for a 
    - Key features: Mirrors the Python script; includes detailed steps and experimentation suggestions; embeds Q&A pairs, stores in DB, retrieves semantically similar answers.
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
 
-4. **selectai.sql**: Pure Select AI examples demonstrating "inline LLM" SQL capabilities directly in the database.
+4. **selectai.sql**: Workshop-facing Select AI examples demonstrating inline natural-language SQL directly in the database.
    - Key features: Shows various SELECT AI queries for natural language database interactions.
    - How to run: Execute in SQL client connected to 23ai database.
    - Docs: [Select AI Documentation](https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html)
 
-5. **selectai_demo.py**: Demonstrates Oracle SELECT AI functionality using the Python select-ai library. It showcases various Profile methods (narrate, show_sql, explain_sql, run_sql, chat, generate, get_attributes, list) with examples adapted for the WORKSHOP_ADMIN.STUDENTS table, providing a comprehensive Python alternative to SQL-based SELECT AI queries.
+5. **selectai_demo.py**: Demonstrates Oracle SELECT AI functionality using the Python `select-ai` library. It showcases various `Profile` methods and provides a Python alternative to SQL-based SELECT AI queries.
    - Key features: Demonstrates all major Profile methods programmatically; includes comprehensive examples and interactive query loop.
    - How to run: `uv run database/selectai_demo.py`.
 
-6. **selectai_demo.ipynb**: A Jupyter notebook variation of the selectai_demo.py script, demonstrating the various ways to use Select AI from Python.
+6. **selectai_demo.ipynb**: A Jupyter notebook variation of `selectai_demo.py`, demonstrating the various ways to use Select AI from Python.
    - Key features: Demonstrates all major Profile methods programmatically; includes comprehensive examples and an interactive query loop.
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
 
@@ -87,7 +87,7 @@ Here are some ideas for projects you can build upon these examples:
   - [Select AI](https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html)
   - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/overview-ai-vector-search.html)
   - [Python-oracledb](https://python-oracledb.readthedocs.io/)
-  - [SelectAi python](https://github.com/oracle/python-select-ai)
+  - [Python Select AI Library](https://github.com/oracle/python-select-ai)
 
 - **Slack Channels**:
   - **#generative-ai-users**: Questions about OCI Gen AI.

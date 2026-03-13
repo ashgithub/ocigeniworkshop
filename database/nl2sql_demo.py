@@ -8,19 +8,19 @@ Documentation to reference:
 - Python-oracledb: https://python-oracledb.readthedocs.io/
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
 uv run database/nl2sql_demo.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and initialize OCI client.
 - Step 2: Set up database connection.
 - Step 3: Build chat prompt with schema description and examples.
@@ -85,7 +85,7 @@ def pretty_table(cols: List[str], rows: List[tuple]) -> None:
 
 
 # ------------------------------------------------------------------------------
-# Config and credentials
+# Configuration and OCI-related settings
 # ------------------------------------------------------------------------------
 
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
@@ -140,8 +140,8 @@ SCHEMA_DESCRIPTION = textwrap.dedent(
       SALES.channel_id     = CHANNELS.channel_id
       SALES.time_id        = TIMES.time_id
 
-    Always prefix tables with SH. Return valid SQL only. Your output will be directly fed to the oracle database.
-    dont include backquotes as they would interfere
+    Always prefix tables with SH. Return valid SQL only. Your output will be directly fed to the Oracle database.
+    Do not include backquotes because they would interfere with execution.
     """
 )
 
@@ -201,7 +201,7 @@ def build_chat_details(question: str) -> ChatDetails:
 
 
 # ------------------------------------------------------------------------------
-# DB helpers
+# Database connection helpers
 # ------------------------------------------------------------------------------
 
 
@@ -232,7 +232,7 @@ def execute_query(conn: oracledb.Connection, sql: str):
 def main() -> None:
     hr("NL → SQL Demo")
 
-    # OCI client
+    # 1. Initialize the OCI client from the loaded configuration.
     try:
         oci_config = oci.config.from_file(OCI_CONFIG_PATH, OCI_PROFILE)
     except Exception as exc:
@@ -246,7 +246,7 @@ def main() -> None:
         timeout=(10, 240),
     )
 
-    # DB connection
+    # 2. Open the database connection.
     try:
         conn = connect_db()
     except oracledb.Error as exc:
@@ -263,7 +263,10 @@ def main() -> None:
         if not question:
             break
 
+        # 3. Build the structured chat request for the user's question.
         details = build_chat_details(question)
+
+        # 4. Ask the LLM to generate SQL from the natural-language question.
         try:
             resp = llm_client.chat(details)
             generated_sql = resp.data.chat_response.choices[0].message.content[0].text.strip()
@@ -274,6 +277,7 @@ def main() -> None:
         hr("Generated SQL")
         print(generated_sql)
 
+        # 5. Execute the generated SQL and display the results.
         try:
             cols, rows = execute_query(conn, generated_sql)
         except oracledb.Error as exc:
