@@ -1,15 +1,15 @@
 
 
 -- What this file does:
--- Demonstrates Oracle 23ai Select AI capabilities for natural language database queries.
--- Shows different AI query modes (narrate, showsql, explainsql, chat) and how they work with the SH schema.
+-- Demonstrates Oracle 23ai Select AI for natural-language database queries.
+-- Shows different AI query modes (narrate, showsql, explainsql, runsql, and chat) and how they work with the SH schema.
 
 -- Documentation to reference:
 -- - Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/select-ai.html
 -- - Select AI Examples: https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/select-ai-examples.html
 -- - DBMS_CLOUD_AI Package: https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/DBMS_CLOUD_AI.html
 
--- Relevant slack channels:
+-- Relevant Slack channels:
 -- - #adb-select-ai-users: questions about Oracle 23ai Select AI
 -- - #igiu-innovation-lab: general discussions on your project
 -- - #igiu-ai-learning: help with sandbox environment or help with running this code
@@ -106,7 +106,7 @@ SELECT AI narrate 'how many customers exist';
 
 -- Chat mode for conversational queries
 SELECT AI chat 'how many customers exist';
-SELECT AI chat 'why is the sky blue';
+SELECT AI chat 'summarize the customer count result for me';
 
 -- Complex queries with filtering
 SELECT AI showsql 'how many customers in San Francisco are married';
