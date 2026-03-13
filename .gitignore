@@ -126,7 +126,10 @@ sqlcl/*
 .codex/*
 AGENTS.md
 .agents/*
+.clinerules/**
 
 
-#audoit 
+
+
+#audit 
 audit_report/*
