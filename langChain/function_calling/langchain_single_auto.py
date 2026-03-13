@@ -1,35 +1,37 @@
 """
 What this file does:
-Demonstrates creating a LangChain agent with custom tools using OCI Generative AI for LLM.
+Demonstrates automatic single-step function calling by creating a LangChain
+agent with custom tools.
 
 Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - LangChain: https://docs.langchain.com/oss/python/langchain/agents
-- How to build tools: https://python.langchain.com/docs/how_to/custom_tools/
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API 
-- OCI langchain SDK: https://github.com/oracle-devrel/langchain-oci-genai  note: as of Nov 2025 it is not compatible with langchain v1.0. supports all OCI models including Cohere
+- How to build tools: https://docs.langchain.com/oss/python/langchain/tools
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+- OCI LangChain SDK: https://github.com/oracle-devrel/langchain-oci-genai
 - OCI GenAI SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI 
- - #igiu-innovation-lab: general discussions on your project 
- - #igiu-ai-learning: help with sandbox environment or help with running this code 
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+- .env: Loads environment variables if needed.
 
 How to run the file:
-uv run langChain/function_calling/langchain_step.py
+uv run langChain/function_calling/langchain_single_auto.py
 
-Comments to important sections of file:
-- Step 1: Load the config file        
-- Step 2: create the OpenAI LLM client using credentials and optional parameters
+Important sections:
+- Step 1: Load the configuration
+- Step 2: Create the LLM client
 - Step 3: Create the agent
-- Step 4: call the agent
+- Step 4: Invoke and stream the agent response
 """
 
-import sys, os
+import os
+import sys
 from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_core.messages import HumanMessage
@@ -40,7 +42,7 @@ from envyaml import EnvYAML
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
 
-# How to build tools: https://python.langchain.com/docs/how_to/custom_tools/
+# How to build tools: https://docs.langchain.com/oss/python/langchain/tools
 # NEW langchain version: https://docs.langchain.com/oss/python/langchain/agents
 # Version langchain 1.0.0 not compatible with langchain_oci current version 0.1.5
 
@@ -52,8 +54,7 @@ load_dotenv()
 
 # change LLMs to see how the differ, try both reasoning and non reasoning models and different families
 #LLM_MODEL = "xai.grok-4-1-fast-reasoning"
-#LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
-LLM_MODEL = "google.gemini-2.5-pro"
+LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
 
 # meta.llama-3.1-405b-instruct
 # meta.llama-3.3-70b-instruct
@@ -77,11 +78,10 @@ def get_projection_bill(current_bill: int, gas_oven: bool) -> int:
 
 tools = [get_weather, get_projection_bill]
 
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None

@@ -1,109 +1,106 @@
-## Welcome to the Function Calling Module
-In this module, we will experiment with the LLMs' ability to call functions. Function calling is synonymous with using tools, where an agent can be given a set of tools and decompose problems to solve them using those tools.
+# Welcome to the Function Calling Module
 
-In this module, we will explore the following capabilities:
-1. Single-step & multi step tools: LLM invoking a single function/tool vs orcestrating a sequence of tool calls
-2. Manual vs automated tool call: Different ways of handling LLM tool call requests 
+This module explores how LLMs use tools to solve user problems. In LangChain, function calling and tool calling are synonymous  related: the model decides when to call a tool, provides arguments, and then uses the tool result to continue reasoning.
 
+## What You Will Learn
+
+In this module, you will learn how to:
+
+1. Handle single-step and multi-step tool calls
+2. Compare manual tool orchestration with automatic agent orchestration
+3. Understand how LangChain binds tools to models
+4. Use notebooks to experiment with tool-calling patterns interactively
+5. Extend function calling into Model Context Protocol (MCP) workflows
 
 ## Environment Setup
-- `sandbox.yaml`: Contains OCI config, compartment
-- `.env`:  environment variables for secrets
-- Ensure you have access to OCI Generative AI services.
+
+- `sandbox.yaml`: Contains OCI configuration and compartment details.
+- `.env`: Loads environment variables and optional overrides.
+- Ensure you have access to OCI Generative AI services before running the examples.
 
 ## Suggested Study Order and File Descriptions
-The files are designed to build upon each other. Study them in this order for a progressive understanding:
 
-1. **langchain_single_manual.py**: Demonstrates basic single-step function calling where the LLM requests a single tool toolcall to answer a query.
-   - Key features: Binds a single tool to the LLM 
-   - How to run: `uv run langChain/function_calling/langchain_single_manual.py`.
-   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
+The files are designed to build on one another. Study them in this order for a progressive understanding:
 
-2. **langchain_multi_manual.py**: Demonstrates llm requesting multiple tool calls to answer a query
-   - Key features: Similar to langchain_single_manual.py but with multiple tool requests 
-   - How to run: `uv run langChain/function_calling/langchain_multi_manual.py`.
-   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
+1. **`langchain_single_manual.py`**
+   - Demonstrates basic single-step function calling where the model requests a single tool
+   - Highlights: manual tool execution, message history management, and final model reinvocation
+   - Run: `uv run langChain/function_calling/langchain_single_manual.py`
 
-3. **langchain_single_auto.py**: Demonstrates basic single-step function calling where langchaiun automatically handles the toolcall to answer a query.
-   - Key features: use of langChain agents for automaticl call toolcall handling
-   - How to run: `uv run langChain/function_calling/langchain_single_auto.py`.
-   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
+2. **`langchain_single_auto.py`**
+   - Demonstrates single-step function calling with automatic agent orchestration
+   - Highlights: `create_agent`, automatic tool handling, and streaming updates
+   - Run: `uv run langChain/function_calling/langchain_single_auto.py`
 
-4. **langchain_multi_manual.py**: Demonstrates how multiple tool call can be handled automatically by langchain
-   - Key features: use of langChain agents for automaticl call toolcall handling
-   - How to run: `uv run langChain/function_calling/langchain_multi_auto.py`.
-   - Docs: [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/)
+3. **`langchain_multi_manual.py`**
+   - Demonstrates manual multi-step tool orchestration in a loop
+   - Highlights: iterative tool calling, tool maps, and explicit model/tool handoff
+   - Run: `uv run langChain/function_calling/langchain_multi_manual.py`
 
+4. **`langchain_multi_auto.py`**
+   - Demonstrates multi-step tool orchestration with automatic agent handling
+   - Highlights: agent-managed multi-step reasoning and streamed progress output
+   - Run: `uv run langChain/function_calling/langchain_multi_auto.py`
 
-5. **singlestep_tool.ipynb**: A Jupyter notebook variation of single step tool calling demonstrating single-step tool calling with interactive cells and explanations.
-   - Key features: Mirrors the Python script; includes markdown for understanding, experiments with models and prompts.
-   - How to run: Open in Jupyter or VS Code and run cells sequentially.
-   - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Tools](https://python.langchain.com/docs/how_to/custom_tools/).
+5. **`singlestep_tool.ipynb`**
+   - Notebook walkthrough of single-step tool calling in both manual and automatic forms
+   - Highlights: guided explanations, experiments, and side-by-side comparison with the Python scripts
+   - Run: open in VS Code or Jupyter and execute cells sequentially
 
-6. **multistep_tool.ipynb**: A Jupyter notebook variation of  demonstrating multi-step tool orchestration with interactive cells and explanations.
-   - Key features: Mirrors the Python script; includes markdown, encourages experimentation with tools and prompts.
-   - How to run: Open in Jupyter or VS Code and run cells sequentially.
-   - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents).
+6. **`multistep_tool.ipynb`**
+   - Notebook walkthrough of multi-step tool orchestration in both manual and automatic forms
+   - Highlights: iterative tool loops, message handling, and streamed agent behavior
+   - Run: open in VS Code or Jupyter and execute cells sequentially
 
-7. **mcp/**: Model Context Protocol servers and client integration (subfolder).
-   - Key features: Demonstrates external MCP servers (weather and bill calculation), HTTP and stdio transports, tool discovery, and agent integration.
-   - Files: weather_mcp_server.py, bill_mcp_server.py, langchain_host.py, langchain_host.ipynb, readme_mcp.md.
-   - How to run: Start weather server first, then run langchain_host.py or use the notebook.
-   - Docs: [MCP Specification](https://modelcontextprotocol.io/specification), [LangChain MCP](https://docs.langchain.com/oss/python/langchain/mcp).
-
+7. **`mcp/`**
+   - Model Context Protocol servers and client integration examples
+   - Highlights: external tool servers, MCP transports, tool discovery, and host integration
+   - Includes: `weather_mcp_server.py`, `bill_mcp_server.py`, `langchain_mcp_auto.py`, `langchain_mcp_manual.py`, `langchain_mcp.ipynb`, `readme_mcp.md`, and related utilities
 
 ## Project Ideas
-Here are some ideas for projects you can build upon these examples. Focus on experimenting with tools, models, and pipelines to deepen your understanding:
 
-1. **Build a personal assistant agent**:
+Here are some ideas for projects you can build on top of these examples:
+
+1. **Build a personal assistant agent**
    - Create tools for weather, calendar, and email summaries.
    - Implement multi-step orchestration to plan a day based on weather and schedule.
-   - Experiment with adding memory (e.g., LangChain's memory modules) to retain context across interactions.
-   - Resources: [LangChain Memory](https://docs.langchain.com/oss/python/langchain/memory), [Custom Tools Guide](https://python.langchain.com/docs/how_to/custom_tools/).
 
-2. **Intelligent tool router**:
-   - Use classification (from llm_classification.py) to categorize user queries and route to appropriate tools.
-   - Add more categories and tools; test accuracy by comparing classified results with manual routing.
-   - Experiment with different prompts in the classifier to improve precision.
-   - Resources: [Prompt Engineering](https://docs.langchain.com/oss/python/langchain/guides/prompt_engineering), [OCI Gen AI Models](https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm).
+2. **Intelligent tool router**
+   - Classify user queries and route them to specialized tools.
+   - Compare manual routing with model-driven routing.
 
-3. **Semantic caching in RAG**:
-   - Integrate semantic cache from llm_semantic_cache.py into a RAG pipeline.
-   - Measure performance improvements by caching frequent queries.
-   - Experiment with different embedding models or similarity thresholds.
-   - Resources: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/), [LangChain Caching](https://docs.langchain.com/oss/python/langchain/caching).
+3. **Semantic cache integration**
+   - Combine tool-calling with semantic caching to reduce repeated work.
+   - Experiment with caching thresholds and repeated queries.
 
-4. **Streaming enhancements**:
-   - Modify streaming demos to handle errors gracefully.
-   - Compare streaming vs. non-streaming performance in multi-step scenarios.
-   - Experiment with partial streaming for tool calls.
-   - Resources: [LangChain Streaming](https://python.langchain.com/docs/how_to/streaming/).
+4. **Streaming-first tool workflows**
+   - Improve streaming output and explore how streamed updates help debugging.
 
-5. **Advanced agent with guardrails**:
-   - Add guardrails to prevent harmful tool calls (e.g., restrict sensitive data access).
-   - Experiment with multi-turn conversations and tool chaining.
-   - Resources: [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents), [OCI Gen AI Safety](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm).
+5. **Guardrailed tool-calling agent**
+   - Add validation or safety checks before allowing certain tools to run.
 
-## Learning and Experimentation Suggestions
-- **Start simple**: Begin with single-step demos to understand tool binding and invocation.
-- **Experiment with models**: Try different LLM_MODEL values. from different families (e.g., 'xai,grok-4', 'openai.gpt-5') to see how tool usage varies. try switchig between reasoning & non-reasoning models
-- **Modify tools**: Change tool logic or add parameters to observe how the LLM adapts.
-- **Debug streaming**: Use streaming versions to learn about real-time responses, but fall back to non-streaming if issues arise.
-- **Combine modules**: Integrate classification with tools for smarter agents, or add caching to reduce API calls.
-- **Performance tuning**: Time executions and experiment with reasoning parameters for optimization.
+## Ideas for Experimenting
+
+- **Prompt Engineering**: Change the prompt wording and observe how tool selection changes.
+- **Model Selection**: Compare reasoning and non-reasoning models across manual and automatic patterns.
+- **Tool Design**: Add more tools or change tool parameters and outputs.
+- **Streaming Behavior**: Compare non-streamed and streamed execution.
+- **Workflow Design**: Test where manual orchestration is easier to debug than agent-based automation.
 
 ## Resources and Links
+
 - **Documentation**:
   - [OCI Gen AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
   - [LangChain Agents and Tools](https://docs.langchain.com/oss/python/langchain/agents)
+  - [LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
   - [MCP Specification](https://modelcontextprotocol.io/specification)
   - [Fast MCP](https://gofastmcp.com/getting-started/welcome)
   - [LangChain MCP](https://docs.langchain.com/oss/python/langchain/mcp)
   - [OCI Python SDK](https://github.com/oracle/oci-python-sdk)
   - [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai)
-  - [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/)
+  
 
 - **Slack Channels**:
-  - **#igiu-ai-learning**: Help with sandbox environment or running code.
-  - **#igiu-innovation-lab**: Discuss project ideas.
-  - **#generative-ai-users**: Questions about OCI Gen AI.
+  - **#igiu-ai-learning**: Help with environment setup or running code
+  - **#igiu-innovation-lab**: Discuss project ideas
+  - **#generative-ai-users**: Questions about OCI Generative AI
