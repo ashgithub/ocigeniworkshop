@@ -1,13 +1,13 @@
 -- What this file does:
--- Demonstrates full RAG (Retrieval-Augmented Generation) implementation in Oracle 23ai using vector embeddings and AI profiles.
--- Shows how to create vector indexes from documents stored in Object Storage and perform natural language queries with citations.
+-- Demonstrates full Retrieval-Augmented Generation (RAG) in Oracle 23ai by using vector indexes and AI profiles.
+-- Shows how to create a vector index from documents stored in Object Storage and run natural-language queries with citations.
 
 -- Documentation to reference:
 -- - Oracle 23ai Select AI: https://docs.oracle.com/en/cloud/paas/autonomous-database/select-ai/
 -- - DBMS_CLOUD_AI Package: https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/DBMS_CLOUD_AI.html
 -- - Vector Operations: https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/
 
--- Relevant slack channels:
+-- Relevant Slack channels:
 -- - #adb-select-ai-users: questions about Oracle 23ai Select AI
 -- - #igiu-innovation-lab: general discussions on your project
 -- - #igiu-ai-learning: help with sandbox environment or help with running this code
@@ -62,7 +62,7 @@ END;
 /
 
 -- Step 4: Create vector index from documents in Object Storage
--- NOTE: Update the location URL below to point to your Object Storage bucket containing documents
+-- NOTE: Update the location URL below to point to your Object Storage bucket containing documents before running this step.
 BEGIN
     DBMS_CLOUD_AI.CREATE_VECTOR_INDEX(
         index_name => 'RAG_INDEX',
