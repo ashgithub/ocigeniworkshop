@@ -1,28 +1,29 @@
 """
 What this file does:
-Demonstrates function calling using OCI Generative AI Llama models. Shows how to define tools and handle tool calls with Llama models in a multi-step conversation.
+Demonstrates function-calling patterns with OCI-hosted Llama models. It shows
+how to define tools, process tool calls, and continue a multi-step conversation.
 
 Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - Llama Models: https://www.llama.com/
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment, and other details.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI config, compartment, and related details.
+- .env: Loads environment variables if needed.
 
 How to run the file:
-uv run function_calling/llama_tool_example.py
+uv run oci_genai/function_calling/llama_tool_example.py
 
-Comments to important sections of file:
-- Step 1: Define tools and make initial chat request with system and user messages.
-- Step 2+: Handle tool calls, provide results, and continue the conversation.
-- Experiment: Try different Llama models or modify tool definitions and responses.
+Important sections:
+- Step 1: Define tools and build the initial chat request
+- Step 2: Handle tool calls and append tool responses
+- Step 3: Continue the conversation until the model stops requesting tools
 """
 
 from dotenv import load_dotenv
@@ -54,11 +55,10 @@ llm_service_endpoint= "https://inference.generativeai.us-chicago-1.oci.oracleclo
 
 
 
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
@@ -77,7 +77,7 @@ report_tool.description = "Connects to a database to retrieve overall sales volu
 report_tool.parameters = {
     "date": {
                 "type": "string",
-                "description": "Retrieves sales data for this daye, formatted as YYYY-MM-DD."
+                "description": "Retrieves sales data for this day, formatted as YYYY-MM-DD."
             }
 }
 
@@ -88,7 +88,7 @@ calculator_tool.description = "Connects to a database to retrieve overall sales 
 calculator_tool.parameters = {
             "city_name": {
                 "type": "string",
-                "description": "The expression to caculatie"
+                "description": "The expression to calculate"
             }
     }
 
@@ -109,12 +109,12 @@ user_msg.content = [
 ] 
 
 
-def get_tool_message(result, id):
+def get_tool_message(result, tool_call_id):
         content = oci.generative_ai_inference.models.TextContent()
         content.text = str(result)
         message = oci.generative_ai_inference.models.ToolMessage()
         message.content = [content] 
-        message.tool_call_id = call.id
+        message.tool_call_id = tool_call_id
 
         return message
 
@@ -185,5 +185,5 @@ while response_message.tool_calls and len(response_message.tool_calls) > 0:
     print(f"**************************Step {step} Result**************************")
     print(vars(response_message))
 
-print(f"\n\n\************************** final result **************************")
+print("\n\n************************** final result **************************")
 print(response_message.content[0].text)

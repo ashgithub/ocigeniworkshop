@@ -1,8 +1,8 @@
 ## Welcome to the Speech Module
 
-In this module, you will experiment with Oracle Cloud Infrastructure (OCI) Speech services for **Text-to-Speech (TTS)** and **Speech-to-Text (STT)**.
+This module explores Oracle Cloud Infrastructure (OCI) Speech services for **Text-to-Speech (TTS)** and **Speech-to-Text (STT)** workflows.
 
-### What you will try
+## What You Will Learn
 
 1. **Text-to-Speech (TTS)** – Explore available voice models, convert text to speech, and experiment with different languages.
 2. **Speech-to-Text (STT)** – Use batch transcription with OCI Speech (Oracle model) and Whisper models, compare results.
@@ -12,7 +12,7 @@ In this module, you will experiment with Oracle Cloud Infrastructure (OCI) Speec
 
 ---
 
-### Environment Setup
+## Environment Setup
 
 - **sandbox.yaml**: Contains OCI config, compartment, bucket details.
 - **.env**: Load environment variables if needed.

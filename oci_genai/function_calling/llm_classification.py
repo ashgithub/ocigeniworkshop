@@ -7,19 +7,19 @@ Documentation to reference:
 - Cohere Command Models: https://docs.cohere.com/docs/command-r
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, and other details.
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
 uv run function_calling/llm_classification.py
 
-Comments to important sections of file:
+Important sections:
 - Setup: Load config and initialize client.
 - Classification: Define preamble with categories and make chat request.
 - Experiment: Try different questions or modify categories in the preamble.
@@ -64,17 +64,17 @@ def get_chat_request():
         cohere_chat_request = CohereChatRequest()
         cohere_chat_request.preamble_override = """
         
-        You are a call classifier you carefully analyze teh question and classify it into one of the following categories. 
-        you then return just the category in response
+        You are a call classifier. Carefully analyze the question and classify it into one of the following categories.
+        Return only the category name in the response.
         
         categories: billing, outage, program, service
         
         eg: 
-        question:  can i pay my bill by creditcard
+        question: can I pay my bill by credit card
         answer: billing
-        question: i need to cancel my service as i am moving
+        question: I need to cancel my service because I am moving
         answer: service
-        question: when will by power come back on?
+        question: when will my power come back on?
         answer: outage
         
         """
@@ -95,7 +95,7 @@ def get_chat_detail (llm_request,compartmentId):
         return chat_detail
 
 
-#set up the oci gen ai client based on config 
+# Set up the OCI Gen AI client based on the loaded config.
 scfg = load_config(SANDBOX_CONFIG_FILE)
 config = oci.config.from_file(os.path.expanduser(scfg["oci"]["configFile"]),scfg["oci"]["profile"])
 

@@ -8,12 +8,12 @@ Documentation to reference:
 - Oracle DB Vectors: https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference
 
-Relevant slack channels:
-- #generative-ai-users: For OCI GenAI questions
-- #igiu-innovation-lab: Project discussions
-- #igiu-ai-learning: Environment/code help
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Needs "oci" and "db" sections (configFile, profile, compartment, tablePrefix, walletPath, username, password, dsn, walletPass).
 - .env: Load environment variables if needed.
 - Download wallet for DB access.
@@ -21,7 +21,7 @@ Env setup:
 How to run the file:
 uv run rag/cohere-rag-26ai.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and set up clients.
 - Step 2: Define mock chunks and source metadata.
 - Step 3: Set up DB connection and create vector table.

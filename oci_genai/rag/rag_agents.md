@@ -1,6 +1,6 @@
-# OCI Gen AI Agent Service
+# OCI GenAI Agent Service
 
-OCI RAG agents have a hard usage limit. We can only have one agent in the tenancy. As this tenancy is shared, we all use the same agent by adding our documents to the knowledge base associated with the agent and rerunning the ingestion job.
+OCI RAG agents have a practical shared-usage constraint in this sandbox environment. Because the tenancy is shared, users typically work with the same agent by adding documents to the associated knowledge base and rerunning ingestion.
 
 ## Steps in OCI Console
 
@@ -12,13 +12,13 @@ OCI RAG agents have a hard usage limit. We can only have one agent in the tenanc
    - Select the data source for the knowledge.
    - Note the bucket used by the datasource.
 
-2. **Upload the document to datasource**:
+2. **Upload the document to the data source**:
    - Change tenancy to Phoenix.
    - Go to Object Storage and to the bucket found in step 1.
    - Find the folder for the knowledge base.
    - Upload your file.
 
-3. **Restart the pipeline**:
+3. **Restart the ingestion pipeline**:
    - Change tenancy to Chicago.
    - Navigate to agent, knowledge base.
    - Click on the datasource.
@@ -26,13 +26,13 @@ OCI RAG agents have a hard usage limit. We can only have one agent in the tenanc
    - Wait for ingestion to complete (track % in Work Requests for ingestion job).
    - Small files are faster; large files may take >5 mins.
 
-4. **Go to chat console for the agent**:
+4. **Go to the chat console for the agent**:
    - Go to the agent.
    - Click on the endpoint.
    - Click on Launch Chat.
    - Ask questions related to the uploaded file.
 
-5. **Go to code**:
+5. **Run the code example**:
    - Verify endpoint in sandbox.yaml matches your agent.
    - Run the Python script.
    - Ask questions related to the uploaded file.

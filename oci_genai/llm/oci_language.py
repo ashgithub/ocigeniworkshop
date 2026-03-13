@@ -4,26 +4,26 @@ Demonstrates OCI Language service capabilities for natural language processing t
 
 Documentation to reference:
 - OCI Language: https://docs.oracle.com/en-us/iaas/language/using/home.htm
-- Sentiment Analysis: hhttps://docs.oracle.com/en-us/iaas/Content/language/using/sentment.htm
+- Sentiment Analysis: https://docs.oracle.com/en-us/iaas/Content/language/using/sentiment.htm
 - Key Phrases: https://docs.oracle.com/en-us/iaas/Content/language/using/key_ref.htm
 - Named Entities: https://docs.oracle.com/en-us/iaas/Content/language/using/ner.htm
 - Text Classification: https://docs.oracle.com/en-us/iaas/Content/language/using/text-class.htm
 - PII Detection: https://docs.oracle.com/en-us/iaas/Content/language/using/pii.htm
 - OCI Python SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/ai_language
 
-Relevant slack channels:
-- #oci_ai_lang_service_users: for questions on OCI Language service
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #oci_ai_lang_service_users: Questions about OCI Language service
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, and other details.
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
 uv run llm/oci_language.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load configuration and initialize client.
 - Step 2: Prepare text document for analysis.
 - Step 3: Perform sentiment analysis.
@@ -51,11 +51,10 @@ SAMPLE_TEXT = """Oracle Cloud Infrastructure is built for enterprises seeking hi
 # Global compartment ID (set during execution)
 compartment_id = None
 
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-                return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None

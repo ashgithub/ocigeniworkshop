@@ -1,16 +1,18 @@
 
 ## Welcome to the LLM Module
 
-In this module, we will experiment with OCI Generative AI APIs, exploring both Cohere models for advanced language tasks and OpenAI-compatible models for unified access to various hosted LLMs. We also demonstrate OCI Language service for efficient small language model tasks.
+This module explores OCI Generative AI APIs, including Cohere-based chat models, OpenAI-compatible model access, and OCI Language service examples for targeted NLP tasks.
 
-In this module, we will explore the following capabilities:
+## What You Will Learn
+
+In this module, you will learn how to:
 1. Basic chat functionality with Cohere models and parameter experimentation
 2. Conversation history management for contextual responses
 3. Streaming responses for real-time token delivery
 4. Structured output generation with JSON schemas
 5. OpenAI-compatible API usage with multiple model providers
-6. Conversational streaming with history maintenance
-7. Natural language processing with OCI Language service
+6. Maintain conversation context with OpenAI-compatible models
+7. Use OCI Language service for targeted NLP tasks
 
 ## Environment Setup
 - `sandbox.yaml`: Contains OCI config, compartment, and other details.
