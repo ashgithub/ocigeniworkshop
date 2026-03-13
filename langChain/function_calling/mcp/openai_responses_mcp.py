@@ -1,29 +1,27 @@
 """
-OCI Responses API MCP Demo
+What this file does:
+Demonstrates OCI OpenAI Responses API integration with remote MCP servers. The
+model can call remote MCP tools directly through `responses.create()`.
 
-This file demonstrates how an OCI-hosted OpenAI-compatible client lets an LLM call remote MCP
-servers directly via the responses.create() method. Uses OCI Generative AI for the model and
-native MCP tool execution on each request.
-
-Documentation:
+Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - OpenAI Responses API with MCP: https://platform.openai.com/docs/guides/tools-connectors-mcp
 - Model Context Protocol overview: https://modelcontextprotocol.io
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 
-Environment Setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path
-- .env: Load environment variables (API keys if needed)
+Environment setup:
+- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- .env: Loads environment variables if needed.
 
-How to run:
-1. Start MCP server: uv run langChain/function_calling/mcp/weather_mcp_server.py
-2. Run this client: uv run langChain/function_calling/mcp/langchain_host_responses.py
-3. Set up ngrok tunnel: ngrok http 8000 --host-header=localhost:8000
+How to run the file:
+1. Start the weather MCP server: `uv run langChain/function_calling/mcp/weather_mcp_server.py`
+2. Expose it if needed with ngrok: `ngrok http 8000 --host-header=localhost:8000`
+3. Run this client: `uv run langChain/function_calling/mcp/openai_responses_mcp.py`
 
-Slack channels:
-- #generative-ai-users: OCI Gen AI questions
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
 - #igiu-innovation-lab: General project discussions
-- #igiu-ai-learning: Sandbox environment help
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 """
 
 import sys
@@ -45,7 +43,7 @@ load_dotenv()
 LLM_MODEL = "openai.gpt-5"
 # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
-def main():
+def main() -> None:
     """Main function demonstrating MCP integration with OpenAI Responses API."""
 
     # Load configuration and initialize OCI client
@@ -73,7 +71,7 @@ def main():
     if not user_weather_url:
         print(f"Using default Weather MCP URL: {weather_mcp_url}\n")
 
-    llm_client = OCIOpenAIHelper.get_sync_openai_key_client(
+    llm_client = OCIOpenAIHelper.get_sync_openai_client(
         config=config,
     )
 
@@ -86,7 +84,7 @@ def main():
             "server_url": "https://mcp.deepwiki.com/mcp",
             "require_approval": "never",
         },
-         {
+          {
             "type": "mcp",
             "server_label": "tiktoken",
             "require_approval": "never",
@@ -98,7 +96,9 @@ def main():
             "server_label": "weather",
             "server_url": weather_mcp_url,
             "require_approval": "never",
-        },
+            "defer_loading": "true",
+
+         },
     ]
 
     print("Running sample query with MCP tools...\n")
@@ -108,7 +108,10 @@ def main():
         model=LLM_MODEL,
         store=False,
         tools=server_tools,
-        input="What is weather in arlington, va",
+        input = "Whay is BPE in tiktoken specification?"
+        #other question to ask 
+        #input="What is weather in arlington, va",
+        #input="What transport protocols does the 2025-03-26 version of the MCP spec (modelcontextprotocol/modelcontextprotocol) support?"
     )
 
     print("AI Response:", response.output_text)
