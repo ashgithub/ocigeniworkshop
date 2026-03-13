@@ -1,6 +1,8 @@
 """
 What this file does:
-Demonstrates conversation history management in chat interactions using OCI's OpenAI-compatible API. Shows the difference between stateless conversations and conversations with maintained history.
+Demonstrates stateful conversations by using OCI's OpenAI-compatible Responses
+API. It shows both previous-response chaining and persistent conversation store
+usage.
 
 Documentation to reference:
 - OCI Gen AI Chat Models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
@@ -8,25 +10,23 @@ Documentation to reference:
 - LangChain Messages: https://docs.langchain.com/oss/python/langchain_core/messages
 - Conversation Memory: https://docs.langchain.com/oss/python/langchain/memory
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
-- sandbox.yaml: Contains OCI config, compartment details.
-- .env: Load environment variables (e.g., API keys if needed).
+Environment setup:
+- sandbox.yaml: Contains OCI config and compartment details.
+- .env: Loads environment variables if needed.
 
 How to run the file:
 uv run langChain/llm/openai_oci_responses_stateful.py
 
-rember to note the conversation id ans use it in subsequent conversations
-
-Comments to important sections of file:
-- Step 1: Load config and initialize client.
-- Step 2: Define conversation questions.
-- Step 3: Demonstrate stateful conversation using previous response ID.
-- Step 4: Interactive demo of conversation store using OCI APIs.
+Important sections:
+- Step 1: Load configuration and initialize the client
+- Step 2: Define the conversation questions
+- Step 3: Demonstrate previous-response chaining
+- Step 4: Demonstrate persistent conversation store usage
 """
 
 import os
@@ -46,11 +46,10 @@ load_dotenv()
 LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
 #LLM_MODEL = "openai.gpt-4.1"
 # Step 1: Load config and initialize client
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None

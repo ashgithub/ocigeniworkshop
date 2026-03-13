@@ -8,19 +8,19 @@ Documentation to reference:
 - OpenAI Reasoning API: https://platform.openai.com/docs/guides/reasoning
 - LangChain Chat Models: https://docs.langchain.com/oss/python/langchain/chat_models
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment details.
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
 uv run langChain/llm/openai_oci_reasoning.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and import dependencies.
 - Step 2: Define reasoning-focused messages.
 - Step 3: Initialize client with reasoning parameters.
