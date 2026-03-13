@@ -1,37 +1,35 @@
 """
 What this file does:
-Demonstrates a full RAG (Retrieval-Augmented Generation) example using OCI Generative AI for embeddings and LLM, with Oracle DB for vector storage and semantic search.
+Demonstrates a full Retrieval-Augmented Generation (RAG) workflow using OCI
+embeddings, Oracle Database vector storage, and an OCI-hosted chat model.
 
 Documentation to reference:
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - LangChain: https://docs.langchain.com/oss/python/langchain/overview
 - Oracle DB Vectors: https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai  note: supports OpenAI, XAI & Meta models. Also supports OpenAI Responses API 
-- OCI langchain SDK: https://github.com/oracle-devrel/langchain-oci-genai  note: as of Nov 2025 it is not compatible with langchain v1.0. supports all OCI models including Cohere
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+- OCI LangChain SDK: https://github.com/oracle-devrel/langchain-oci-genai
 - OCI GenAI SDK: https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models
 
-Relevant slack channels:
- - #generative-ai-users: for questions on OCI Gen AI 
- - #igiu-innovation-lab: general discussions on your project 
- - #igiu-ai-learning: help with sandbox environment or help with running this code 
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
-- .env: Load environment variables (e.g., API keys if needed).
+- .env: Loads environment variables if needed.
 
 How to run the file:
 uv run langChain/rag/langchain_rag_26ai.py
 
-Comments to important sections of file:
-- Step 1: Load config and initialize clients.
-- Step 2: Load and chunk the PDF document.
-- Step 3: Generate embeddings for chunks.
-- Step 4: Set up Oracle DB connection and create vector table.
-- Step 5: Insert embeddings into DB.
-- Step 6: Define semantic search function.
-- Step 7: Helper to build context from search results.
-- Step 8: RAG workflow: retrieve, augment, generate.
-- Step 9: Interactive loop for user queries.
+Important sections:
+- Step 1: Load configuration and initialize clients
+- Step 2: Load and chunk the PDF document
+- Step 3: Generate embeddings for chunks
+- Step 4: Store embeddings in Oracle Database
+- Step 5: Define retrieval helpers and the RAG answer flow
+- Step 6: Run the interactive query loop
 """
 
 import os
@@ -72,11 +70,10 @@ OCI_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 LLM_MODEL = "openai.gpt-4.1"
 
 # Step 1: Load config and initialize clients
-def load_config(config_path):
+def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
     try:
-        with open(config_path, 'r') as f:
-            return EnvYAML(config_path)
+        return EnvYAML(config_path)
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.")
         return None
