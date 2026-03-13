@@ -3,24 +3,23 @@ What this file does:
 Generates natural-sounding speech clips from text prompts using OCI-hosted GPT-Audio models. Stores the audio locally so you can test responses or feed them into downstream workflows.
 
 Documentation to reference:
-- Open AI Audio: https://developers.openai.com/api/docs/guides/audio
+- OpenAI Audio: https://developers.openai.com/api/docs/guides/audio
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
-- note oci doesnt support audio -> audio just yet (as of feb 2026)
+- Note: OCI does not support audio-to-audio workflows yet (as of Feb 2026).
 
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
 
-Relevant slack channels:
-- #generative-ai-users: for questions on OCI Gen AI
-- #igiu-innovation-lab: general discussions on your project
-- #igiu-ai-learning: help with sandbox environment or help with running this code
-
-Env setup:
+Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, and profile details.
 - .env: Store overrides like `VOICE_NAME` or `AUDIO_FORMAT` if you want to experiment.
 
 How to run the file:
 uv run langChain/multimodal/text_to_speech.py
 
-Comments to important sections of file:
+Important sections:
 - Step 1: Load config and initialize the OCI OpenAI chat client.
 - Step 2: Define the text prompt, voice, and output path.
 - Step 3: Call GPT-Audio and extract the synthesized voice track.
@@ -28,13 +27,13 @@ Comments to important sections of file:
 """
 
 import base64
-import os,sys
+import os
+import sys
 from pathlib import Path
 from typing import Tuple
 
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from oci_openai_helper import OCIOpenAIHelper
