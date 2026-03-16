@@ -33,6 +33,7 @@ USER_AGENT = "weather-app/1.0"
 # Step 2: Helper function to make requests to the weather API
 async def make_nws_request(url: str) -> dict[str, Any] | None:
     """Make a request to the NWS API with proper error handling."""
+    print(f"calling {url=}")
     headers = {
         "User-Agent": USER_AGENT,
         "Accept": "application/geo+json"
