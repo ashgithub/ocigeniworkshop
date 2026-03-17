@@ -116,6 +116,11 @@ class OCIOpenAIHelper:
             base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
             #base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
 
+            http_client=httpx.Client(auth=OciUserPrincipalAuth(profile_name=config['oci']['profile'])),  # or OciResourcePrincipalAuth | OciInstancePrincipalAuth | OciUserPrincipalAuth,
+                default_headers={
+                "opc-compartment-id": config['oci']['compartment'],  # a compartment of your tenancy that this caller identity has access to 
+                "opc-conversation-store-id": config['oci']['conversation_store']  # conversation stored to be used 
+                },
             api_key=config['oci']['api_key'],
             model=model_name,
             store = False,
