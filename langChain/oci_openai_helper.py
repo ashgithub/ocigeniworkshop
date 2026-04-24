@@ -47,6 +47,7 @@ class OCIOpenAIHelper:
               "modalities": ["text", "audio"],
               "audio": {"voice": "alloy", "format": "wav"},
             },
+        
             
             **kwargs
         )
@@ -82,6 +83,7 @@ class OCIOpenAIHelper:
             region=region,
             auth=OciUserPrincipalAuth(profile_name=config['oci']['profile']),
             compartment_id= config['oci']['compartment'],
+#            project=config['oci']['project'],
             store=store,
             **kwargs
         )
@@ -113,17 +115,18 @@ class OCIOpenAIHelper:
         region = "us-chicago-1"
 
         client = ChatOpenAI(
-            base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
-            #base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+            
+            base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
 
             http_client=httpx.Client(auth=OciUserPrincipalAuth(profile_name=config['oci']['profile'])),  # or OciResourcePrincipalAuth | OciInstancePrincipalAuth | OciUserPrincipalAuth,
                 default_headers={
-                "opc-compartment-id": config['oci']['compartment'],  # a compartment of your tenancy that this caller identity has access to 
-                "opc-conversation-store-id": config['oci']['conversation_store']  # conversation stored to be used 
+             #   "opc-compartment-id": config['oci']['compartment'],  # a compartment of your tenancy that this caller identity has access to 
+                "OpenAI-Project": config['oci']['project']
                 },
             api_key=config['oci']['api_key'],
             model=model_name,
             store = False,
+            
             **kwargs
         )
         return client
@@ -153,9 +156,8 @@ class OCIOpenAIHelper:
         client = OciOpenAI(
             auth=OciUserPrincipalAuth(profile_name=config['oci']['profile']),
             compartment_id=config['oci']['compartment'],
-            conversation_store_id= config['oci']['conversation_store'],  # conversation stored to be used
             region="us-chicago-1",
-            store=store,
+#            store=store,
             **kwargs
         )
         return client 
@@ -183,9 +185,9 @@ class OCIOpenAIHelper:
         client = AsyncOciOpenAI(
             auth=OciUserPrincipalAuth(profile_name=config['oci']['profile']),
             compartment_id=config['oci']['compartment'],
-            conversation_store_id= config['oci']['conversation_store'],  # conversation stored to be used
+        #    conversation_store_id= config['oci']['conversation_store'],  # conversation stored to be used
             region="us-chicago-1",
-            store=store,
+        #    store=store,
             **kwargs
         )
         return client 
@@ -211,12 +213,12 @@ class OCIOpenAIHelper:
         client = OpenAI(
             base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
             api_key="not-used",  # type: ignore
+            project=config['oci']['project'],
             #store = store, need to specify per request
             http_client=httpx.Client(auth=OciUserPrincipalAuth(profile_name=config['oci']['profile'])),  # or OciResourcePrincipalAuth | OciInstancePrincipalAuth | OciUserPrincipalAuth,
-                default_headers={
-                "opc-compartment-id": config['oci']['compartment'],  # a compartment of your tenancy that this caller identity has access to 
-                "opc-conversation-store-id": config['oci']['conversation_store']  # conversation stored to be used 
-                }
+            default_headers={
+               "opc-compartment-id": config['oci']['compartment'],  # a compartment of your tenancy that this caller identity has access to 
+               }
             )
 
         return client 
@@ -243,11 +245,11 @@ class OCIOpenAIHelper:
             base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
             api_key="not-used",  # type: ignore
         #    store=store,    # need to specify per request
+            project=config['oci']['project'],
             http_client=httpx.AsyncClient(auth=OciUserPrincipalAuth(profile_name=config['oci']['profile'])),  # or OciResourcePrincipalAuth | OciInstancePrincipalAuth | OciUserPrincipalAuth,
-                default_headers={
-                "opc-compartment-id": config['oci']['compartment'],  # a compartment of your tenancy that this caller identity has access to 
-                "opc-conversation-store-id": config['oci']['conversation_store'] # conversation stored to be used 
-                }
+            default_headers={
+               "opc-compartment-id": config['oci']['compartment'],  # a compartment of your tenancy that this caller identity has access to 
+               }
             )
 
         return client  
@@ -271,9 +273,10 @@ class OCIOpenAIHelper:
             Uses httpx client with OCI authentication. Model specified per API call.
         """
         client = OpenAI(
-            base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
-            #base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
-            api_key=config['oci']['api_key']
+            #base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+            base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+            api_key=config['oci']['api_key'],
+            project=config['oci']['project']
             )
 
         return client 
@@ -297,9 +300,10 @@ class OCIOpenAIHelper:
             Uses httpx client with OCI authentication. Model specified per API call.
         """
         client = AsyncOpenAI(
-            base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
-            #base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
-            api_key=config['oci']['api_key']
+            #base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+            base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+            api_key=config['oci']['api_key'],
+            project=config['oci']['project']
             )
 
         return client 
@@ -626,31 +630,34 @@ if __name__ == "__main__":
         ("human", "I love programming."),
     ]
 
-    #test_langchain_ocigenai_sync_chat(model_name="google.gemini-2.5-flash-lite", question="where is paris? ")
-    test_langchain_ocigenai_audio(model_name="openai.gpt-audio", question="where is paris? ") 
+#    test_langchain_ocigenai_sync_chat(model_name="google.gemini-2.5-flash-lite", question="where is paris? ")
+#    test_langchain_ocigenai_audio(model_name="openai.gpt-audio", question="where is paris? ") 
     
+    ## ok  
+    # test_langchain_ociopenai_sync_chat(model_name="openai.gpt-4.1",question="where is paris?")
+    #test_langchain_ociopenai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
+
+    test_langchain_openai_sync_chat(model_name="openai.gpt-4.1",question="where is paris?")
+    test_langchain_openai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
+
     
-#    test_langchain_ociopenai_sync_chat(model_name="openai.gpt-4.1",question="where is paris?")
-#    test_langchain_ociopenai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
+    # test_ociopenai_sync_chat(model_name="openai.gpt-4.1", question="where is paris? ")
+    # test_ociopenai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
 
-#    test_langchain_openai_sync_chat(model_name="openai.gpt-4.1",question="where is paris?")
-#    test_langchain_openai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
+    # test_openai_sync_chat(model_name="openai.gpt-4.1", question="where is paris? ")
+    # test_openai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
+    # test_openai_key_sync_chat(model_name="openai.gpt-4.1", question="where is paris? ")
+    # test_openai_key_sync_responses(model_name="openai.gpt-5.2", question="where is paris? ")
 
-#    test_ociopenai_sync_chat(model_name="openai.gpt-4.1", question="where is paris? ")
-#    test_ociopenai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
+    # asyncio.run(test_langchain_ociopenai_async_chat())
 
-#    test_openai_sync_chat(model_name="openai.gpt-4.1", question="where is paris? ")
-#    test_openai_sync_responses(model_name="openai.gpt-4.1", question="where is paris? ")
-#    test_openai_key_sync_chat(model_name="openai.gpt-4.1", question="where is paris? ")
-#    test_openai_key_sync_responses(model_name="openai.gpt-5.2", question="where is paris? ")
+    #fail asyncio.run(test_langchain_ociopenai_async_responses())
 
-#    asyncio.run(test_langchain_ociopenai_async_chat())
-#    asyncio.run(test_langchain_ociopenai_async_responses())
-#    asyncio.run(test_langchain_openai_async_chat())
-#    asyncio.run(test_langchain_openai_async_responses())
-#    asyncio.run(test_ociopenai_async_chat())
-#    asyncio.run(test_ociopenai_async_responses())
-#    asyncio.run(test_openai_async_chat())
-#    asyncio.run(test_openai_async_responses())
-#    asyncio.run(test_openai_key_async_chat())
-#    asyncio.run(test_openai_key_async_responses())
+    # asyncio.run(test_langchain_openai_async_chat())
+    # asyncio.run(test_langchain_openai_async_responses())
+    # asyncio.run(test_ociopenai_async_chat())
+    # asyncio.run(test_ociopenai_async_responses())
+    # asyncio.run(test_openai_async_chat())
+    # asyncio.run(test_openai_async_responses())
+    # asyncio.run(test_openai_key_async_chat())
+    # asyncio.run(test_openai_key_async_responses())

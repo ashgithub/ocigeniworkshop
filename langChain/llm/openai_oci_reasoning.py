@@ -41,7 +41,7 @@ load_dotenv()
 config = EnvYAML("sandbox.yaml")
 
 # Step 2: Define reasoning-focused messages
-LLM_MODEL = "openai.gpt-5"
+LLM_MODEL = "openai.gpt-5.2"
 
 messages = [
     (

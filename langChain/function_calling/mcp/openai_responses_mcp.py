@@ -90,15 +90,8 @@ def main() -> None:
             "require_approval": "never",
             "server_url": "https://gitmcp.io/openai/tiktoken",
             "allowed_tools": ["fetch_tiktoken_documentation"]
-        },
-        {
-            "type": "mcp",
-            "server_label": "weather",
-            "server_url": weather_mcp_url,
-            "require_approval": "never",
-            "defer_loading": "true",
-
-         },
+        }
+       
     ]
 
     print("Running sample query with MCP tools...\n")

@@ -113,7 +113,7 @@ tools = [get_weather, get_city, get_clothes]
 agent = create_agent(
     model=openai_llm_client,
     tools=tools,
-    system_prompt="Answer questions by using the provided tools. Some queries may require multiple tool calls.",
+    system_prompt="Answer questions by using the provided tools. Some queries may require multiple tool calls. DO not assume any thing. only use the tools. I am a 50 yr old guy",
 )
 print("************************** Agent ready **************************")
 

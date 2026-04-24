@@ -55,7 +55,7 @@ END;
 -- Step 3: Clean up existing profile
 BEGIN
     dbms_cloud_ai.drop_profile(
-        profile_name => 'genaish',
+        profile_name => 'genaish2',
         force => true
     );
 END;
@@ -90,7 +90,7 @@ SET WRAP ON
 -- Step 7: Sample Select AI queries demonstrating different modes
 
 -- Basic AI query - returns natural language answer
-SELECT AI 'how many customers exist';
+SELECT AI 'how many customers exist'
 
 -- Show the SQL that would be executed
 SELECT AI showsql 'how many customers exist';
