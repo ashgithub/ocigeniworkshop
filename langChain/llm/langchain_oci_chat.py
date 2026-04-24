@@ -124,7 +124,7 @@ print(response.content)
 # Step 7: System and user prompt types demonstration
 print(f"\n\n**************************Chat Result with system & user prompts for {llm_client.model_id} **************************")
 system_message = {"role": "system", "content": "You are a poetic assistant who responds in exactly four lines."}
-user_message = {"role": "user", "content": "What is the meaning of life?"}
+user_message = {"role": "user", "content": "What are teh best tourist spots in mexico?"}
 messages = [system_message, user_message]
 
 response = llm_client.invoke(messages)

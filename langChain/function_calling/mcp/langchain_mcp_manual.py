@@ -100,7 +100,7 @@ async def build_oci_model():
 async def call_manual_agent():
     """Make a manual MCP-enabled tool-calling loop similar to the base workshop demo."""
 
-    prompt = "Which will be my projected bill? I'm in San Francisco, and I have oven. My past bill was $45"
+    prompt = "Which will be my projected bill? I'm in San Francisco, and I have gas oven. My past bill was $45"
     #prompt = "what is the weather in the capital of US, are there any weather alerts"
     messages = [HumanMessage(prompt)]
 
