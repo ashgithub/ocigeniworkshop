@@ -1,7 +1,7 @@
 """ 
 This is a provider to fetch connections using the OCI methods and auth
 In normal mode is required to have a valid OpenAI API Key and project id
-For using this case, we only require project id and conversation store
+For using this case, we only require project ID
 The other auth methods follow the same OCI patterns to work
 """
 
@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEFAULT_SANDBOX_CONFIG = "sandbox.yaml"
+DEFAUL_OPENAI_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
 
 class SandBoxConfigKeyNotSetException(Exception):
     """Raised when required config keys are missing."""
@@ -27,12 +28,11 @@ class OpenAIClientProvider:
         self.scfg = self.load_config(self.config_path)       
         
         # get the values from env variables
-        self.oci_openai_endpoint = os.environ.get("OPENAI_SERVICE_ENDPOINT")
+        self.oci_openai_endpoint = DEFAUL_OPENAI_ENDPOINT
         self.oci_openai_api_key = self.scfg['oci']['api_key']
-        self.oci_openai_project = os.environ.get("OCI_OPENAI_PROJECT")
+        self.oci_openai_project = self.scfg['oci']['project']
         self.oci_compartment_id = self.scfg['oci']['compartment']
         self.oci_openai_profile = self.scfg['oci']['profile']
-        self.oci_openai_conversation_store = self.scfg['oci']['conversation_store']
         
         #verify that the env is set correctly
         self._verify_required_config()
@@ -55,8 +55,8 @@ class OpenAIClientProvider:
             missing.append("openai.service_endpoint")
         if not self.oci_compartment_id:
             missing.append("oci.compartment")
-        if not self.oci_openai_conversation_store:
-            missing.append("oci.conversation_store")
+        if not self.oci_openai_project:
+            missing.append("oci.project")
 
         if missing:
             raise SandBoxConfigKeyNotSetException(
@@ -69,8 +69,6 @@ class OpenAIClientProvider:
         if self.oci_compartment_id:
             headers["opc-compartment-id"] = self.oci_compartment_id
             headers["CompartmentId"] = self.oci_compartment_id
-        if self.oci_openai_conversation_store:
-            headers["opc-conversation-store-id"] = self.oci_openai_conversation_store
         return headers
 
     # Client for responses.create use cases
@@ -78,9 +76,7 @@ class OpenAIClientProvider:
         client = OpenAI(
             base_url=self.oci_openai_endpoint,
             api_key=self.oci_openai_api_key,
-            # Not using temporarly, project needs permissions, using conversation store instead.
-            # Conversation store passed on headers
-            # project=self.oci_openai_project,
+            project=self.oci_openai_project,
             default_headers=self._default_headers(),
             http_client=httpx.Client(
                 auth=OciUserPrincipalAuth(profile_name=self.oci_openai_profile)
@@ -94,7 +90,7 @@ class OpenAIClientProvider:
         async_client = AsyncOpenAI(
             base_url=self.oci_openai_endpoint,
             api_key=self.oci_openai_api_key,
-            # project=self.oci_openai_project,
+            project=self.oci_openai_project,
             default_headers=self._default_headers(),
             http_client=httpx.AsyncClient(
                 auth=OciUserPrincipalAuth(profile_name=self.oci_openai_profile)
@@ -116,5 +112,5 @@ class OpenAIClientProvider:
     # Allows connections through OCI instead of native OpenAI clients
     def configure_agents_oci_env(self) -> AsyncOpenAI:
         set_default_openai_client(self.oci_openai_async_client, use_for_tracing=False)
-        set_default_openai_api("responses")
+        set_default_openai_api(self.oci_openai_api_key)
         return self.oci_openai_async_client
