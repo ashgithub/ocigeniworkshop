@@ -39,8 +39,8 @@ from openai import OpenAI
 from openai_sdk.openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
-IMAGE_PATH = Path("public/test_image.png")
-FILE_PATH = Path("public/fema_outage_flyer.pdf")
+IMAGE_PATH = Path("output/test_image.png")
+FILE_PATH = Path("output/fema_outage_flyer.pdf")
 IMAGE_PROMPT = "What's in this image?"
 FILE_PROMPT = "What's discussed in the file?"
 

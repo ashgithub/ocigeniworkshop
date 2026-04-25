@@ -38,7 +38,7 @@ from openai_sdk.openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 IMAGE_PROMPT = "Generate an image of a dog race golden playing with a samoyen"
-OUTPUT_IMAGE_PATH = Path("public/otter.png")
+OUTPUT_IMAGE_PATH = Path("output/otter.png")
 
 
 def main() -> None:

@@ -43,7 +43,7 @@ from openai_sdk.openai_client_provider import OpenAIClientProvider
 MODEL_ID = "openai.gpt-5.2"
 DEFAULT_STT_MODEL = "openai.gpt-4o-transcribe"
 DEFAULT_TTS_MODEL = "openai.gpt-4o-mini-tts"
-DEFAULT_OUTPUT_FILE = "public/voice_output.wav"
+DEFAULT_OUTPUT_FILE = "output/voice_output.wav"
 SAMPLE_RATE = 24000
 SILENCE_SECONDS = 3
 
