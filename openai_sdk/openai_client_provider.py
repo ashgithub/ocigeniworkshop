@@ -5,7 +5,6 @@ For using this case, we only require project ID
 The other auth methods follow the same OCI patterns to work
 """
 
-import os
 import httpx
 import logging
 from envyaml import EnvYAML

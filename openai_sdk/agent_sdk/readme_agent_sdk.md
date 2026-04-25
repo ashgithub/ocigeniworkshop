@@ -1,26 +1,32 @@
-# Agent SDK Learning Guide
+# Welcome to the Agent SDK Module
 
-This folder contains beginner-friendly, incremental examples for learning the OpenAI Agents SDK with your OCI-backed client setup.
+This module teaches the OpenAI Agents SDK using OCI-backed OpenAI-compatible configuration. It is organized as a progressive walkthrough so beginners can start with one minimal agent and then add more advanced features such as streaming, tools, multi-turn memory, orchestration, guardrails, human approvals, and voice.
+
+If you are new to agent systems, think of this folder as a practical ladder: each script introduces one core capability that builds on the previous one.
 
 ## What You Will Learn
 
-1. Build and run a minimal agent.
-2. Stream tokens in real time.
-3. Return typed structured outputs.
-4. Register and use function tools.
-5. Keep multi-turn memory.
-6. Route requests with agent handoffs.
-7. Add input guardrails.
-8. Require human approval for sensitive tool calls.
-9. Run a basic voice pipeline and save WAV output.
+In this module, you will learn how to:
 
-## Prerequisites
+1. Create and run a minimal agent with `Agent` + `Runner`
+2. Stream token deltas in real time
+3. Return typed structured outputs with `pydantic`
+4. Register and call Python function tools
+5. Keep multi-turn context using local session memory and server-linked turns
+6. Route questions to specialist agents with handoffs
+7. Add input guardrails that can block unsafe or disallowed requests
+8. Require human approval before sensitive tool execution
+9. Run a basic voice pipeline (STT -> agent -> TTS) and save WAV output
 
-1. Dependencies installed with `uv`.
-2. `.env` configured (copy from `.env.example` at project root).
-3. OCI/OpenAI-compatible values available so `OpenAIClientProvider` can initialize.
+All scripts use `OpenAIClientProvider().configure_agents_oci_env()` so the OpenAI Agents SDK runs against OCI-backed clients.
 
-Common environment variables used by examples:
+## Environment Setup
+
+- `sandbox.yaml`: Stores OCI endpoint/project/compartment/profile values used by `openai_client_provider.py`.
+- `.env`: Optional runtime values used by selected scripts.
+- Ensure OCI authentication and model access are configured before running examples.
+
+Common values used in this folder:
 
 - `LLM_SERVICE_ENDPOINT`
 - `OPENAI_API_KEY`
@@ -28,87 +34,111 @@ Common environment variables used by examples:
 - `OCI_COMPARTMENT_ID`
 - `OCI_PROFILE`
 
-Optional variables for voice examples:
+Optional values for voice workflow:
 
 - `VOICE_STT_MODEL`
 - `VOICE_TTS_MODEL`
 - `VOICE_OUTPUT_FILE`
 
-## How To Run
+How to run files from project root:
 
-Run from project root:
+- Preferred pattern: `uv run python -m openai_sdk.agent_sdk.<script_name_without_py>`
+- Example: `uv run python -m openai_sdk.agent_sdk.simple_agent`
 
-```bash
-uv run python -m openai_sdk.agent_sdk.simple_agent
-uv run python -m openai_sdk.agent_sdk.streaming_agent
-uv run python -m openai_sdk.agent_sdk.structured_agent
-uv run python -m openai_sdk.agent_sdk.use_tool
-uv run python -m openai_sdk.agent_sdk.multiturn
-uv run python -m openai_sdk.agent_sdk.orchestration
-uv run python -m openai_sdk.agent_sdk.guardail
-uv run python -m openai_sdk.agent_sdk.guardail_approval
-uv run python -m openai_sdk.agent_sdk.voice_agent
-```
+## Suggested Study Order and File Descriptions
 
-## File-by-File Guide
+These examples are intentionally incremental. Follow this order for the easiest beginner experience:
 
-- `simple_agent.py`: Minimal one-agent, one-prompt flow.
-- `streaming_agent.py`: Streaming response deltas as they arrive.
-- `structured_agent.py`: Structured output using `pydantic.BaseModel`.
-- `use_tool.py`: Function tool registration and agent tool-calling behavior.
-- `multiturn.py`: Local session memory (`SQLiteSession`) and server-linked turns (`previous_response_id`).
-- `orchestration.py`: Triage agent with handoffs to specialists.
-- `guardail.py`: Input guardrail that blocks selected requests.
-- `guardail_approval.py`: Human-in-the-loop tool approval interruptions.
-- `voice_agent.py`: Voice pipeline (STT + agent workflow + TTS) and WAV output.
-- `agent_sdk.ipynb`: Guided notebook with all major patterns and practice prompts.
-- `__init__.py`: Package marker.
+1. **`simple_agent.py`**: Smallest end-to-end agent run.
+   - Key features: One agent, one prompt, one final output.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.simple_agent`.
+   - Why first: Establishes the core `Agent` + `Runner.run` mental model.
 
-## Recommended Learning Order
+2. **`streaming_agent.py`**: Streams output as it is generated.
+   - Key features: `Runner.run_streamed`, event iteration, token delta rendering.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.streaming_agent`.
+   - Why second: Shows real-time UX pattern used in chat interfaces.
 
-1. `simple_agent.py`
-2. `streaming_agent.py`
-3. `structured_agent.py`
-4. `use_tool.py`
-5. `multiturn.py`
-6. `orchestration.py`
-7. `guardail.py`
-8. `guardail_approval.py`
-9. `voice_agent.py`
-10. `agent_sdk.ipynb`
+3. **`structured_agent.py`**: Produces validated structured output.
+   - Key features: `output_type` with `pydantic.BaseModel` for typed results.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.structured_agent`.
+   - Why here: Structured outputs are essential for reliable downstream logic.
 
-## Notebook Coverage
+4. **`use_tool.py`**: Adds function tools to agent behavior.
+   - Key features: `@function_tool`, tool registration, instruction-guided tool use.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.use_tool`.
+   - Why here: Introduces model + code collaboration through tools.
 
-`agent_sdk.ipynb` includes guided sections for:
+5. **`multiturn.py`**: Demonstrates two memory patterns.
+   - Key features: Local memory via `SQLiteSession` and server-linked continuity via `previous_response_id`.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.multiturn`.
+   - Why here: Multi-turn state is core for real assistants.
 
-- Setup and environment initialization
-- Minimal agent run
-- Streaming events
-- Structured output parsing
-- Tool usage
-- Multi-turn memory patterns
-- Orchestration handoffs
-- Input guardrails
-- Approval interruptions
-- Practice experiments and discussion prompts
+6. **`orchestration.py`**: Routes requests with handoffs.
+   - Key features: Triage agent delegating to specialist agents.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.orchestration`.
+   - Why here: Introduces multi-agent coordination patterns.
 
-## Safe Experiments
+7. **`guardail.py`**: Applies input guardrails before main handling.
+   - Key features: Guardrail classifier agent, tripwire trigger, blocked execution flow.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.guardail`.
+   - Why here: Adds safety and policy checks to your agent pipeline.
 
-1. Change one variable at a time (prompt, instructions, model) and compare behavior.
-2. Add a second tool and update instructions so the model chooses between tools.
-3. Expand structured schemas with optional fields.
-4. Tune guardrail classifier instructions and observe false positives/negatives.
-5. Add another specialist to orchestration and test routing quality.
+8. **`guardail_approval.py`**: Requires explicit human approval for sensitive tools.
+   - Key features: `needs_approval=True`, interruption handling, approve/reject state continuation.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.guardail_approval`.
+   - Why here: Demonstrates human-in-the-loop controls for high-risk actions.
 
-## Troubleshooting
+9. **`voice_agent.py`**: Runs a basic voice workflow and saves WAV output.
+   - Key features: STT + single-agent workflow + TTS streaming output to file.
+   - How to run: `uv run python -m openai_sdk.agent_sdk.voice_agent`.
+   - Why here: Most integrated example in the folder.
 
-- Auth errors: Verify `.env` values and OCI profile availability.
-- Model errors: Confirm the selected model is available in your configured project/endpoint.
-- Voice output missing: Check voice model access and try overriding `VOICE_STT_MODEL` / `VOICE_TTS_MODEL`.
+10. **`agent_sdk.ipynb`**: Notebook walkthrough covering the full learning path.
+   - Key features: Interactive cell-by-cell exploration and easy experimentation.
+   - How to run: Open in Jupyter or VS Code and run cells in order.
 
-## References
+11. **`__init__.py`**: Package marker for module execution.
+   - Key features: Ensures folder behaves as Python package for `-m` runs.
 
-- OpenAI Agents SDK docs: https://openai.github.io/openai-agents-python/
-- OpenAI Agents guides: https://developers.openai.com/api/docs/guides/agents
-- Pydantic docs: https://docs.pydantic.dev/
-- Local OCI client configuration: `openai_client_provider.py`
+## Project Ideas
+
+After completing this module, you can build:
+
+1. **A customer support assistant with approvals**:
+   - Start from `use_tool.py` + `guardail_approval.py`.
+   - Require operator confirmation for actions like cancellations or refunds.
+
+2. **A triage tutor with specialist agents**:
+   - Extend `orchestration.py` with more specialists (science, coding, writing).
+   - Improve handoff instructions and evaluate routing quality.
+
+3. **A safe homework helper**:
+   - Build on `guardail.py` to classify and block disallowed request categories.
+   - Add audit logging around tripwire events.
+
+4. **A memory-enabled personal assistant**:
+   - Use `multiturn.py` patterns to preserve context over multiple turns.
+   - Add structured outputs for scheduling, reminders, or task tracking.
+
+5. **A voice-first FAQ assistant**:
+   - Use `voice_agent.py` with domain-specific tools.
+   - Save audio responses and compare model/voice settings.
+
+## Resources and Links
+
+- **Documentation**:
+  - [OpenAI Agents Python SDK](https://openai.github.io/openai-agents-python/)
+  - [Agents Guides](https://developers.openai.com/api/docs/guides/agents)
+  - [Running Agents](https://developers.openai.com/api/docs/guides/agents/running-agents)
+  - [Orchestration](https://developers.openai.com/api/docs/guides/agents/orchestration)
+  - [Guardrails](https://developers.openai.com/api/docs/guides/agents/guardrails)
+  - [Guardrail Approvals](https://developers.openai.com/api/docs/guides/agents/guardrails-approvals)
+  - [Voice Agents](https://developers.openai.com/api/docs/guides/voice-agents)
+  - [Pydantic Models](https://docs.pydantic.dev/)
+
+- **Slack Channels**:
+  - **#igiu-innovation-lab**: Discuss project ideas and share implementations.
+  - **#igiu-ai-learning**: Help with sandbox environment or running code.
+  - **#generative-ai-users**: Questions about OCI Gen AI and model capabilities.
+  - **#genai-hosted-deployment-users**: GA deployment and integration updates.

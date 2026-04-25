@@ -28,44 +28,32 @@ OCI Generative AI provides OpenAI-compatible APIs that support features such as 
 ## Environment Setup
 
 - `sandbox.yaml`: Contains OCI configuration values used by `openai_client_provider.py`.
-- `.env`: Loads environment variables that may be required by some examples.
 - Ensure you have access to OCI Generative AI services and valid authentication before running the examples.
 
-Common values used in this module:
+Important keys are the use of a **valid project ID** and the right **OCI profile** from config file, values by default on the `sandbox.yaml` are enough to run all examples.
 
-- `LLM_SERVICE_ENDPOINT`
-- `OPENAI_API_KEY`
-- `OCI_OPENAI_PROJECT`
-- `OCI_COMPARTMENT_ID`
-- `OCI_PROFILE`
+## Langfuse set up
 
-Optional values for voice examples:
+Some examples in this folder use Langfuse for tracing.
 
-- `VOICE_STT_MODEL`
-- `VOICE_TTS_MODEL`
-- `VOICE_OUTPUT_FILE`
+1. create an account at https://langfuse.com/?tab=metrics
+2. create an demo org & project
+3. create your API keys
+4. Set the .env file variables: LANGFUSE_HOST, LANGFUSE_SK, LANGFUSE_PK
+5. refer to [OpenAI Agents Langfuse Integration](https://langfuse.com/integrations/frameworks/openai-agents) for details
 
-Additional values for Langfuse script:
+See `genai_client/langfuse_client.py` for a basic example on using langfuse tracing.
 
-- `OCI_GENAI_API_KEY`
-- `OCI_GENAI_PROJECT_ID`
-
-## Langfuse Setup
-
-Langfuse tracing example is available in the GenAI client track:
-
-- `openai_sdk/genai_client/langfuse_client.py`
-
-If you plan to run it:
-
-1. Create an account/project in Langfuse.
-2. Configure required Langfuse/OCI variables in your `.env`.
-3. Run from project root with:
-   - `uv run python -m openai_sdk.genai_client.langfuse_client`
+> [!Important]
+> To use lagfuse snippet, requires >=4.5.1 package version.
+> For compatibility on other snippets, global version is on 3.9.1.
+> Upgrade or use in a new environment for running.
 
 ## Suggested Study Order
 
-The examples are designed to build on one another.
+The examples shows different capabilities for agents and genai clients
+
+`output` folder keeps the examples for multimodal examples and image/audio generation.
 
 1. **`agent_sdk/agent_sdk.ipynb`**
    - Guided notebook walkthrough of core Agent SDK patterns

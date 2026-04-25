@@ -1,24 +1,31 @@
-# GenAI Client Learning Guide
+# Welcome to the GenAI Client Module
 
-This folder contains focused, beginner-friendly examples for the OpenAI-compatible Responses API and OCI integrations.
+This module explores the OpenAI-compatible Responses API using OCI-backed configuration. It is designed as a beginner-friendly walkthrough that starts with simple calls and progressively introduces streaming, structured outputs, tool calling, multimodal inputs, code execution tools, MCP integration, and tracing.
+
+If you are new to this codebase, the key idea is: every script shows one capability clearly, with minimal setup, so you can learn by running small examples end-to-end.
 
 ## What You Will Learn
 
-1. Basic request/response calls.
-2. Streaming token deltas.
-3. Structured output parsing with `pydantic`.
-4. Manual function-calling state continuation.
-5. Built-in tools (`web_search`, `mcp`, `code_interpreter`, `image_generation`).
-6. Multimodal inputs (image + text, file + text).
-7. Optional tracing flow with Langfuse.
+In this module, you will learn how to:
 
-## Prerequisites
+1. Send basic Responses API requests and read plain-text outputs
+2. Stream token deltas for real-time UI or CLI rendering
+3. Parse structured outputs into typed `pydantic` models
+4. Implement manual function-calling loops with local tool execution and `previous_response_id`
+5. Use built-in tools such as `web_search`, `image_generation`, `mcp`, and `code_interpreter`
+6. Send multimodal inputs (image + text and file + text)
+7. Configure reasoning settings and inspect structured output blocks
+8. Trace requests with a Langfuse OpenAI-compatible client wrapper
 
-1. Install dependencies with `uv sync`.
-2. Configure `.env` in project root (copy from `.env.example`).
-3. Ensure OCI profile and endpoint/project values are valid.
+These examples use `OpenAIClientProvider` so requests run against OCI OpenAI-compatible endpoints while keeping the same OpenAI SDK patterns.
 
-Common environment variables used in this folder:
+## Environment Setup
+
+- `sandbox.yaml`: Stores OCI endpoint/project/compartment/profile settings used by `openai_client_provider.py`.
+- `.env`: Optional runtime variables for scripts that read environment values.
+- Ensure your OCI authentication and project access are correctly configured before running examples.
+
+Common environment values used across this folder:
 
 - `LLM_SERVICE_ENDPOINT`
 - `OPENAI_API_KEY`
@@ -28,85 +35,116 @@ Common environment variables used in this folder:
 
 Additional variables for specific scripts:
 
-- `OCI_GENAI_API_KEY` and `OCI_GENAI_PROJECT_ID` for `langfuse_client.py`
+- `OCI_GENAI_API_KEY`, `OCI_GENAI_PROJECT_ID` (`langfuse_client.py`)
 
-## How To Run
+How to run files from project root:
 
-Run from project root:
+- Preferred pattern: `uv run python -m openai_sdk.genai_client.<script_name_without_py>`
+- Example: `uv run python -m openai_sdk.genai_client.base_client`
 
-```bash
-uv run python genai_client/base_client.py
-uv run python genai_client/streaming.py
-uv run python genai_client/reasoning.py
-uv run python genai_client/structured_response.py
-uv run python genai_client/api_state.py
-uv run python genai_client/web_search.py
-uv run python genai_client/multimodal.py
-uv run python genai_client/image_generator.py
-uv run python genai_client/mcp_client.py
-uv run python genai_client/code_interpreter.py
-uv run python genai_client/langfuse_client.py
-```
+## Suggested Study Order and File Descriptions
 
-Optional advanced examples:
+The files are designed to build on each other. Follow this order for the smoothest beginner path:
 
-```bash
-uv run python genai_client/skills_use/skill_injection.py
-uv run python genai_client/skills_use/skill_as_function.py
-uv run python genai_client/skills_use/tool_search_skill.py
-uv run python genai_client/vector_store/file_search.py
-uv run python genai_client/vector_store/vector_store.py
-uv run python genai_client/vector_store/nl2sql.py
-```
+1. **`base_client.py`**: Starts with the two most important patterns: one normal `responses.create` call and one streaming call.
+   - Key features: Non-streaming + streaming in one file, minimal setup.
+   - How to run: `uv run python -m openai_sdk.genai_client.base_client`.
+   - Why first: It gives you the baseline mental model for every later script.
 
-## Main File Guide
+2. **`streaming.py`**: Focused streaming-only example that prints token deltas as they arrive.
+   - Key features: Event-loop style output rendering from `response.output_text.delta` chunks.
+   - How to run: `uv run python -m openai_sdk.genai_client.streaming`.
+   - Why second: Helps you understand real-time output handling before adding complexity.
 
-- `base_client.py`: Minimal standard and streaming Responses API calls.
-- `streaming.py`: Focused streaming example with text deltas.
-- `reasoning.py`: Reasoning settings and raw output inspection.
-- `structured_response.py`: Typed parsing into `BaseModel`.
-- `api_state.py`: Manual function call loop with `previous_response_id`.
-- `web_search.py`: Built-in `web_search` tool example.
-- `multimodal.py`: Image+text and file+text inputs.
-- `image_generator.py`: Generate image output and save locally.
-- `mcp_client.py`: Remote MCP tool integration.
-- `code_interpreter.py`: Auto and named containers for Python tool execution.
-- `langfuse_client.py`: Responses request via Langfuse OpenAI-compatible client.
-- `genai_client.ipynb`: Guided notebook with runnable patterns and exercises.
-- `__init__.py`: Package marker.
+3. **`structured_response.py`**: Parses model output directly into a typed `pydantic` class (`CalendarEvent`).
+   - Key features: `responses.parse`, schema validation, strongly-typed outputs.
+   - How to run: `uv run python -m openai_sdk.genai_client.structured_response`.
+   - Why here: Structured outputs are foundational for reliable app logic.
 
-## Recommended Learning Order
+4. **`reasoning.py`**: Shows reasoning controls (`effort`, `summary`) and how to inspect raw output blocks.
+   - Key features: Reasoning configuration and output introspection via serialized JSON.
+   - How to run: `uv run python -m openai_sdk.genai_client.reasoning`.
+   - Why here: Builds on basic calls and helps you inspect advanced model behavior.
 
-1. `base_client.py`
-2. `streaming.py`
-3. `structured_response.py`
-4. `api_state.py`
-5. `web_search.py`
-6. `multimodal.py`
-7. `image_generator.py`
-8. `mcp_client.py`
-9. `code_interpreter.py`
-10. `langfuse_client.py`
-11. `genai_client.ipynb`
+5. **`api_state.py`**: Demonstrates manual function calling flow with a local Python tool.
+   - Key features: Function schema declaration, tool-call detection, local execution, `previous_response_id` continuation.
+   - How to run: `uv run python -m openai_sdk.genai_client.api_state`.
+   - Why here: Introduces app-like control flow where your code and model collaborate.
 
-## Safe Experiments
+6. **`web_search.py`**: Uses built-in `web_search` for prompts that need current information.
+   - Key features: Tool-enabled Responses API request with minimal changes to normal request flow.
+   - How to run: `uv run python -m openai_sdk.genai_client.web_search`.
+   - Why here: Easiest built-in tool to understand after manual function calling.
 
-1. Change one variable at a time (prompt, model, tool).
-2. Compare the same prompt across two model IDs.
-3. Add fields to tool schemas in `api_state.py`.
-4. Switch `web_search` on/off and compare grounding quality.
-5. Swap image/file inputs in `multimodal.py` and compare outputs.
+7. **`image_generator.py`**: Uses `image_generation` tool and saves output image bytes to disk.
+   - Key features: Tool call output extraction and base64 decoding to local file.
+   - How to run: `uv run python -m openai_sdk.genai_client.image_generator`.
+   - Why here: Demonstrates non-text output handling.
 
-## Troubleshooting
+8. **`multimodal.py`**: Sends image+text and file+text inputs in the same script.
+   - Key features: Local image encoding, file upload (`purpose="user_data"`), mixed-content prompts.
+   - How to run: `uv run python -m openai_sdk.genai_client.multimodal`.
+   - Why here: Multimodal patterns are easier after text and tool fundamentals.
 
-- Auth failures: verify `.env` values and OCI profile availability.
-- Model failures: ensure the model ID is enabled in your project/endpoint.
-- Tool failures: confirm your environment has access to the required tool capability.
-- File input failures: confirm local files exist and are readable.
+9. **`mcp_client.py`**: Connects a remote MCP server as a tool in Responses API.
+   - Key features: Remote tool provider via MCP server URL and model-side tool calling.
+   - How to run: `uv run python -m openai_sdk.genai_client.mcp_client`.
+   - Why here: Introduces external tool ecosystems beyond local code.
 
-## References
+10. **`code_interpreter.py`**: Demonstrates `code_interpreter` with auto containers and a named container.
+   - Key features: Container configuration (`auto`, memory limits, explicit container reuse), tool-required execution.
+   - How to run: `uv run python -m openai_sdk.genai_client.code_interpreter`.
+   - Why here: Most advanced tool flow in this folder.
 
-- Responses API docs: https://platform.openai.com/docs/api-reference/responses
-- Tools guide: https://platform.openai.com/docs/guides/tools
-- Structured outputs guide: https://platform.openai.com/docs/guides/structured-outputs
-- OpenAI Agents Python SDK docs: https://openai.github.io/openai-agents-python/
+11. **`langfuse_client.py`**: Uses Langfuse OpenAI-compatible wrapper for traced requests.
+   - Key features: Traceable Responses API call, optional MCP tool with Langfuse client.
+   - How to run: `uv run python -m openai_sdk.genai_client.langfuse_client`.
+   - Why last: Requires extra external setup and is easiest once core patterns are familiar.
+
+12. **`genai_client.ipynb`**: Notebook version of the walkthrough for interactive learning.
+   - Key features: Hands-on experimentation and step-by-step execution in cells.
+   - How to run: Open in Jupyter or VS Code and run cells in order.
+
+## Project Ideas
+
+Here are practical projects you can build after completing this module:
+
+1. **Build a grounded assistant with optional web search**:
+   - Start with normal Responses calls and enable `web_search` only when freshness is needed.
+   - Add a switch that compares outputs with and without search.
+
+2. **Create a structured extraction pipeline**:
+   - Use `structured_response.py` patterns to extract entities/events from unstructured text.
+   - Validate with `pydantic` and store outputs in a database.
+
+3. **Implement a tool-calling weather or finance assistant**:
+   - Extend `api_state.py` with real external APIs.
+   - Add fallback behavior when tool calls fail.
+
+4. **Build a multimodal document helper**:
+   - Use `multimodal.py` to accept PDFs/images and produce summaries or action items.
+   - Save extracted insights in JSON using structured outputs.
+
+5. **Create a code-analysis helper with code interpreter**:
+   - Use `code_interpreter.py` patterns for calculations, transformations, and quick data analysis.
+   - Reuse named containers for related tasks in one session.
+
+## Resources and Links
+
+- **Documentation**:
+  - [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses)
+  - [Streaming Responses Guide](https://platform.openai.com/docs/guides/streaming-responses)
+  - [Structured Outputs Guide](https://platform.openai.com/docs/guides/structured-outputs)
+  - [Function Calling Guide](https://platform.openai.com/docs/guides/function-calling)
+  - [Tools Guide](https://platform.openai.com/docs/guides/tools)
+  - [Web Search Tool](https://platform.openai.com/docs/guides/tools-web-search)
+  - [Code Interpreter Tool](https://platform.openai.com/docs/guides/tools-code-interpreter)
+  - [Remote MCP Tooling](https://platform.openai.com/docs/guides/tools-remote-mcp)
+  - [Images and Vision Guide](https://platform.openai.com/docs/guides/images-vision)
+  - [Langfuse Python SDK](https://langfuse.com/docs/sdk/python/overview)
+
+- **Slack Channels**:
+  - **#igiu-innovation-lab**: Discuss project ideas and share implementations.
+  - **#igiu-ai-learning**: Help with sandbox environment or running code.
+  - **#generative-ai-users**: Questions about OCI Gen AI and model capabilities.
+  - **#genai-hosted-deployment-users**: GA deployment and integration updates.
