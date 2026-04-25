@@ -3,7 +3,8 @@ Demonstrates how to stream model tokens in real time.
 Instead of waiting for one final answer, this prints deltas as they arrive.
 
 Documentation for reference:
-- OpenAI SDK Streaming: https://developers.openai.com/api/docs/guides/streaming-responses
+- OpenAI Agents SDK Running agents: https://openai.github.io/openai-agents-python/running_agents/
+- Streaming responses guide: https://platform.openai.com/docs/guides/streaming-responses
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
@@ -13,12 +14,12 @@ Relevant Slack channels:
 - #genai-hosted-deployment-users: Information on GA deployment and integrations
 
 Environment setup:
-- Use `.env.example` to create your local `.env`
-- Ensure OCI/OpenAI endpoint and project values are configured
-- Confirm your OCI profile is available in the environment
+- Ensure `sandbox.yaml` contains valid OCI profile, project, and compartment values
+- `.env` is optional for this script
+- Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python agent_sdk/streaming_agent.py
+uv run python -m openai_sdk.agent_sdk.streaming_agent
 
 Safe experiments:
 1. Change USER_PROMPT to a different topic.
@@ -49,9 +50,11 @@ def build_planet_guide_agent() -> Agent:
 
 async def main() -> None:
     # Step 2: Configure the OpenAI Agents SDK with OCI settings.
+    print("Step 2/5: Configuring Agents SDK with OCI-backed client...")
     OpenAIClientProvider().configure_agents_oci_env()
 
     # Step 3: Start a streamed run.
+    print("Step 3/5: Starting streamed run. Tokens will print live:")
     planet_guide = build_planet_guide_agent()
     stream = Runner.run_streamed(planet_guide, USER_PROMPT)
 
@@ -65,6 +68,7 @@ async def main() -> None:
 
     # Step 5: Print the assembled final output for reference.
     print(f"\nFinal: {stream.final_output}")
+    print("Step 5/5: Streaming run completed.")
 
 
 if __name__ == "__main__":

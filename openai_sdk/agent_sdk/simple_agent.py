@@ -3,8 +3,8 @@ Demonstrates the smallest end-to-end Agents SDK flow:
 1) create one agent, 2) run one prompt, 3) print one answer.
 
 Documentation for reference:
-- OpenAI SDK Running agents: https://developers.openai.com/api/docs/guides/agents/running-agents
-- OpenAI SDK Quick start: https://developers.openai.com/api/docs/guides/agents/quickstart
+- OpenAI Agents SDK Quickstart: https://developers.openai.com/api/docs/guides/agents/quickstart
+- OpenAI Agents SDK Overview: https://developers.openai.com/api/docs/guides/agents
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
@@ -14,12 +14,12 @@ Relevant Slack channels:
 - #genai-hosted-deployment-users: Information on GA deployment and integrations
 
 Environment setup:
-- Use `.env.example` to create your local `.env`
-- Ensure OCI/OpenAI endpoint and project values are configured
-- Confirm your OCI profile is available in the environment
+- Ensure `sandbox.yaml` contains valid OCI profile, project, and compartment values
+- `.env` is optional for this script
+- Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python agent_sdk/simple_agent.py
+uv run python -m openai_sdk.agent_sdk.simple_agent
 
 Safe experiments:
 1. Change USER_PROMPT to ask another history question.
@@ -56,6 +56,7 @@ async def main() -> None:
     run_result = await Runner.run(history_tutor, USER_PROMPT)
 
     # Step 4: Print the final model response.
+    print("Final response:")
     print(run_result.final_output)
 
 if __name__ == "__main__":

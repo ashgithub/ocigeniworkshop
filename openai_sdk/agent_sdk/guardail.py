@@ -4,7 +4,8 @@ A small classifier agent runs first; if it trips the guardrail, the main
 support agent is not allowed to continue.
 
 Documentation for reference:
-- OpenAI SDK Input guardrails: https://developers.openai.com/api/docs/guides/agents/guardrails
+- OpenAI Agents SDK guardails: https://developers.openai.com/api/docs/guides/agents/guardrails-approvals
+- OpenAI Agents guide: https://developers.openai.com/api/docs/guides/agents/quickstart
 - GenAI platform GA docs (VPN): https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
@@ -14,12 +15,12 @@ Relevant Slack channels:
 - #genai-hosted-deployment-users: Information on GA deployment and integrations
 
 Environment setup:
-- Use `.env.example` to create your local `.env`
-- Ensure OCI/OpenAI endpoint and project values are configured
-- Confirm your OCI profile is available in the environment
+- Ensure `sandbox.yaml` contains valid OCI profile, project, and compartment values
+- `.env` is optional for this script
+- Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python agent_sdk/guardail.py
+uv run python -m openai_sdk.agent_sdk.guardail
 
 Safe experiments:
 1. Change `TEST_PROMPT` to a non-math request and compare behavior.
@@ -70,6 +71,12 @@ async def math_guardrail(
     input: str | list[TResponseInputItem],
 ) -> GuardrailFunctionOutput:
     result = await Runner.run(guardrail_agent, input, context=ctx.context)
+    print(
+        "Guardrail classifier result:",
+        result.final_output.is_math_homework,
+        "|",
+        result.final_output.reasoning,
+    )
     return GuardrailFunctionOutput(
         output_info=result.final_output,
         tripwire_triggered=result.final_output.is_math_homework,
@@ -88,8 +95,11 @@ async def main() -> None:
     OpenAIClientProvider().configure_agents_oci_env()
 
     # Step 6: Run a prompt that may trigger the guardrail.
+    print(f"Running guarded agent with prompt: {TEST_PROMPT}")
     try:
-        await Runner.run(agent, TEST_PROMPT)
+        result = await Runner.run(agent, TEST_PROMPT)
+        print("Guardrail passed. Final response:")
+        print(result.final_output)
     except InputGuardrailTripwireTriggered:
         print("Guardrail blocked the request.")
 

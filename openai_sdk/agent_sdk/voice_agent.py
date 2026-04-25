@@ -1,9 +1,13 @@
 """ What this file does:
 Demonstrates a basic voice pipeline with:
-1) STT model, 2) one voice agent workflow, and 3) WAV file output.
+1) STT model, 
+2) one voice agent workflow, 
+3) WAV file output.
 
 Documentation for reference:
-- OpenAI SDK Voice agents: https://developers.openai.com/api/docs/guides/voice-agents
+- OpenAI Voice agents guide: https://developers.openai.com/api/docs/guides/voice-agents
+- OpenAI Agents SDK Quickstart: https://developers.openai.com/api/docs/guides/agents/quickstart
+- OpenAI Agents SDK Overview: https://developers.openai.com/api/docs/guides/agents
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
@@ -13,12 +17,13 @@ Relevant Slack channels:
 - #genai-hosted-deployment-users: Information on GA deployment and integrations
 
 Environment setup:
-- Use `.env.example` to create your local `.env`
-- Ensure OCI/OpenAI endpoint and project values are configured
+- Ensure `sandbox.yaml` contains valid OCI profile, project, and compartment values
+- `.env` is optional for this script
+- Ensure you have access to OCI Generative AI services
 - Optional overrides: `VOICE_STT_MODEL`, `VOICE_TTS_MODEL`, `VOICE_OUTPUT_FILE`
 
 How to run the file:
-uv run python agent_sdk/voice_agent.py
+uv run python -m openai_sdk.agent_sdk.voice_agent
 
 Safe experiments:
 1. Change tool behavior in `get_weather` and ask weather-related prompts.
@@ -43,16 +48,9 @@ from openai_sdk.openai_client_provider import OpenAIClientProvider
 MODEL_ID = "openai.gpt-5.2"
 DEFAULT_STT_MODEL = "openai.gpt-4o-transcribe"
 DEFAULT_TTS_MODEL = "openai.gpt-4o-mini-tts"
-DEFAULT_OUTPUT_FILE = "output/voice_output.wav"
+DEFAULT_OUTPUT_FILE = "openai_sdk/output/voice_output.wav"
 SAMPLE_RATE = 24000
 SILENCE_SECONDS = 3
-
-
-@function_tool
-def get_weather(city: str) -> str:
-    # Step 1: Example tool available to the voice agent.
-    return f"The weather in {city} is sunny."
-
 
 def build_voice_agent() -> Agent:
     # Step 2: Build one voice-capable assistant agent.
@@ -60,15 +58,16 @@ def build_voice_agent() -> Agent:
         name="Assistant",
         instructions="You are a helpful voice assistant.",
         model=MODEL_ID,
-        tools=[get_weather],
+        tools=[],
     )
-
 
 async def main() -> None:
     # Step 3: Configure the OpenAI Agents SDK with OCI settings.
     OpenAIClientProvider().configure_agents_oci_env()
     stt_model = os.getenv("VOICE_STT_MODEL", DEFAULT_STT_MODEL)
     tts_model = os.getenv("VOICE_TTS_MODEL", DEFAULT_TTS_MODEL)
+    print(f"Using STT model: {stt_model}")
+    print(f"Using TTS model: {tts_model}")
 
     # Step 4: Build the voice pipeline for one agent.
     pipeline = VoicePipeline(
@@ -78,9 +77,11 @@ async def main() -> None:
     )
 
     # Step 5: Use silence as placeholder audio input for demo purposes.
+    print("Creating silent demo audio input...")
     audio_input = AudioInput(buffer=np.zeros(SAMPLE_RATE * SILENCE_SECONDS, dtype=np.int16))
 
     # Step 6: Run voice workflow and collect streamed audio bytes.
+    print("Running voice workflow and collecting audio stream...")
     result = await pipeline.run(audio_input)
     audio_buffer = bytearray()
     async for event in result.stream():
@@ -93,6 +94,7 @@ async def main() -> None:
         return
 
     # Step 7: Save output audio to a WAV file.
+    print("Saving WAV output...")
     output_file = os.getenv("VOICE_OUTPUT_FILE", DEFAULT_OUTPUT_FILE)
     output_dir = os.path.dirname(output_file)
     if output_dir:

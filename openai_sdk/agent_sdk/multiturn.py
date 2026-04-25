@@ -4,8 +4,8 @@ Demonstrates two multi-turn memory patterns:
 2) server-linked memory using `previous_response_id`
 
 Documentation for reference:
-- OpenAI SDK Running agents: https://developers.openai.com/api/docs/guides/agents/running-agents
-- OpenAI SDK Conversations state: https://developers.openai.com/api/docs/guides/agents/conversations
+- OpenAI Agents SDK Running agents: https://developers.openai.com/api/docs/guides/agents/running-agents
+- OpenAI Agents guide: https://developers.openai.com/api/docs/guides/agents/quickstart
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
@@ -15,12 +15,12 @@ Relevant Slack channels:
 - #genai-hosted-deployment-users: Information on GA deployment and integrations
 
 Environment setup:
-- Use `.env.example` to create your local `.env`
-- Ensure OCI/OpenAI endpoint and project values are configured
-- Confirm your OCI profile is available in the environment
+- Ensure `sandbox.yaml` contains valid OCI profile, project, and compartment values
+- `.env` is optional for this script
+- Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python agent_sdk/multiturn.py
+uv run python -m openai_sdk.agent_sdk.multiturn
 
 Safe experiments:
 1. Change `SESSION_ID` and compare local memory behavior.
@@ -40,7 +40,6 @@ from openai_sdk.openai_client_provider import OpenAIClientProvider
 MODEL_ID = "openai.gpt-5.2"
 SESSION_ID = "conversation_123"
 
-
 def build_tour_guide_agent() -> Agent:
     # Step 1: Create one agent reused in both multi-turn patterns.
     return Agent(
@@ -48,7 +47,6 @@ def build_tour_guide_agent() -> Agent:
         instructions="Answer with compact travel facts. Reply concisely",
         model=MODEL_ID,
     )
-
 
 async def main() -> None:
     # Step 2: Configure the OpenAI Agents SDK with OCI settings.
@@ -64,6 +62,7 @@ async def main() -> None:
         "What city is the Golden Gate Bridge in?",
         session=session,
     )
+    print("Local turn 1:")
     print(local_first_turn.final_output)
 
     local_second_turn = await Runner.run(
@@ -71,6 +70,7 @@ async def main() -> None:
         "Tell me another interesting fact about that city",
         session=session,
     )
+    print("Local turn 2:")
     print(local_second_turn.final_output)
 
     # Step 5: Run server-linked turns using previous_response_id.
@@ -78,6 +78,7 @@ async def main() -> None:
         tour_guide,
         "Where is located the statue of liberty?",
     )
+    print("Server turn 1:")
     print(server_first_turn.final_output)
 
     server_second_turn = await Runner.run(
@@ -85,8 +86,8 @@ async def main() -> None:
         "So, when was it placed?",
         previous_response_id=server_first_turn.last_response_id,
     )
+    print("Server turn 2:")
     print(server_second_turn.final_output)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

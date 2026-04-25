@@ -3,7 +3,8 @@ Demonstrates a human-in-the-loop approval flow for sensitive tool calls.
 The agent requests approval before executing `cancel_order`.
 
 Documentation for reference:
-- OpenAI SDK Guardrail approvals: https://developers.openai.com/api/docs/guides/agents/guardrails-approvals
+- OpenAI Agents SDK guardails: https://developers.openai.com/api/docs/guides/agents/guardrails-approvals
+- OpenAI Agents guide: https://developers.openai.com/api/docs/guides/agents/quickstart
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
@@ -13,12 +14,12 @@ Relevant Slack channels:
 - #genai-hosted-deployment-users: Information on GA deployment and integrations
 
 Environment setup:
-- Use `.env.example` to create your local `.env`
-- Ensure OCI/OpenAI endpoint and project values are configured
-- Confirm your OCI profile is available in the environment
+- Ensure `sandbox.yaml` contains valid OCI profile, project, and compartment values
+- `.env` is optional for this script
+- Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python -m agent_sdk.guardail_approval.py
+uv run python -m openai_sdk.agent_sdk.guardail_approval
 
 Safe experiments:
 1. Change `USER_PROMPT` to other support actions.
@@ -92,6 +93,7 @@ async def main() -> None:
 
     # Step 5: Resolve each interruption by user approval/rejection.
     if result.interruptions:
+        print(f"Found {len(result.interruptions)} interruption(s).")
         state = result.to_state()
         for interruption in result.interruptions:
             if _ask_for_approval(interruption):
@@ -104,6 +106,7 @@ async def main() -> None:
         result = await Runner.run(agent, state)
 
     # Step 6: Print final response after approvals are processed.
+    print("Final response:")
     print(result.final_output)
 
 

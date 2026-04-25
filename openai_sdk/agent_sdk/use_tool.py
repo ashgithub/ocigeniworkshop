@@ -3,7 +3,8 @@ Demonstrates function tools in the Agents SDK.
 The agent can call a Python function when it helps answer the user prompt.
 
 Documentation for reference:
-- OpenAI SDK Tools: https://developers.openai.com/api/docs/guides/agents/tools
+- OpenAI Agents SDK Tools: https://developers.openai.com/api/docs/guides/tools
+- Function calling guide: https://developers.openai.com/api/docs/guides/function-calling
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
@@ -13,12 +14,12 @@ Relevant Slack channels:
 - #genai-hosted-deployment-users: Information on GA deployment and integrations
 
 Environment setup:
-- Use `.env.example` to create your local `.env`
-- Ensure OCI/OpenAI endpoint and project values are configured
-- Confirm your OCI profile is available in the environment
+- Ensure `sandbox.yaml` contains valid OCI profile, project, and compartment values
+- `.env` is optional for this script
+- Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python agent_sdk/use_tool.py
+uv run python -m openai_sdk.agent_sdk.use_tool
 
 Safe experiments:
 1. Add a second tool and update instructions for tool selection.
@@ -65,6 +66,7 @@ async def main() -> None:
     run_result = await Runner.run(history_tutor, USER_PROMPT)
 
     # Step 5: Print the final answer.
+    print("Final response:")
     print(run_result.final_output)
 
 

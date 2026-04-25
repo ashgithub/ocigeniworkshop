@@ -3,7 +3,8 @@ Demonstrates orchestration with handoffs:
 a triage agent routes questions to specialist agents.
 
 Documentation for reference:
-- OpenAI SDK Orchestration: https://developers.openai.com/api/docs/guides/agents/orchestration
+- OpenAI Agents SDK Handoffs: https://developers.openai.com/api/docs/guides/agents/orchestration
+- OpenAI Agents guide: https://developers.openai.com/api/docs/guides/agents/quickstart
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
@@ -13,12 +14,12 @@ Relevant Slack channels:
 - #genai-hosted-deployment-users: Information on GA deployment and integrations
 
 Environment setup:
-- Use `.env.example` to create your local `.env`
-- Ensure OCI/OpenAI endpoint and project values are configured
-- Confirm your OCI profile is available in the environment
+- Ensure `sandbox.yaml` contains valid OCI profile, project, and compartment values
+- `.env` is optional for this script
+- Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python agent_sdk/orchestration.py
+uv run python -m openai_sdk.agent_sdk.orchestration
 
 Safe experiments:
 1. Ask a math question and verify handoff to `Math tutor`.
@@ -62,7 +63,6 @@ triage_agent = Agent(
     handoffs=[history_tutor, math_tutor],
 )
 
-
 async def main() -> None:
     # Step 4: Configure the OpenAI Agents SDK with OCI settings.
     OpenAIClientProvider().configure_agents_oci_env()
@@ -71,9 +71,9 @@ async def main() -> None:
     run_result = await Runner.run(triage_agent, USER_PROMPT)
 
     # Step 6: Print answer and the agent that produced it.
+    print("Final response and selected specialist:")
     print(run_result.final_output)
     print(run_result.last_agent.name)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
