@@ -3,22 +3,23 @@ Demonstrates structured output parsing using a Pydantic schema.
 The model output is validated and returned as a typed Python object.
 
 Documentation for reference:
-- Structured Outputs guide: https://platform.openai.com/docs/guides/structured-outputs
-- Responses API parse: https://platform.openai.com/docs/api-reference/responses/parse
+- Structured Outputs guide: https://developers.openai.com/api/docs/guides/structured-outputs
+- Responses API migration and features: https://developers.openai.com/api/docs/guides/migrate-to-responses
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
-- #generative-ai-users
-- #igiu-innovation-lab
-- #igiu-ai-learning
-- #genai-hosted-deployment-users
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution
+- #genai-hosted-deployment-users: GA deployment and integration updates
 
 Environment setup:
-- Create `.env` from `.env.example`
-- Ensure endpoint/project/profile values are set for OCI
+- Set up the credentials for OCI over the `sandbox.yaml file`
+- Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
+- Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python genai_client/structured_response.py
+uv run python -m openai_sdk.genai_client.structured_response
 
 Safe experiments:
 1. Add optional fields to `CalendarEvent`.
@@ -34,7 +35,6 @@ from openai import OpenAI
 from pydantic import BaseModel
 from openai_sdk.openai_client_provider import OpenAIClientProvider
 
-
 MODEL_ID = "openai.gpt-4.1"
 INPUT_MESSAGES = [
     {"role": "system", "content": "Extract the event information."},
@@ -44,13 +44,11 @@ INPUT_MESSAGES = [
     },
 ]
 
-
 class CalendarEvent(BaseModel):
     # Step 1: Schema used for typed output parsing.
     name: str
     date: str
     participants: list[str]
-
 
 def main() -> None:
     # Step 1: Build configured client.
@@ -65,6 +63,7 @@ def main() -> None:
     )
 
     # Step 3: Print parsed object.
+    print("Parsed typed output:")
     event = response.output_parsed
     print(event)
 

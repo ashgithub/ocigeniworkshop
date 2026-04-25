@@ -3,22 +3,23 @@ Demonstrates the built-in `web_search` tool in a Responses API call.
 Useful when answer quality depends on current events or fresh web data.
 
 Documentation for reference:
-- Tools guide: https://platform.openai.com/docs/guides/tools
-- Web search guide: https://platform.openai.com/docs/guides/tools-web-search
+- Tools guide: https://developers.openai.com/api/docs/guides/tools
+- Web search guide: https://developers.openai.com/api/docs/guides/tools-web-search
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
-- #generative-ai-users
-- #igiu-innovation-lab
-- #igiu-ai-learning
-- #genai-hosted-deployment-users
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution
+- #genai-hosted-deployment-users: GA deployment and integration updates
 
 Environment setup:
-- Create `.env` from `.env.example`
-- Ensure endpoint/project/profile values are set for OCI
+- Set up the credentials for OCI over the `sandbox.yaml file`
+- Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
+- Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python genai_client/web_search.py
+uv run python -m openai_sdk.genai_client.web_search
 
 Safe experiments:
 1. Ask for news from a specific country.
@@ -40,7 +41,6 @@ load_dotenv()
 MODEL_ID = "openai.gpt-5.2"
 USER_PROMPT = "What was a positive news story from today?"
 
-
 def main() -> None:
     # Step 1: Build configured client.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
@@ -53,8 +53,8 @@ def main() -> None:
     )
 
     # Step 3: Print final answer text.
+    print("Final grounded response:")
     print(response.output_text)
-
 
 if __name__ == "__main__":
     main()

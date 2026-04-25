@@ -6,21 +6,23 @@ Demonstrates manual function-calling state management:
 
 Documentation for reference:
 - Function calling guide: https://platform.openai.com/docs/guides/function-calling
-- Responses API: https://platform.openai.com/docs/api-reference/responses
+- Responses API migration and features: https://developers.openai.com/api/docs/guides/migrate-to-responses
+- Responses API reference: https://platform.openai.com/docs/api-reference/responses
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
-- #generative-ai-users
-- #igiu-innovation-lab
-- #igiu-ai-learning
-- #genai-hosted-deployment-users
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution for this repo
+- #genai-hosted-deployment-users: GA deployment and integration updates with latest SDK
 
 Environment setup:
-- Create `.env` from `.env.example`
-- Ensure endpoint/project/profile values are set for OCI
+- Set up the credentials for OCI over the `sandbox.yaml file`
+- Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
+- Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python genai_client/api_state.py
+uv run python -m openai_sdk.genai_client.api_state
 
 Safe experiments:
 1. Add fields to tool schema (example: temperature units).
@@ -76,6 +78,8 @@ def main() -> None:
         input=USER_PROMPT,
     )
 
+    print(f"\n<------------- First agent response with tool calls --------->\n\n{first_response.output}\n")
+
     # Step 4: Execute function calls locally and collect outputs.
     function_outputs = []
     for output_item in first_response.output:
@@ -98,8 +102,7 @@ def main() -> None:
         input=function_outputs,
         previous_response_id=first_response.id,
     )
-    print(final_response.output_text)
-
+    print(f"<----------- Final agent response --------->\n\n{final_response.output_text}\n")
 
 if __name__ == "__main__":
     main()

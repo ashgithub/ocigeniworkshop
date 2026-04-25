@@ -1,6 +1,7 @@
 """ What this file does:
 Demonstrates `code_interpreter` usage with:
-1) automatic container, 2) automatic container with memory config,
+1) automatic container, 
+2) automatic container with memory config,
 3) explicit named container.
 
 Documentation for reference:
@@ -9,17 +10,18 @@ Documentation for reference:
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
-- #generative-ai-users
-- #igiu-innovation-lab
-- #igiu-ai-learning
-- #genai-hosted-deployment-users
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution for this repo
+- #genai-hosted-deployment-users: GA deployment and integration updates with latest SDK
 
 Environment setup:
-- Create `.env` from `.env.example`
-- Ensure endpoint/project/profile values are set for OCI
+- Set up the credentials for OCI over the `sandbox.yaml file`
+- Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
+- Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python genai_client/code_interpreter.py
+uv run python -m openai_sdk.genai_client.code_interpreter
 
 Safe experiments:
 1. Change prompts to other math/data tasks.
@@ -35,12 +37,10 @@ Important sections:
 from openai import OpenAI
 from openai_sdk.openai_client_provider import OpenAIClientProvider
 
-
 MODEL_ID = "openai.gpt-4.1"
 PROMPT_LINEAR = "I need to solve the equation 3x + 11 = 14. Can you help me?"
 PROMPT_NESTED_ROOT = "Use the python tool to find the square root of the square root of (4 * 3.82)."
 PROMPT_REQUIRED_TOOL = "Use the python tool to calculate what is 4 * 3.82, then find its square root, then find the square root of that result."
-
 
 def main() -> None:
     # Step 1: Build configured client.
@@ -53,6 +53,7 @@ def main() -> None:
         instructions="Write and run code using python tool to answer the question.",
         input=PROMPT_LINEAR,
     )
+    print(f"<----------------- Response from agent using auto container ------------------>\n")
     print(first_response.output_text)
 
     # Step 3: Auto container with custom memory limit.
@@ -66,6 +67,7 @@ def main() -> None:
         ],
         input=PROMPT_NESTED_ROOT,
     )
+    print(f"<----------------- Response from agent using auto container with memory ------------------>\n")
     print(second_response.output_text)
 
     # Step 4: Explicit named container example.
@@ -76,8 +78,8 @@ def main() -> None:
         tool_choice="required",
         input=PROMPT_REQUIRED_TOOL,
     )
+    print(f"<----------------- Response from agent using a custom container ------------------>\n")
     print(third_response.output_text)
-
 
 if __name__ == "__main__":
     main()

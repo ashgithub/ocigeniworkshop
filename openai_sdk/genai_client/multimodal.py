@@ -5,22 +5,22 @@ Demonstrates multimodal requests in Responses API:
 Documentation for reference:
 - Images and vision: https://platform.openai.com/docs/guides/images-vision
 - File inputs: https://platform.openai.com/docs/guides/pdf-files
-- Responses API: https://platform.openai.com/docs/api-reference/responses
+- Responses API: https://developers.openai.com/api/docs/guides/migrate-to-responses
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
-- #generative-ai-users
-- #igiu-innovation-lab
-- #igiu-ai-learning
-- #genai-hosted-deployment-users
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution
+- #genai-hosted-deployment-users: GA deployment and integration updates
 
 Environment setup:
-- Create `.env` from `.env.example`
-- Ensure endpoint/project/profile values are set for OCI
-- Confirm `IMAGE_PATH` and `FILE_PATH` exist before running
+- Set up the credentials for OCI over the `sandbox.yaml file`
+- Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
+- Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python genai_client/multimodal.py
+uv run python -m openai_sdk.genai_client.multimodal
 
 Safe experiments:
 1. Change `IMAGE_PATH` and ask targeted visual questions.
@@ -38,9 +38,9 @@ from pathlib import Path
 from openai import OpenAI
 from openai_sdk.openai_client_provider import OpenAIClientProvider
 
-MODEL_ID = "openai.gpt-5.2"
-IMAGE_PATH = Path("output/test_image.png")
-FILE_PATH = Path("output/fema_outage_flyer.pdf")
+MODEL_ID = "openai.gpt-5.4"
+IMAGE_PATH = Path("openai_sdk/output/test_image.png")
+FILE_PATH = Path("openai_sdk/output/fema_outage_flyer.pdf")
 IMAGE_PROMPT = "What's in this image?"
 FILE_PROMPT = "What's discussed in the file?"
 
@@ -49,12 +49,18 @@ def encode_image(image_path: Path) -> str:
     with image_path.open("rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
 
+def encode_file_data_uri(file_path: Path, mime_type: str) -> str:
+    # Helper: Convert local file bytes to base64 data URI for input_file.
+    with file_path.open("rb") as file:
+        encoded = base64.b64encode(file.read()).decode("utf-8")
+    return f"data:{mime_type};base64,{encoded}"
 
 def main() -> None:
     # Step 1: Build configured client.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 2: Send image + text input.
+    print(f"Running image + text request using image at '{IMAGE_PATH}'...")
     base64_image = encode_image(IMAGE_PATH)
     image_response = client.responses.create(
         model=MODEL_ID,
@@ -73,24 +79,27 @@ def main() -> None:
             }
         ],
     )
+    print("Image + text response:")
     print(image_response.output_text)
 
-    # Step 3: Upload PDF and send file + text input.
-    uploaded_file = client.files.create(file=FILE_PATH.open("rb"), purpose="user_data")
+    # Step 3: Send PDF as inline file_data + text input.
+    # OCI OpenAI-compatible deployments may not expose /files upload endpoint.
+    print(f"Sending inline file data for '{FILE_PATH}' with file + text request...")
+    pdf_data_uri = encode_file_data_uri(FILE_PATH, "application/pdf")
     file_response = client.responses.create(
         model=MODEL_ID,
         input=[
             {
                 "role": "user",
                 "content": [
-                    {"type": "input_file", "file_id": uploaded_file.id},
+                    {"type": "input_file", "filename": FILE_PATH.name, "file_data": pdf_data_uri},
                     {"type": "input_text", "text": FILE_PROMPT},
                 ],
             }
         ],
     )
+    print("File + text response:")
     print(file_response.output_text)
-
 
 if __name__ == "__main__":
     main()

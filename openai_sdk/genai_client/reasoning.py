@@ -3,22 +3,24 @@ Demonstrates reasoning configuration in Responses API and shows how to
 inspect raw structured output blocks.
 
 Documentation for reference:
-- Responses API: https://platform.openai.com/docs/api-reference/responses
-- Reasoning models guide: https://platform.openai.com/docs/guides/reasoning
+- Reasoning models: https://developers.openai.com/api/docs/guides/reasoning
+- Reasoning explanations: https://developers.openai.com/api/docs/guides/reasoning
+- Reasoning best practices: https://developers.openai.com/api/docs/guides/reasoning-best-practices
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
 Relevant Slack channels:
-- #generative-ai-users
-- #igiu-innovation-lab
-- #igiu-ai-learning
-- #genai-hosted-deployment-users
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution
+- #genai-hosted-deployment-users: GA deployment and integration updates
 
 Environment setup:
-- Create `.env` from `.env.example`
-- Ensure endpoint/project/profile values are set for OCI
+- Set up the credentials for OCI over the `sandbox.yaml file`
+- Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
+- Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python genai_client/reasoning.py
+uv run python -m openai_sdk.genai_client.reasoning
 
 Safe experiments:
 1. Change reasoning effort: `low`, `medium`, `high`.
@@ -45,6 +47,7 @@ def main() -> None:
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 2: Create response with reasoning controls.
+    print(f"Running reasoning request with settings: {REASONING_SETTINGS}")
     response = client.responses.create(
         model=MODEL_ID,
         input=USER_PROMPT,
@@ -53,9 +56,9 @@ def main() -> None:
     )
 
     # Step 3: Pretty-print output items for inspection.
+    print("Raw structured output blocks:")
     pretty_output = json.dumps(response.to_dict()["output"], indent=4)
     print(pretty_output)
-
 
 if __name__ == "__main__":
     main()
