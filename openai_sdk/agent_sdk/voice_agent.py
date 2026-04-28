@@ -23,7 +23,7 @@ Environment setup:
 - Optional overrides: `VOICE_STT_MODEL`, `VOICE_TTS_MODEL`, `VOICE_OUTPUT_FILE`
 
 How to run the file:
-uv run python -m openai_sdk.agent_sdk.voice_agent
+uv run openai_sdk/agent_sdk/voice_agent.py
 
 Safe experiments:
 1. Change tool behavior in `get_weather` and ask weather-related prompts.
@@ -43,7 +43,12 @@ import numpy as np
 
 from agents import Agent, function_tool
 from agents.voice import AudioInput, SingleAgentVoiceWorkflow, VoicePipeline
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 DEFAULT_STT_MODEL = "openai.gpt-4o-transcribe"

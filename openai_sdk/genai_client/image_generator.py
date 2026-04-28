@@ -20,7 +20,7 @@ Environment setup:
 - Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python -m openai_sdk.genai_client.image_generator
+uv run openai_sdk/genai_client/image_generator.py
 
 Safe experiments:
 1. Change `IMAGE_PROMPT` style, subject, and detail level.
@@ -35,7 +35,12 @@ import base64
 from pathlib import Path
 
 from openai import OpenAI
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 IMAGE_PROMPT = "Generate an image of a golden playing with a cat"

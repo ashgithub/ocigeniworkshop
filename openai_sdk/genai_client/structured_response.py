@@ -19,7 +19,7 @@ Environment setup:
 - Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python -m openai_sdk.genai_client.structured_response
+uv run openai_sdk/genai_client/structured_response.py
 
 Safe experiments:
 1. Add optional fields to `CalendarEvent`.
@@ -33,7 +33,12 @@ Important sections:
 
 from openai import OpenAI
 from pydantic import BaseModel
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-4.1"
 INPUT_MESSAGES = [

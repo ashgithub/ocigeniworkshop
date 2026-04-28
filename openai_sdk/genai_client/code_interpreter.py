@@ -21,7 +21,7 @@ Environment setup:
 - Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python -m openai_sdk.genai_client.code_interpreter
+uv run openai_sdk/genai_client/code_interpreter.py
 
 Safe experiments:
 1. Change prompts to other math/data tasks.
@@ -35,7 +35,12 @@ Important sections:
 4. Step 4: Run named-container example. """
 
 from openai import OpenAI
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-4.1"
 PROMPT_LINEAR = "I need to solve the equation 3x + 11 = 14. Can you help me?"

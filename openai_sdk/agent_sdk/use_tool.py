@@ -19,7 +19,7 @@ Environment setup:
 - Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python -m openai_sdk.agent_sdk.use_tool
+uv run openai_sdk/agent_sdk/use_tool.py
 
 Safe experiments:
 1. Add a second tool and update instructions for tool selection.
@@ -34,7 +34,12 @@ Important sections:
 import asyncio
 
 from agents import Agent, Runner, function_tool
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 
 MODEL_ID = "openai.gpt-5.2"

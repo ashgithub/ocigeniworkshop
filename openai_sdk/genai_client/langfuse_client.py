@@ -25,7 +25,7 @@ Environment setup:
 - Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python -m openai_sdk.genai_client.langfuse_client
+uv run openai_sdk/genai_client/langfuse_client.py
 
 Safe experiments:
 1. Change `USER_PROMPT` and inspect resulting traces.

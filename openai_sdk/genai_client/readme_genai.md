@@ -27,11 +27,11 @@ For most files in `openai_sdk/genai_client`, no additional environment variables
 
 Run commands from project root using:
 
-- `uv run python -m openai_sdk.genai_client.<script_name_without_py>`
+- `uv run openai_sdk/genai_client/<script_name>.py`
 
 Example:
 
-- `uv run python -m openai_sdk.genai_client.base_client`
+- `uv run openai_sdk/genai_client/base_client.py`
 
 ## Langfuse Setup
 
@@ -43,7 +43,7 @@ Example:
    - `LANGFUSE_SECRET_KEY`
    - `LANGFUSE_BASE_URL` (for region/self-host)
 3. Run:
-   - `uv run python -m openai_sdk.genai_client.langfuse_client`
+   - `uv run openai_sdk/genai_client/langfuse_client.py`
 
 ## Suggested Study Order and File Descriptions
 
@@ -51,57 +51,57 @@ The files are designed to build on one another. Study them in this order for a p
 
 1. **`base_client.py`**: Demonstrates baseline Responses API usage with one normal call and one streaming call.
    - Key features: `responses.create`, plain output text, initial streaming pattern.
-   - How to run: `uv run python -m openai_sdk.genai_client.base_client`.
+   - How to run: `uv run openai_sdk/genai_client/base_client.py`.
    - Docs: [Responses API](https://platform.openai.com/docs/api-reference/responses), [Streaming Responses](https://platform.openai.com/docs/guides/streaming-responses).
 
 2. **`streaming.py`**: Focused streaming-only walkthrough for token delta handling.
    - Key features: event iteration and incremental output rendering.
-   - How to run: `uv run python -m openai_sdk.genai_client.streaming`.
+   - How to run: `uv run openai_sdk/genai_client/streaming.py`.
    - Docs: [Streaming Responses](https://platform.openai.com/docs/guides/streaming-responses).
 
 3. **`structured_response.py`**: Demonstrates typed parsing with a `pydantic` schema.
    - Key features: `responses.parse`, validation into Python objects.
-   - How to run: `uv run python -m openai_sdk.genai_client.structured_response`.
+   - How to run: `uv run openai_sdk/genai_client/structured_response.py`.
    - Docs: [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs).
 
 4. **`reasoning.py`**: Demonstrates reasoning controls and structured output inspection.
    - Key features: `reasoning` configuration and output serialization.
-   - How to run: `uv run python -m openai_sdk.genai_client.reasoning`.
+   - How to run: `uv run openai_sdk/genai_client/reasoning.py`.
    - Docs: [Reasoning Guide](https://platform.openai.com/docs/guides/reasoning).
 
 5. **`api_state.py`**: Demonstrates manual function-calling state continuation.
    - Key features: tool schema declaration, local function execution, `previous_response_id` chaining.
-   - How to run: `uv run python -m openai_sdk.genai_client.api_state`.
+   - How to run: `uv run openai_sdk/genai_client/api_state.py`.
    - Docs: [Function Calling](https://platform.openai.com/docs/guides/function-calling), [Responses API](https://platform.openai.com/docs/api-reference/responses).
 
 6. **`web_search.py`**: Demonstrates built-in web grounding via `web_search`.
    - Key features: tool-enabled call for freshness-sensitive prompts.
-   - How to run: `uv run python -m openai_sdk.genai_client.web_search`.
+   - How to run: `uv run openai_sdk/genai_client/web_search.py`.
    - Docs: [Tools Guide](https://platform.openai.com/docs/guides/tools), [Web Search Tool](https://platform.openai.com/docs/guides/tools-web-search).
 
 7. **`image_generator.py`**: Demonstrates image generation and local file persistence.
    - Key features: `image_generation` tool call and base64 decode/save.
-   - How to run: `uv run python -m openai_sdk.genai_client.image_generator`.
+   - How to run: `uv run openai_sdk/genai_client/image_generator.py`.
    - Docs: [Image Generation](https://platform.openai.com/docs/guides/image-generation).
 
 8. **`multimodal.py`**: Demonstrates image+text and file+text inputs.
    - Key features: data-URI image input, file upload, mixed-content prompt blocks.
-   - How to run: `uv run python -m openai_sdk.genai_client.multimodal`.
+   - How to run: `uv run openai_sdk/genai_client/multimodal.py`.
    - Docs: [Images and Vision](https://platform.openai.com/docs/guides/images-vision), [PDF and File Inputs](https://platform.openai.com/docs/guides/pdf-files).
 
 9. **`mcp_client.py`**: Demonstrates remote MCP tool integration.
    - Key features: model access to remote MCP server capabilities.
-   - How to run: `uv run python -m openai_sdk.genai_client.mcp_client`.
+   - How to run: `uv run openai_sdk/genai_client/mcp_client.py`.
    - Docs: [Remote MCP Tools](https://platform.openai.com/docs/guides/tools-remote-mcp).
 
 10. **`code_interpreter.py`**: Demonstrates code interpreter containers.
    - Key features: auto container, memory configuration, explicit named container use.
-   - How to run: `uv run python -m openai_sdk.genai_client.code_interpreter`.
+   - How to run: `uv run openai_sdk/genai_client/code_interpreter.py`.
    - Docs: [Code Interpreter Tool](https://platform.openai.com/docs/guides/tools-code-interpreter).
 
 11. **`langfuse_client.py`**: Demonstrates tracing-ready client pattern via Langfuse wrapper.
    - Key features: OpenAI-compatible wrapped client and trace-friendly requests.
-   - How to run: `uv run python -m openai_sdk.genai_client.langfuse_client`.
+   - How to run: `uv run openai_sdk/genai_client/langfuse_client.py`.
    - Docs: [Langfuse OpenAI (Python)](https://langfuse.com/integrations/model-providers/openai-py).
 
 12. **`genai_client.ipynb`**: Notebook walkthrough covering the same patterns interactively.

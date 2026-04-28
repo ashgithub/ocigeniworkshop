@@ -89,11 +89,11 @@ Over here there are information about the main folders and tracks to follow acco
 ## Running
 
 RIGHT command pattern to run from project root:
-uv run python -m openai_sdk.<subfolder>.<script_name_without_py>
+uv run openai_sdk/<subfolder>/<script_name>.py
 
 Examples:
-- uv run python -m openai_sdk.agent_sdk.simple_agent
-- uv run python -m openai_sdk.genai_client.base_client
+- uv run openai_sdk/agent_sdk/simple_agent.py
+- uv run openai_sdk/genai_client/base_client.py
 
 ## Slack Channels
 

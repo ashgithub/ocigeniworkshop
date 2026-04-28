@@ -19,7 +19,7 @@ Environment setup:
 - Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python -m openai_sdk.genai_client.mcp_client
+uv run openai_sdk/genai_client/mcp_client.py
 
 Safe experiments:
 1. Change `USER_PROMPT` to another dice expression.
@@ -34,7 +34,12 @@ Important sections:
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 load_dotenv()
 

@@ -20,7 +20,7 @@ Environment setup:
 - Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python -m openai_sdk.agent_sdk.guardail
+uv run openai_sdk/agent_sdk/guardail.py
 
 Safe experiments:
 1. Change `TEST_PROMPT` to a non-math request and compare behavior.
@@ -45,7 +45,12 @@ from agents import (
     input_guardrail,
 )
 from pydantic import BaseModel
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 TEST_PROMPT = "Can you solve 2x + 3 = 11 for me?"

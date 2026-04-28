@@ -20,7 +20,7 @@ Environment setup:
 - Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python -m openai_sdk.agent_sdk.structured_agent
+uv run openai_sdk/agent_sdk/structured_agent.py
 
 Safe experiments:
 1. Add fields to `CalendarEvent` (example: `location: str | None = None`).
@@ -36,7 +36,12 @@ import asyncio
 
 from agents import Agent, Runner
 from pydantic import BaseModel
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 USER_PROMPT = "Dinner with Priya and Sam on Friday."

@@ -19,7 +19,7 @@ Environment setup:
 - Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python -m openai_sdk.agent_sdk.simple_agent
+uv run openai_sdk/agent_sdk/simple_agent.py
 
 Safe experiments:
 1. Change USER_PROMPT to ask another history question.
@@ -34,7 +34,12 @@ Important sections:
 import asyncio
 
 from agents import Agent, Runner
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 USER_PROMPT = "When did the Roman Empire fall?"

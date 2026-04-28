@@ -32,11 +32,11 @@ Optional variables used by voice examples:
 
 Run commands from project root using:
 
-- `uv run python -m openai_sdk.agent_sdk.<script_name_without_py>`
+- `uv run openai_sdk/agent_sdk/<script_name>.py`
 
 Example:
 
-- `uv run python -m openai_sdk.agent_sdk.simple_agent`
+- `uv run openai_sdk/agent_sdk/simple_agent.py`
 
 ## Suggested Study Order and File Descriptions
 
@@ -44,47 +44,47 @@ The files are designed to build on one another. Study them in this order for a p
 
 1. **`simple_agent.py`**: Smallest end-to-end agent run.
    - Key features: one agent, one prompt, one final response.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.simple_agent`.
+   - How to run: `uv run openai_sdk/agent_sdk/simple_agent.py`.
    - Docs: [Quickstart](https://developers.openai.com/api/docs/guides/agents/quickstart), [Agents Overview](https://developers.openai.com/api/docs/guides/agents).
 
 2. **`streaming_agent.py`**: Streams response deltas as they are generated.
    - Key features: streamed events + token-by-token output rendering.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.streaming_agent`.
+   - How to run: `uv run openai_sdk/agent_sdk/streaming_agent.py`.
    - Docs: [Running Agents](https://developers.openai.com/api/docs/guides/agents/running-agents), [Streaming Responses](https://platform.openai.com/docs/guides/streaming-responses).
 
 3. **`structured_agent.py`**: Produces typed output validated by a `pydantic` schema.
    - Key features: `output_type` and structured final objects.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.structured_agent`.
+   - How to run: `uv run openai_sdk/agent_sdk/structured_agent.py`.
    - Docs: [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs), [Quickstart](https://developers.openai.com/api/docs/guides/agents/quickstart).
 
 4. **`use_tool.py`**: Adds function tools to an agent.
    - Key features: `@function_tool` and tool-guided response generation.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.use_tool`.
+   - How to run: `uv run openai_sdk/agent_sdk/use_tool.py`.
    - Docs: [Tools Guide](https://developers.openai.com/api/docs/guides/tools), [Function Calling](https://developers.openai.com/api/docs/guides/function-calling).
 
 5. **`multiturn.py`**: Demonstrates memory across turns.
    - Key features: `SQLiteSession` local memory + `previous_response_id` server-linked continuity.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.multiturn`.
+   - How to run: `uv run openai_sdk/agent_sdk/multiturn.py`.
    - Docs: [Running Agents](https://developers.openai.com/api/docs/guides/agents/running-agents), [Quickstart](https://developers.openai.com/api/docs/guides/agents/quickstart).
 
 6. **`orchestration.py`**: Demonstrates triage and specialist handoffs.
    - Key features: handoff routing across multiple agents.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.orchestration`.
+   - How to run: `uv run openai_sdk/agent_sdk/orchestration.py`.
    - Docs: [Orchestration](https://developers.openai.com/api/docs/guides/agents/orchestration), [Quickstart](https://developers.openai.com/api/docs/guides/agents/quickstart).
 
 7. **`guardail.py`**: Demonstrates input guardrails with tripwire behavior.
    - Key features: classifier guardrail and blocked execution path.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.guardail`.
+   - How to run: `uv run openai_sdk/agent_sdk/guardail.py`.
    - Docs: [Guardrails Approvals](https://developers.openai.com/api/docs/guides/agents/guardrails-approvals), [Quickstart](https://developers.openai.com/api/docs/guides/agents/quickstart).
 
 8. **`guardail_approval.py`**: Demonstrates human-in-the-loop approvals.
    - Key features: approval interruptions and approve/reject continuation.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.guardail_approval`.
+   - How to run: `uv run openai_sdk/agent_sdk/guardail_approval.py`.
    - Docs: [Guardrails Approvals](https://developers.openai.com/api/docs/guides/agents/guardrails-approvals), [Quickstart](https://developers.openai.com/api/docs/guides/agents/quickstart).
 
 9. **`voice_agent.py`**: Demonstrates a basic voice workflow with WAV output.
    - Key features: STT + single-agent workflow + TTS stream capture.
-   - How to run: `uv run python -m openai_sdk.agent_sdk.voice_agent`.
+   - How to run: `uv run openai_sdk/agent_sdk/voice_agent.py`.
    - Docs: [Voice Agents](https://developers.openai.com/api/docs/guides/voice-agents), [Quickstart](https://developers.openai.com/api/docs/guides/agents/quickstart).
 
 10. **`agent_sdk.ipynb`**: Notebook walkthrough covering the same path interactively.

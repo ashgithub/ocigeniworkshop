@@ -20,7 +20,7 @@ Environment setup:
 - Ensure you have access to OCI Generative AI services
 
 How to run the file:
-uv run python -m openai_sdk.agent_sdk.multiturn
+uv run openai_sdk/agent_sdk/multiturn.py
 
 Safe experiments:
 1. Change `SESSION_ID` and compare local memory behavior.
@@ -35,7 +35,12 @@ Important sections:
 import asyncio
 
 from agents import Agent, Runner, SQLiteSession
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 SESSION_ID = "conversation_123"

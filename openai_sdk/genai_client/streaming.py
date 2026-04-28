@@ -19,7 +19,7 @@ Environment setup:
 - Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python -m openai_sdk.genai_client.streaming
+uv run openai_sdk/genai_client/streaming.py
 
 Safe experiments:
 1. Print all chunk types to understand the stream schema.
@@ -32,7 +32,12 @@ Important sections:
 3. Step 3: Render text deltas in real time. """
 
 from openai import OpenAI
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 USER_PROMPT = "Why the sky is blue?"

@@ -20,7 +20,7 @@ Environment setup:
 - Set up the right compartment ID and profile name over the config file
 
 How to run the file:
-uv run python -m openai_sdk.genai_client.reasoning
+uv run openai_sdk/genai_client/reasoning.py
 
 Safe experiments:
 1. Change reasoning effort: `low`, `medium`, `high`.
@@ -35,7 +35,12 @@ Important sections:
 import json
 
 from openai import OpenAI
-from openai_sdk.openai_client_provider import OpenAIClientProvider
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.4"
 USER_PROMPT = "What is the answer to 12 * (3 + 9)?"
