@@ -1,5 +1,3 @@
----
-
 # OCI Generative AI Policy set up for GA + OpenIA SDK usage
 
 *Policies + Procedures for SDK + Console*
@@ -283,3 +281,88 @@ allow group <group> to manage generative-ai-hosted-deployment in compartment <co
   * configure DB for NL2SQL
 
 ---
+
+## References (OCI Generative AI + SDK)
+
+#### Core Generative AI Platform
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
+  → Main entry point for OCI Generative AI
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/overview.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/overview.htm)
+  → Service overview and concepts
+
+#### Agentic API (Responses API)
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-responses-api.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-responses-api.htm)
+  → How to use OCI Responses API (OpenAI-compatible)
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/get-started.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/get-started.htm)
+  → Getting started guide
+
+#### IAM & Policies
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/iam-policies.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/iam-policies.htm)
+  → All IAM policies for Generative AI
+
+* [https://docs.oracle.com/en-us/iaas/Content/Identity/Concepts/policies.htm](https://docs.oracle.com/en-us/iaas/Content/Identity/Concepts/policies.htm)
+  → General OCI IAM policy syntax
+
+#### Vector Stores (RAG)
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-vector-store.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-vector-store.htm)
+  → Vector store concepts and usage
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/vector-store-permissions.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/vector-store-permissions.htm)
+  → Required permissions for vector stores
+
+#### Files API
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-files.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-files.htm)
+  → Upload and manage files
+
+#### File Search (RAG Tool)
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-file-search.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-file-search.htm)
+  → Using file search with vector stores
+
+#### Vector Store Connectors
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-vector-store-connectors.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-vector-store-connectors.htm)
+  → Sync data from Object Storage
+
+#### NL2SQL / Semantic Store
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/get-started-agents.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/get-started-agents.htm)
+  → Semantic store + NL2SQL setup
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-semantic-store.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-semantic-store.htm)
+  → Manage semantic stores
+
+#### Database Tools (Required for NL2SQL)
+
+* [https://docs.oracle.com/en-us/iaas/database-tools/doc/database-tools-overview.html](https://docs.oracle.com/en-us/iaas/database-tools/doc/database-tools-overview.html)
+  → Database Tools service overview
+
+#### Containers / Code Interpreter
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-containers.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-containers.htm)
+  → Containers API (code interpreter backend)
+
+#### Hosted Applications (Deploy Agents)
+
+* [https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-hosted-applications.htm](https://docs.oracle.com/en-us/iaas/Content/generative-ai/use-hosted-applications.htm)
+  → Deploy agents as services
+
+#### Authentication (IAM + SDK)
+
+* [https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm)
+  → OCI authentication methods
+
+* [https://github.com/oracle-samples/oci-genai-auth-python](https://github.com/oracle-samples/oci-genai-auth-python)
+  → OCI GenAI IAM auth helper (Python)
+
+#### OpenAI SDK (Used with OCI)
+
+* [https://developers.openai.com/api/docs](https://developers.openai.com/api/docs)
+  → OpenAI Responses API spec (compatible with OCI)

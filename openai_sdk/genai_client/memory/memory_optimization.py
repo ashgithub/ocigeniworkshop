@@ -1,41 +1,21 @@
-""" What this file does:
-Demonstrates the two foundational Responses API patterns:
-1) one standard response from responses API
+"""What this file does:
+Creates a conversation with short-term memory optimization metadata enabled.
 
-Documentation for reference:
-- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
-- Responses API: https://platform.openai.com/docs/api-reference/responses
-- Responses API reference: https://platform.openai.com/docs/api-reference/responses
-- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+How to run:
+uv run openai_sdk/genai_client/memory/memory_optimization.py
 
-Relevant Slack channels:
-- #generative-ai-users: Questions about OCI Generative AI
-- #igiu-innovation-lab: General project discussions
-- #igiu-ai-learning: Help with sandbox environment and execution for this repo
-- #genai-hosted-deployment-users: GA deployment and integration updates with latest SDK
+Setup:
+- Credentials are loaded from `sandbox.yaml` through `OpenAIClientProvider`.
+- Metadata key `short_term_memory_optimization` is set to `"True"` in this sample.
 
-Environment setup:
-- Set up the credentials for OCI over the `sandbox.yaml file`
-- Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
-- Set up the right compartment ID and profile name over the config file
-
-How to run the file:
-uv run openai_sdk/genai_client/base_client.py
-
-Safe experiments:
-1. Change `BASIC_PROMPT` and `STREAM_PROMPT`.
-2. Swap `MODEL_ID` with another available model.
-3. Print all stream chunk types to inspect event flow.
-
-Important sections:
-1. Step 1: Build configured OpenAI client.
-2. Step 2: Execute standard response call.
+Notes for beginners:
+- This example focuses only on conversation creation with memory-related metadata.
+- Extend it with `responses.create(...)` calls if you want to inspect runtime behavior.
 """
 
 from openai import OpenAI
 import os
 import sys
-import time
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -54,6 +34,8 @@ def main():
                 metadata={"topic": "demo", "short_term_memory_optimization": "True"},
                 items=[{"type": "message", "role": "user", "content": "Hello!"}],
         )
+    
+    print(conversation1)
 
 if __name__ == "__main__":
     main()

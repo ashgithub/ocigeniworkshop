@@ -1,36 +1,41 @@
-"""File search sample using a vector store.
+"""What this file does:
+Runs a simple `responses.create` call with the `file_search` tool.
 
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/file_search.py
 
-Required environment variable:
-- VECTOR_STORE_ID: vector store id used by the file_search tool
-
-Optional environment variable:
-- VECTOR_SEARCH_PROMPT: user prompt for search (default provided)
+Setup notes:
+- Prefer setting constants below for workshop clarity.
+- If you prefer env vars, create `VECTOR_STORE_ID` in your `.env`.
 """
 
-from __future__ import annotations
+import os
+import sys
+from openai import OpenAI
 
-try:
-    from .vector_genai_client import get_client, get_env, print_section, require_env
-except ImportError:
-    from vector_genai_client import get_client, get_env, print_section, require_env
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from openai_client_provider import OpenAIClientProvider
 
-
+MODEL_ID = "openai.gpt-5.2"
 DEFAULT_PROMPT = "What does this knowledge base say about OCI GPU shapes?"
+VECTOR_STORE_ID = ""  # Set your vector store id here, or use env var VECTOR_STORE_ID.
 
+def main():
+    # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-def main() -> None:
-    client = get_client()
-    vector_store_id = require_env("VECTOR_STORE_ID")
-    prompt = get_env("VECTOR_SEARCH_PROMPT", DEFAULT_PROMPT)
-    prompt="example"
+    # Step 2: Resolve required runtime values.
+    vector_store_id = VECTOR_STORE_ID or os.getenv("VECTOR_STORE_ID", "").strip()
+    if not vector_store_id:
+        raise ValueError(
+            "Missing vector store id. Set VECTOR_STORE_ID constant in this file "
+            "or create env var VECTOR_STORE_ID."
+        )
 
-    print_section("Responses API with file_search")
+    # Step 3: Call Responses API with file_search.
     response = client.responses.create(
-        model="openai.gpt-5.2",
-        input=prompt,
+        model=MODEL_ID,
+        input=DEFAULT_PROMPT,
         tools=[
             {
                 "type": "file_search",
@@ -38,8 +43,8 @@ def main() -> None:
             }
         ],
     )
+    print("Result of the file search on vector store:")
     print(response.output_text)
-
 
 if __name__ == "__main__":
     main()

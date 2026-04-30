@@ -1,68 +1,67 @@
-"""File management sample for vector store workflows.
-
-What this file does:
-1) Uploads a file with `purpose=user_data`
-2) Lists files
-3) Optionally retrieves file metadata/content and deletes a file
+"""What this file does:
+1) Upload a file with `purpose=user_data` (optional)
+2) List files
+3) Retrieve metadata/content for one file
+4) Optionally delete that file
 
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/file_management.py
-
-Optional environment variables:
-- VECTOR_SAMPLE_FILE_PATH: local file to upload
-- VECTOR_SAMPLE_FILE_ID: existing file id for retrieve/content/delete operations
-- VECTOR_DELETE_FILE: set to true to delete `VECTOR_SAMPLE_FILE_ID`
 """
 
-from __future__ import annotations
+from openai import OpenAI
+import os
+import sys
 
-try:
-    from .vector_genai_client import as_bool, get_client, get_env, print_section
-except ImportError:
-    from vector_genai_client import as_bool, get_client, get_env, print_section
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from openai_client_provider import OpenAIClientProvider
 
+UPLOAD_FILE_PATH = ""  # Set local file path here, or create env var VECTOR_SAMPLE_FILE_PATH.
+TARGET_FILE_ID = ""  # Set an existing file id here, or create env var VECTOR_SAMPLE_FILE_ID.
+DELETE_FILE_AT_END = False  # Set True to delete the file after running.
 
-def main() -> None:
-    client = get_client()
+def main():
+    # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    file_path = get_env("VECTOR_SAMPLE_FILE_PATH")
-    file_id = get_env("VECTOR_SAMPLE_FILE_ID")
+    # Step 2: Resolve optional file input values.
+    file_path = UPLOAD_FILE_PATH or os.getenv("VECTOR_SAMPLE_FILE_PATH", "").strip()
+    file_id = TARGET_FILE_ID or os.getenv("VECTOR_SAMPLE_FILE_ID", "").strip()
 
+    # Step 3: Upload (optional).
     if file_path:
-        print_section("Upload File")
         with open(file_path, "rb") as file_handle:
             uploaded_file = client.files.create(file=file_handle, purpose="user_data")
-        print(uploaded_file)
+        print(f"uploaded file: {uploaded_file}")
         file_id = uploaded_file.id
     else:
-        print("Skipping upload: set VECTOR_SAMPLE_FILE_PATH to upload a file.")
+        print(
+            "Skipping upload. Set UPLOAD_FILE_PATH constant or create env var VECTOR_SAMPLE_FILE_PATH."
+        )
 
-    print_section("List Files")
+    # Step 4: List files.
     files_list = client.files.list(order="asc", limit=20)
-    print(files_list)
+    print(f"Files listed:\n{files_list}")
 
+    # Step 5: Retrieve info/content for one file.
     if not file_id:
         print(
-            "Skipping retrieve/content/delete: set VECTOR_SAMPLE_FILE_ID "
+            "Skipping retrieve/content/delete. Set TARGET_FILE_ID constant, "
             "or upload a file in this run."
         )
         return
 
-    print_section("Retrieve File Metadata")
     file_info = client.files.retrieve(file_id=file_id)
-    print(file_info)
+    print(f"File metadata found:\n{file_info}")
 
-    print_section("Retrieve File Content")
     content_page = client.files.content(file_id=file_id)
-    print(content_page)
+    print(f"Content page:\n{content_page}")
 
-    if as_bool("VECTOR_DELETE_FILE", default=False):
-        print_section("Delete File")
+    # Step 6: Delete (optional).
+    if DELETE_FILE_AT_END:
         delete_result = client.files.delete(file_id=file_id)
-        print(delete_result)
+        print(f"Delete job result:\n{delete_result}")
     else:
-        print("Skipping delete: set VECTOR_DELETE_FILE=true to delete the file.")
-
+        print("Skipping delete. Set DELETE_FILE_AT_END=True to delete the file.")
 
 if __name__ == "__main__":
     main()

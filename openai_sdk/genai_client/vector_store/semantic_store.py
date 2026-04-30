@@ -1,44 +1,42 @@
-"""Semantic search-style workflow using vector stores.
+"""What this file does:
+Runs a semantic search directly against an existing vector store.
 
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/semantic_store.py
-
-Required environment variable:
-- VECTOR_STORE_ID: existing vector store id
-
-Optional environment variables:
-- VECTOR_SEMANTIC_QUERY
-- VECTOR_SEMANTIC_LIMIT
 """
 
-from __future__ import annotations
+from openai import OpenAI
+import os
+import sys
 
-try:
-    from .vector_genai_client import get_client, get_env, print_section, require_env
-except ImportError:
-    from vector_genai_client import get_client, get_env, print_section, require_env
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from openai_client_provider import OpenAIClientProvider
 
+VECTOR_STORE_ID = ""  # Set here, or create env var VECTOR_STORE_ID.
+SEARCH_QUERY = "Summarize the business meaning of these documents."
+MAX_RESULTS = 8
 
-DEFAULT_QUERY = "Summarize the business meaning of these documents."
+def main():
+    # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
 
+    # Step 2: Resolve required vector store id.
+    vector_store_id = VECTOR_STORE_ID or os.getenv("VECTOR_STORE_ID", "").strip()
+    if not vector_store_id:
+        raise ValueError(
+            "Missing vector store id. Set VECTOR_STORE_ID constant in this file "
+            "or create env var VECTOR_STORE_ID."
+        )
 
-def main() -> None:
-    client = get_client()
-    vector_store_id = require_env("VECTOR_STORE_ID")
-    query = get_env("VECTOR_SEMANTIC_QUERY", DEFAULT_QUERY)
-
-    limit_raw = get_env("VECTOR_SEMANTIC_LIMIT", "8")
-    limit = int(limit_raw)
-
-    print_section("Semantic Search")
+    # Step 3: Run semantic search.
     result = client.vector_stores.search(
         vector_store_id=vector_store_id,
-        query=query,
-        max_num_results=limit,
+        query=SEARCH_QUERY,
+        max_num_results=MAX_RESULTS,
         ranking_options={"ranker": "auto", "score_threshold": 0.0},
     )
+    print("Semantic search results:")
     print(result)
-
 
 if __name__ == "__main__":
     main()
