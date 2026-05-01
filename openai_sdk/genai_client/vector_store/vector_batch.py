@@ -1,8 +1,31 @@
 """What this file does:
-Shows vector store file batch create/retrieve/list and optional cancel.
+Shows vector store file batch operations:
+1) Create file batch
+2) Retrieve batch status
+3) List files in batch
+4) Optionally cancel batch
+
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Vector store file batches API reference: https://platform.openai.com/docs/api-reference/vector-stores-file-batches
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Set `VECTOR_STORE_ID` and one or more `FILE_IDS` (or env var `VECTOR_FILE_IDS`).
 
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/vector_batch.py
+
+Safe experiments:
+1. Start with one file id, then test multi-file batches.
+2. Inspect retrieve/list outputs before trying cancel.
+3. Use attributes to tag batches for troubleshooting.
+
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2: Resolve vector store and file ids.
+3. Step 3-6: Create/retrieve/list/cancel batch flow.
 """
 
 from openai import OpenAI

@@ -1,12 +1,28 @@
 """What this file does:
-Runs a simple `responses.create` call with the `file_search` tool.
+Runs a simple `responses.create` call using the `file_search` tool.
+
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Responses API reference: https://platform.openai.com/docs/api-reference/responses
+- File search guide: https://platform.openai.com/docs/guides/tools-file-search
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Set `VECTOR_STORE_ID` constant or env var `VECTOR_STORE_ID`.
 
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/file_search.py
 
-Setup notes:
-- Prefer setting constants below for workshop clarity.
-- If you prefer env vars, create `VECTOR_STORE_ID` in your `.env`.
+Safe experiments:
+1. Replace `DEFAULT_PROMPT` with your own domain-specific questions.
+2. Compare answers with and without `file_search` tool usage.
+3. Try multiple vector stores to compare retrieval quality.
+
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2: Resolve vector store id.
+3. Step 3: Execute Responses API call with file search tool.
 """
 
 import os

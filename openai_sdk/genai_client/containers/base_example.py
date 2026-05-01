@@ -1,20 +1,31 @@
 """What this file does:
-Demonstrates basic container lifecycle operations:
+Demonstrates the container lifecycle in a beginner-friendly sequence:
 1) Create a container
 2) List containers
-3) Retrieve one container
-4) Delete one container
+3) Retrieve one container by id
+4) Delete one container by id
 
-How to run:
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Containers API reference: https://platform.openai.com/docs/api-reference/containers
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Confirm `projectId`, `compartmentId`, and profile values are valid.
+- Replace placeholder ids (`container_id`) with real ids before running retrieve/delete.
+
+How to run from repo root:
 uv run openai_sdk/genai_client/containers/base_example.py
 
-Setup:
-- Credentials are loaded from `sandbox.yaml` through `OpenAIClientProvider`.
-- Replace placeholder ids like `container_id` before running retrieve/delete.
+Safe experiments:
+1. Change `name` in create call to test naming conventions.
+2. Comment out delete while learning so the created resource can be inspected.
+3. Print full objects (not only ids) to inspect payload shape.
 
-Notes for beginners:
-- This sample keeps operations separate so each API call is easy to follow.
-- You can comment out delete while testing if you want to inspect created resources.
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2: Run create/list/retrieve/delete container calls.
 """
 
 from openai import OpenAI
@@ -34,24 +45,27 @@ def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    # create container
+    # Step 2a: Create container.
     container = client.containers.create(
         name="name",
     )
     print(container.id)
 
-    # list containers
+    # Step 2b: List available containers.
     page = client.containers.list()
     page = page.data[0]
     print(page.id)
 
-    # retrieve container
+    # Step 2c: Retrieve container by id.
     container = client.containers.retrieve(
         "container_id",
     )
     print(container.id)
 
-    # delete container
+    # Step 2d: Delete container by id.
     client.containers.delete(
         "container_id",
     )
+
+if __name__ == "__main__":
+    main()

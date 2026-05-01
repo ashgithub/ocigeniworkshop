@@ -1,8 +1,34 @@
 """What this file does:
-Runs vector store connector APIs (create/list/get/stats/logs/delete optional).
+Runs vector store connector APIs in one walkthrough:
+1) Create connector
+2) List connectors
+3) Get connector details
+4) Get connector stats
+5) List ingestion logs
+6) Optionally delete connector
+
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- OCI Generative AI control-plane docs (connector-related): internal GA guide
+  https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Set `VECTOR_STORE_ID` constant or env var `VECTOR_STORE_ID`.
+- Ensure object storage bucket values exist in `sandbox.yaml` (or env fallbacks).
 
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/vector_store_connector.py
+
+Safe experiments:
+1. Run with `DELETE_CONNECTOR_AT_END=False` to inspect created connector state.
+2. Adjust `VECTOR_OS_PREFIXES` to scope ingestion.
+3. Review logs output after ingestion windows.
+
+Important sections:
+1. Step 1: Build OCI control-plane client.
+2. Step 2: Resolve runtime values.
+3. Step 3-8: Execute connector lifecycle operations.
 """
 
 import os

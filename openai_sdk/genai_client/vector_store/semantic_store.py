@@ -1,8 +1,27 @@
 """What this file does:
 Runs a semantic search directly against an existing vector store.
 
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Vector stores API reference: https://platform.openai.com/docs/api-reference/vector-stores
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Set `VECTOR_STORE_ID` constant or env var `VECTOR_STORE_ID`.
+
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/semantic_store.py
+
+Safe experiments:
+1. Tune `MAX_RESULTS` to compare precision vs. recall.
+2. Change `ranking_options` threshold to filter weaker matches.
+3. Test several queries and compare returned chunks.
+
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2: Resolve vector store id.
+3. Step 3: Execute semantic search.
 """
 
 from openai import OpenAI

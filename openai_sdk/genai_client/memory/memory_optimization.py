@@ -1,16 +1,26 @@
 """What this file does:
 Creates a conversation with short-term memory optimization metadata enabled.
 
-How to run:
-uv run openai_sdk/genai_client/memory/memory_optimization.py
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Conversations API reference: https://platform.openai.com/docs/api-reference/conversations
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
-Setup:
-- Credentials are loaded from `sandbox.yaml` through `OpenAIClientProvider`.
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
 - Metadata key `short_term_memory_optimization` is set to `"True"` in this sample.
 
-Notes for beginners:
-- This example focuses only on conversation creation with memory-related metadata.
-- Extend it with `responses.create(...)` calls if you want to inspect runtime behavior.
+How to run from repo root:
+uv run openai_sdk/genai_client/memory/memory_optimization.py
+
+Safe experiments:
+1. Toggle `short_term_memory_optimization` between `"True"` and `"False"`.
+2. Add one `responses.create(...)` turn to inspect practical impact.
+3. Add additional metadata keys to test project conventions.
+
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2: Create conversation with optimization metadata.
 """
 
 from openai import OpenAI
@@ -30,6 +40,7 @@ def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
+    # Step 2: Create conversation with short-term memory optimization metadata.
     conversation1 = client.conversations.create(
                 metadata={"topic": "demo", "short_term_memory_optimization": "True"},
                 items=[{"type": "message", "role": "user", "content": "Hello!"}],

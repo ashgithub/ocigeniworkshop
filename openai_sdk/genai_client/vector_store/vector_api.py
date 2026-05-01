@@ -1,8 +1,34 @@
 """What this file does:
-Shows vector store create/retrieve/update/search and optional file attach flow.
+Shows end-to-end vector store lifecycle:
+1) Create vector store
+2) Retrieve vector store
+3) Update vector store metadata/name
+4) Run semantic search
+5) Optionally attach and inspect files
+6) Optionally delete vector store
+
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Vector stores API reference: https://platform.openai.com/docs/api-reference/vector-stores
+- Vector store files API reference: https://platform.openai.com/docs/api-reference/vector-stores-files
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Optionally provide `ATTACH_FILE_ID` or env var `VECTOR_SAMPLE_FILE_ID`.
 
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/vector_api.py
+
+Safe experiments:
+1. Keep `DELETE_VECTOR_STORE_AT_END=False` while learning.
+2. Update metadata keys and inspect retrieval output.
+3. Attach one known file id to validate ingestion flow.
+
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2-5: Create/retrieve/update/search vector store.
+3. Step 6-7: Optional file attach and cleanup.
 """
 
 from openai import OpenAI

@@ -1,18 +1,30 @@
 """What this file does:
 Shows memory recall using a shared `memory_subject_id` across conversations:
-1) Conversation A stores user preference
-2) Conversation B asks the model to recall that preference
+1) Conversation A stores user preferences
+2) Conversation B asks to recall those preferences
 
-How to run:
-uv run openai_sdk/genai_client/memory/memory_subject.py
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Conversations API reference: https://platform.openai.com/docs/api-reference/conversations
+- Responses API reference: https://platform.openai.com/docs/api-reference/responses
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
-Setup:
-- Credentials are loaded from `sandbox.yaml` through `OpenAIClientProvider`.
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
 - Keep `memory_subject_id` consistent between conversations.
 
-Notes for beginners:
-- The pause (`time.sleep(10)`) is intentional to allow memory indexing.
-- If recall is incomplete, wait longer and run again with the same subject id.
+How to run from repo root:
+uv run openai_sdk/genai_client/memory/memory_subject.py
+
+Safe experiments:
+1. Try different memory statements and ask targeted recall questions.
+2. Increase `time.sleep(...)` when memory indexing requires longer delay.
+3. Re-run with a new `memory_subject_id` to isolate test sessions.
+
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2: Store memory in first conversation.
+3. Step 3: Recall memory in second conversation.
 """
 
 from openai import OpenAI
@@ -32,24 +44,24 @@ def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    # first conversation
+    # Step 2a: Create first conversation.
     conversation1 = client.conversations.create(
         metadata={ "memory_subject_id": "user_123456" },
     )
-    # a turn on first conversation
+    # Step 2b: Send preference turn to store memory.
     response = client.responses.create(
         model="openai.gpt-4.1",
         input="I like Fish. I don't like Shrimp.",
         conversation=conversation1.id
     )
     print(response.output_text)
-    # delay for long-term memory processing
+    # Step 2c: Wait for memory indexing.
     time.sleep(10)
-    # second conversation
+    # Step 3a: Create second conversation with same subject id.
     conversation2 = client.conversations.create(
         metadata={ "memory_subject_id": "user_123456" },
     )
-    # a turn on second conversation
+    # Step 3b: Ask a recall question.
     response = client.responses.create(
         model="openai.gpt-4.1",
         input="What do I like",

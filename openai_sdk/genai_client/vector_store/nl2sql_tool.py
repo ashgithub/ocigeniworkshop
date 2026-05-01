@@ -3,12 +3,29 @@ Shows NL2SQL in two beginner-friendly sections:
 1) Semantic store setup (create/get)
 2) SQL generation from natural language
 
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- OCI Generative AI semantic store docs (internal GA guide):
+  https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Set semantic/inference host values for your environment.
+- Provide `SEMANTIC_STORE_ID` or enable `CREATE_SEMANTIC_STORE_IF_MISSING=True`.
+- For creation flow, provide `QUERYING_CONNECTION_ID` and `ENRICHMENT_CONNECTION_ID`.
+
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/nl2sql_tool.py
 
-Important:
-- Client/auth initialization is centralized through `OpenAIClientProvider`.
-- The flow is "create resource first, then use it."
+Safe experiments:
+1. Start with an existing `SEMANTIC_STORE_ID` before trying create flow.
+2. Change `NATURAL_LANGUAGE_QUERY` and inspect generated SQL.
+3. Print payloads to understand request/response shapes.
+
+Important sections:
+1. Section 1: User-editable settings.
+2. Section 3: Semantic store create/get operations.
+3. Section 4: NL2SQL generation call.
 """
 
 import json

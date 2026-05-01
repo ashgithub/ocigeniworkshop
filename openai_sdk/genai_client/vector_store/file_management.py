@@ -1,11 +1,32 @@
 """What this file does:
+Demonstrates core file management for vector workflows:
 1) Upload a file with `purpose=user_data` (optional)
 2) List files
-3) Retrieve metadata/content for one file
+3) Retrieve metadata and content for one file
 4) Optionally delete that file
+
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Files API reference: https://platform.openai.com/docs/api-reference/files
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Set `UPLOAD_FILE_PATH` or env var `VECTOR_SAMPLE_FILE_PATH` to test upload.
+- Set `TARGET_FILE_ID` or env var `VECTOR_SAMPLE_FILE_ID` when skipping upload.
 
 How to run from repo root:
 uv run openai_sdk/genai_client/vector_store/file_management.py
+
+Safe experiments:
+1. Start with a small text or CSV file for easier inspection.
+2. Keep `DELETE_FILE_AT_END=False` while validating list/retrieve output.
+3. Toggle upload on/off to practice both onboarding paths.
+
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2: Resolve optional runtime inputs.
+3. Step 3-6: Run upload/list/retrieve/delete flow.
 """
 
 from openai import OpenAI

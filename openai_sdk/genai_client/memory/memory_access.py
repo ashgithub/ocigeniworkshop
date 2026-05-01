@@ -1,18 +1,30 @@
 """What this file does:
-Shows memory access policies across two conversations for the same subject:
+Demonstrates memory access policies across two conversations for one subject:
 1) Conversation A stores memory (`store_only`)
 2) Conversation B recalls memory (`recall_only`)
 
-How to run:
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Conversations API reference: https://platform.openai.com/docs/api-reference/conversations
+- Responses API reference: https://platform.openai.com/docs/api-reference/responses
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
+
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Keep `memory_subject_id` stable to represent the same logical end user.
+
+How to run from repo root:
 uv run openai_sdk/genai_client/memory/memory_access.py
 
-Setup:
-- Credentials are loaded from `sandbox.yaml` through `OpenAIClientProvider`.
-- `memory_subject_id` should represent the same logical user across turns.
+Safe experiments:
+1. Change `memory_access_policy` values to compare behavior.
+2. Increase `time.sleep(...)` if recall seems incomplete.
+3. Use your own preference statements and verify recall quality.
 
-Notes:
-- The `time.sleep(10)` gives backend memory processing time before recall.
-- Keep the same `memory_subject_id` to test cross-conversation memory behavior.
+Important sections:
+1. Step 1: Build configured OpenAI client.
+2. Step 2: Create store-only conversation and send preference.
+3. Step 3: Create recall-only conversation and validate memory retrieval.
 """
 
 from openai import OpenAI
@@ -33,30 +45,30 @@ def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    # first conversation
+    # Step 2a: Create first conversation (store-only policy).
     conversation1 = client.conversations.create(
         metadata={ 
                     "memory_subject_id": "user_123456",
             "memory_access_policy": "store_only",
             },
     )
-    # a turn on first conversation, this conversation can store memory, but cannot recall memory
+    # Step 2b: Send a turn that should be stored in memory.
     response = client.responses.create(
         model="openai.gpt-4.1",
         input="I like Fish. I don't like Shrimp.", 
         conversation=conversation1.id
     )
     print(response.output_text)
-    # delay for long-term memory processing
+    # Step 2c: Wait for memory processing before recall test.
     time.sleep(10)
-    # second conversation, this conversation can recall memory, but cannot store new memory
+    # Step 3a: Create second conversation (recall-only policy).
     conversation2 = client.conversations.create(
         metadata={
                 "memory_subject_id": "user_123456",
                 "memory_access_policy": "recall_only",
             },
     )
-    # a turn on second conversation
+    # Step 3b: Ask for recalled preference.
     response = client.responses.create(
         model="openai.gpt-4.1",
         input="What do I like",
