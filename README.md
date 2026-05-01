@@ -11,6 +11,23 @@ It is designed to work with the AI sandbox environment and includes:
 
 If you need sandbox access or help with setup, use the `#igiu-ai-learning` Slack channel.
 
+Welcome. This README is the home page for the repository and points you to the fastest path based on your goal and preferred SDK stack.
+
+## Table of Contents
+
+1. [Who This Repository Is For](#who-this-repository-is-for)
+2. [Quick Start](#quick-start)
+3. [Environment and Sandbox Setup](#environment-and-sandbox-setup)
+4. [Running Code](#running-code)
+5. [Recommended Learning Paths](#recommended-learning-paths)
+6. [Module Index](#module-index)
+7. [Learning Stack Guidance (Recommended vs Legacy)](#learning-stack-guidance-recommended-vs-legacy)
+8. [OCI Object Storage Helper Commands](#oci-object-storage-helper-commands)
+9. [Environment Variables](#environment-variables)
+10. [Repository Conventions](#repository-conventions)
+11. [Primary SDKs and Libraries Used](#primary-sdks-and-libraries-used)
+12. [Need Help?](#need-help)
+
 ## Who This Repository Is For
 
 This repository is intended for:
@@ -34,6 +51,8 @@ If you want the fastest path to a working local setup:
    ```
 
 5. Start with one of these:
+   - `openai_sdk/readme_openai_sdk.md`
+   - `openai_sdk/genai_client/readme_genai.md`
    - `langChain/llm/readme_langchain_llm.md`
    - `langChain/agents/readme_agents.md`
    - `langChain/agents/agents.ipynb`
@@ -122,9 +141,28 @@ Some notebooks expect the working directory to be the repository root. If needed
 
 ## Recommended Learning Paths
 
-This repository supports two main learning paths.
+This repository supports three practical learning paths.
 
-### Path 1: LangChain-first learning path
+### Path 1: OpenAI-compatible SDK-first learning path (recommended for most users)
+
+This is the preferred starting path for new users who want modern OpenAI-compatible patterns on OCI.
+
+- **`openai_sdk/genai_client`**
+  - Responses API patterns: basic calls, streaming, structured outputs, reasoning, multimodal, tool use
+  - Includes advanced submodules:
+    - `containers` (container lifecycle + container file operations)
+    - `memory` (memory subject, policies, optimization metadata)
+    - `vector_store` (file search, semantic search, batches, connectors, NL2SQL)
+
+- **`openai_sdk/agent_sdk`**
+  - Agents SDK patterns: agents, orchestration, handoffs, guardrails, approvals, voice
+
+Recommended entry docs:
+- `openai_sdk/readme_openai_sdk.md`
+- `openai_sdk/genai_client/readme_genai.md`
+- `openai_sdk/agent_sdk/readme_agent_sdk.md`
+
+### Path 2: LangChain-first learning path
 
 This is the recommended path if you want to learn modern LLM application patterns first.
 
@@ -146,9 +184,9 @@ This is the recommended path if you want to learn modern LLM application pattern
 - **`database`**
   - NL2SQL, Select AI, database-centric RAG, and semantic caching in Oracle Database
 
-### Path 2: OCI-native learning path
+### Path 3: OCI-native learning path (legacy, still supported)
 
-This path is best if you want to learn OCI AI services through OCI SDKs and platform APIs directly.
+This path is kept for legacy users and direct OCI SDK workflows. New users should generally start with `openai_sdk`, then use `langChain`, and use `oci_genai` when they specifically need OCI-native lower-level patterns.
 
 - **`oci_genai/llm`**
 - **`oci_genai/function_calling`**
@@ -157,6 +195,36 @@ This path is best if you want to learn OCI AI services through OCI SDKs and plat
 - **`oci_genai/vision`**
 
 ## Module Index
+
+### At-a-glance module map
+
+| Module Family | Recommended Order | Status | Entry README |
+|---|---|---|---|
+| `openai_sdk` | 1 | Preferred | `openai_sdk/readme_openai_sdk.md` |
+| `langChain` | 2 | Preferred | `langChain/llm/readme_langchain_llm.md` |
+| `oci_genai` | 3 | Legacy (supported) | module-level READMEs inside `oci_genai/` |
+| `database` | Cross-cutting | Active | module-level READMEs inside `database/` |
+
+### OpenAI-compatible SDK module (`openai_sdk`)
+
+- **`openai_sdk/genai_client`**
+  - Direct OpenAI-compatible Responses API workflows
+  - Core topics: streaming, structured outputs, state continuation, built-in tools, multimodal
+  - Advanced submodules:
+    - `containers/`: container lifecycle + container file operations
+    - `memory/`: memory subject patterns, access policies, optimization metadata
+    - `vector_store/`: files + vector stores, semantic search, file search, batching, connectors, NL2SQL
+  - Entry docs:
+    - `openai_sdk/genai_client/readme_genai.md`
+    - `openai_sdk/genai_client/containers/readme_containers.md`
+    - `openai_sdk/genai_client/memory/readme_memory.md`
+    - `openai_sdk/genai_client/vector_store/readme_vector_store.md`
+
+- **`openai_sdk/agent_sdk`**
+  - OpenAI Agents SDK workflows with OCI-backed configuration
+  - Topics: agents, tools, multiturn memory, orchestration/handoffs, guardrails, approvals, voice
+  - Entry doc:
+    - `openai_sdk/agent_sdk/readme_agent_sdk.md`
 
 ### LangChain-based modules
 
@@ -182,12 +250,12 @@ This path is best if you want to learn OCI AI services through OCI SDKs and plat
   - Optional AIA reranking
 
 - **`langChain/multimodal`**
-  - Text → image
-  - Text → speech
-  - Speech → text
-  - Image → text
+  - Text -> image
+  - Text -> speech
+  - Speech -> text
+  - Image -> text
 
-### OCI-native modules
+### OCI-native modules (legacy, still available)
 
 - **`oci_genai/llm`**
 - **`oci_genai/function_calling`**
@@ -204,7 +272,20 @@ This path is best if you want to learn OCI AI services through OCI SDKs and plat
   - Database-centric RAG
   - Semantic caching
 
-Refer to each module’s README for setup details, study order, experiments, and Slack references.
+Refer to each module's README for setup details, study order, experiments, and Slack references.
+
+## Learning Stack Guidance (Recommended vs Legacy)
+
+Use this sequence when onboarding new users:
+
+1. **Start with `openai_sdk`**
+   - Best default for OpenAI-compatible APIs and modern agentic/retrieval workflows on OCI.
+2. **Then use `langChain`**
+   - Best for framework-based orchestration, chains, and ecosystem integrations.
+3. **Use `oci_genai` as legacy path**
+   - Keep this for backward compatibility, direct OCI-native examples, and existing users already invested in that stack.
+
+This guidance does not deprecate repository content. It clarifies the preferred adoption path while preserving all existing legacy documentation.
 
 ## OCI Object Storage Helper Commands
 
