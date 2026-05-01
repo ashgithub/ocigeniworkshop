@@ -62,6 +62,16 @@ class OpenAIClientProvider:
                 f"Missing required config keys in '{self.config_path}': {', '.join(missing)}"
             )
 
+    def get_sandbox_value(self, section: str, key: str, default: str | None = None) -> str | None:
+        """Read a value from sandbox.yaml using section/key with an optional default."""
+        if not self.scfg:
+            return default
+        section_data = self.scfg.get(section, {})
+        if not isinstance(section_data, dict):
+            return default
+        value = section_data.get(key, default)
+        return value
+
     # Helper for adding the necessary headers to make the sandbox connection
     def _default_headers(self) -> dict[str, str]:
         headers: dict[str, str] = {}
@@ -97,6 +107,67 @@ class OpenAIClientProvider:
         )
 
         return async_client
+
+    def build_oci_generative_ai_control_plane_client(self):
+        #TODO: this client requires token auth, switch to userprincipal auth
+        """
+        Build OCI Generative AI control-plane client for vector store connector APIs.
+        Returns:
+            tuple[oci.generative_ai.GenerativeAiClient, str]
+            -> (client, compartment_id)
+        """
+        import oci
+
+        config, signer = self._load_security_token_config_and_signer()
+        compartment_id = self.oci_compartment_id
+        region = config.get("region", "us-chicago-1")
+        endpoint = f"https://generativeai.{region}.oci.oraclecloud.com"
+
+        client = oci.generative_ai.GenerativeAiClient(
+            config=config,
+            signer=signer,
+            service_endpoint=endpoint,
+        )
+        return client, compartment_id
+
+    def build_oci_generative_ai_inference_client(self, service_endpoint: str | None = None):
+        """
+        Build OCI Generative AI Inference client.
+
+        Args:
+            service_endpoint: Optional endpoint override. If not set, it is built from region.
+        Returns:
+            oci.generative_ai_inference.GenerativeAiInferenceClient
+        """
+        import oci
+
+        config, signer = self._load_security_token_config_and_signer()
+        region = config.get("region", "us-chicago-1")
+        endpoint = service_endpoint or f"https://inference.generativeai.{region}.oci.oraclecloud.com"
+        client = oci.generative_ai_inference.GenerativeAiInferenceClient(
+            config=config,
+            signer=signer,
+            service_endpoint=endpoint,
+            retry_strategy=None,
+        )
+        return client
+
+    def _load_security_token_config_and_signer(self):
+        """Load OCI config and security-token signer from sandbox profile settings."""
+        import os
+        import oci
+
+        profile = self.oci_openai_profile
+        config = oci.config.from_file(self.scfg["oci"]["configFile"], profile_name=profile)
+        token_path = os.path.expanduser(config["security_token_file"])
+        key_path = os.path.expanduser(config["key_file"])
+
+        with open(token_path, encoding="utf-8") as token_file:
+            token = token_file.read()
+
+        private_key = oci.signer.load_private_key_from_file(key_path)
+        signer = oci.auth.signers.SecurityTokenSigner(token, private_key)
+        return config, signer
 
     # Logger for debug, call as:
     # OpenAIClientProvider().get_logger 

@@ -3,7 +3,7 @@
 This directory contains examples for two tracks:
 
 1. `agent_sdk`: OpenAI Agents SDK patterns (agents, tools, orchestration, guardrails, approvals, voice)
-2. `genai_client`: OpenAI-compatible Responses API patterns (streaming, structured outputs, state continuation, built-in tools, multimodal)
+2. `genai_client`: OpenAI-compatible Responses API patterns (streaming, structured outputs, state continuation, built-in tools, multimodal), plus advanced modules for `containers`, `memory`, and `vector_store`
 
 All examples are configured to run with OCI-backed OpenAI-compatible clients via `openai_client_provider.py`.
 
@@ -22,6 +22,9 @@ This module covers the following topics:
 9. Running a basic voice pipeline and saving WAV output
 10. Using built-in tools (`web_search`, `mcp`, `code_interpreter`, `image_generation`)
 11. Running multimodal inputs (image + text, file + text)
+12. Managing container lifecycle and container files
+13. Configuring and validating memory behavior across conversations
+14. Building vector-store retrieval workflows (semantic search, file search, batches, connectors, NL2SQL)
 
 OCI Generative AI provides OpenAI-compatible APIs that support features such as structured output, function calling, orchestration, and built-in tools. These examples use `OpenAIClientProvider` so the SDK runs with OCI-backed configuration.
 
@@ -73,11 +76,18 @@ Over here there are information about the main folders and tracks to follow acco
 
 4. **`genai_client/` (Responses API track overview)**
    - Direct OpenAI-compatible Responses API usage patterns, without agent orchestration abstractions.
-   - Main capability files:
+   - Main capability files (top-level):
      - `base_client.py`, `streaming.py`, `structured_response.py`, `reasoning.py`: core request/response patterns.
      - `api_state.py`: manual function-calling flow and `previous_response_id` continuation.
      - `web_search.py`, `image_generator.py`, `mcp_client.py`, `code_interpreter.py`, `multimodal.py`: built-in tools and multimodal features.
      - `langfuse_client.py`: tracing-oriented client usage example.
+   - Main capability submodules:
+     - `containers/`: container lifecycle and container file operations.
+       - Entry doc: `genai_client/containers/readme_containers.md`
+     - `memory/`: memory subject behavior, access policies, and optimization metadata.
+       - Entry doc: `genai_client/memory/readme_memory.md`
+     - `vector_store/`: files + vector stores, semantic search, file search, batching, connectors, and NL2SQL.
+       - Entry doc: `genai_client/vector_store/readme_vector_store.md`
    - Entry points for learning:
      - `genai_client/readme_genai.md`: complete beginner walkthrough for this folder.
      - `genai_client/genai_client.ipynb`: interactive notebook path.
