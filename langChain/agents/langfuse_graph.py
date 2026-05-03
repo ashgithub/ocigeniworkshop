@@ -51,8 +51,8 @@ from oci_openai_helper import OCIOpenAIHelper
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "xai.grok-4-fast-non-reasoning"
-SECONDARY_LLM_MODEL = "openai.gpt-4.1"
+LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
+SECONDARY_LLM_MODEL = "openai.gpt-5.4"
 # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
 # Step 1: Load configuration and initialize Langfuse
@@ -71,7 +71,33 @@ langfuse = Langfuse(
     secret_key=scfg["langfuse"]["langfuse_sk"],
     host=scfg["langfuse"]["langfuse_host"],
 )
-langfuse_handler = CallbackHandler()
+try:
+    langfuse_enabled = langfuse.auth_check()
+except Exception as exc:
+    langfuse_enabled = False
+    print(f"Langfuse auth check failed: {exc}")
+if not langfuse_enabled:
+    print("Langfuse auth check failed. Continuing without Langfuse callback export.")
+langfuse_handler = CallbackHandler() if langfuse_enabled else None
+
+
+def observe_if_enabled():
+    """Use Langfuse decorators only when credentials are valid."""
+
+    if langfuse_enabled:
+        return observe()
+
+    def decorator(func):
+        return func
+
+    return decorator
+
+
+def update_current_span_metadata(metadata: dict[str, Any]) -> None:
+    """Attach metadata when Langfuse tracing is authenticated."""
+
+    if langfuse_enabled:
+        langfuse.update_current_span(metadata=metadata)
 
 
 # Step 2: Create model clients and define tools
@@ -133,16 +159,18 @@ def llm_call(state: MessagesState) -> dict[str, list[Any]]:
     }
 
 
-@observe()
+@observe_if_enabled()
 def tool_node(state: MessagesState) -> dict[str, list[ToolMessage]]:
     """Execute each requested tool call and attach trace metadata."""
 
     result = []
     for tool_call in state["messages"][-1].tool_calls:  # type: ignore[attr-defined]
         selected_tool = tools_by_name[tool_call["name"]]
-        langfuse.update_current_trace(
-            tags=["using_tools"],
-            metadata={"tool_name": selected_tool.name},
+        update_current_span_metadata(
+            {
+                "tags": ["using_tools"],
+                "tool_name": selected_tool.name,
+            }
         )
         observation = selected_tool.invoke(tool_call["args"])
         result.append(ToolMessage(content=str(observation), tool_call_id=tool_call["id"]))
@@ -158,14 +186,14 @@ def should_continue(state: MessagesState) -> str:
     return "summary_agent"
 
 
-@observe()
+@observe_if_enabled()
 def second_client(state: MessagesState) -> dict[str, list[dict[str, str]]]:
     """Use a secondary model to summarize the workflow output."""
 
     query = f"Make a summary in less than 100 words of this response: {state['messages']}"
     response = secondary_llm_client.invoke(query)
-    langfuse.update_current_trace(
-        metadata={"other_detail": "Included additional summary metadata"}
+    update_current_span_metadata(
+        {"other_detail": "Included additional summary metadata"}
     )
 
     return {"messages": [{"role": "assistant", "content": response.content}]}
@@ -194,7 +222,7 @@ MESSAGE = "What types of clothes should I wear on a trip to Oracle headquarters 
 # Step 4: Run the graph with Langfuse tracing enabled
 config: RunnableConfig = {
     "configurable": {"thread_id": "1"},
-    "callbacks": [langfuse_handler],
+    "callbacks": [langfuse_handler] if langfuse_handler else [],
     "metadata": {
         "langfuse_user_id": os.getenv("MY_PREFIX", "default_user"),
         "langfuse_session_id": datetime.datetime.now().strftime("%Y-%m-%d_%H-%M"),

@@ -39,9 +39,9 @@ from langchain_core.messages import HumanMessage
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-# Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-LLM_MODEL = "xai.grok-4-fast-non-reasoning"
-#LLM_MODEL = "openai.gpt-4.1"
+# GA model families come from the Generative AI Platform Agentic Capabilities guide.
+LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
+# LLM_MODEL = "openai.gpt-5.4"
 # Step 1: Load config and initialize client
 def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""

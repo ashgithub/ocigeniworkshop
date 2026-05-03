@@ -21,8 +21,8 @@ Environment setup:
 - Set up credentials on langfuse API keys from the reference to connect to observability host
 - Set the `.env` variables LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY. IMPORTANT set keys to have automatic traces
 - Set up the credentials for OCI over the `sandbox.yaml file`
-- Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
-- Set up the right compartment ID and profile name over the config file
+    - Make sure to set up a project ID from the console, consult the GenAI platform GA docs for guidance
+    - Set up the right profile name over the config file
 
 How to run the file:
 uv run openai_sdk/genai_client/langfuse_client.py
@@ -67,8 +67,7 @@ def main() -> None:
         api_key="not-used",
         project=scfg['oci']['project'],
         default_headers={
-            "opc-compartment-id":scfg["oci"]["compartment"],
-            "CompartmentId":scfg["oci"]["compartment"]
+            "OpenAI-Project": scfg["oci"]["project"],
         },
         http_client=httpx.Client(
             auth=OciUserPrincipalAuth(profile_name=scfg["oci"]["profile"])

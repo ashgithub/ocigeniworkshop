@@ -49,7 +49,7 @@ load_dotenv()
 # cohere.command-a-03-2025
 # cohere.command-r-08-2024
 # cohere.command-r-plus-08-2024
-CHAT_MODEL = "cohere.command-r-08-2024"
+CHAT_MODEL = "cohere.command-a-03-2025"
 
 # OCI Generative AI service endpoint for US Chicago region
 SERVICE_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
@@ -152,39 +152,47 @@ chat_client = GenerativeAiInferenceClient(
     config=oci_config,
     service_endpoint=SERVICE_ENDPOINT,
     retry_strategy=oci.retry.NoneRetryStrategy(),
-    timeout=(10, 240)
+    timeout=(10, 30)
 )
 
 # Step 3: Configure chat request with different response formats
 # Step 4: Make requests and compare different output formats
 
-# Test 1: Text format with JSON instruction in preamble
-print("************************** Test 1: Text format with JSON instruction in preamble **************************")
-chat_request = create_chat_request(CohereResponseTextFormat())
-chat_payload = create_chat_details(chat_request, config_data["oci"]["compartment"])
+def run_format_test(title, response_format, note=None):
+    """Run one response-format test and keep the workshop script moving."""
 
-response = chat_client.chat(chat_payload)
-print("Response:", response.data.chat_response.text)
+    print(f"\n************************** {title} **************************", flush=True)
+    if note:
+        print(note, flush=True)
+    chat_request = create_chat_request(response_format)
+    chat_payload = create_chat_details(chat_request, config_data["oci"]["compartment"])
+    try:
+        response = chat_client.chat(chat_payload)
+    except Exception as exc:
+        print(f"SKIPPED: response format unavailable or timed out for {CHAT_MODEL}.", flush=True)
+        print(f"Reason: {exc}", flush=True)
+        return
+    print("Response:", response.data.chat_response.text, flush=True)
 
-# Test 2: JSON format without schema
-print("\n************************** Test 2: JSON format without schema **************************")
-chat_request.response_format = CohereResponseJsonFormat()
-response = chat_client.chat(chat_payload)
-print("Response:", response.data.chat_response.text)
 
-# Test 3: JSON format with simple schema (single book object)
-print("\n************************** Test 3: JSON format with simple schema **************************")
-print("Note: Schema restricts to single object, even though we asked for 3 books")
-chat_request.response_format = CohereResponseJsonFormat(schema=SIMPLE_BOOK_SCHEMA)
-response = chat_client.chat(chat_payload)
-print("Response:", response.data.chat_response.text)
-
-# Test 4: JSON format with nested schema (array of books with nested author objects)
-print("\n************************** Test 4: JSON format with nested schema **************************")
-print("Note: This schema expects 'authors' array but message asks for 'books' - demonstrates schema constraints")
-chat_request.response_format = CohereResponseJsonFormat(schema=NESTED_BOOK_SCHEMA)
-response = chat_client.chat(chat_payload)
-print("Response:", response.data.chat_response.text)
+run_format_test(
+    "Test 1: Text format with JSON instruction in preamble",
+    CohereResponseTextFormat(),
+)
+run_format_test(
+    "Test 2: JSON format without schema",
+    CohereResponseJsonFormat(),
+)
+run_format_test(
+    "Test 3: JSON format with simple schema",
+    CohereResponseJsonFormat(schema=SIMPLE_BOOK_SCHEMA),
+    "Note: Schema restricts to single object, even though we asked for 3 books",
+)
+run_format_test(
+    "Test 4: JSON format with nested schema",
+    CohereResponseJsonFormat(schema=NESTED_BOOK_SCHEMA),
+    "Note: This schema expects 'authors' array but message asks for 'books' - demonstrates schema constraints",
+)
 
 # Additional experimentation ideas:
 # - Create schemas that match your data requirements exactly

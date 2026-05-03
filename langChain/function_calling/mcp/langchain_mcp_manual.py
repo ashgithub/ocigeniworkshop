@@ -16,8 +16,9 @@ Relevant Slack channels:
 - #igiu-ai-learning: Help with the sandbox environment or with running this code
 
 Environment setup:
-- sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
+- sandbox.yaml: Contains OCI config and Generative AI project details.
 - .env: Loads environment variables if needed.
+- Start `weather_mcp_server.py` first in a separate terminal and leave it running.
 
 How to run the file:
 uv run langChain/function_calling/mcp/langchain_mcp_manual.py
@@ -29,9 +30,11 @@ Important sections:
 - Step 4: Execute the manual tool-calling loop
 """
 
-import sys
 import os
+import sys
+from pathlib import Path
 
+import httpx
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain.messages import HumanMessage
 
@@ -47,8 +50,9 @@ from oci_openai_helper import OCIOpenAIHelper
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "openai.gpt-4.1"
-# Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+LLM_MODEL = "openai.gpt-5.4"
+# GA model families come from the Generative AI Platform Agentic Capabilities guide.
+MCP_DIR = Path(__file__).resolve().parent
 
 # Step 1: Load configuration and initialize OCI client
 def load_config(config_path: str) -> EnvYAML | None:
@@ -68,7 +72,22 @@ llm_client = OCIOpenAIHelper.get_langchain_openai_client(
 )
 
 # Function to bind the tools
+async def assert_weather_server_available() -> None:
+    """Fail early with workshop guidance if the local weather MCP server is off."""
+    try:
+        async with httpx.AsyncClient(timeout=2) as client:
+            await client.get("http://localhost:8000/mcp")
+    except httpx.HTTPError as exc:
+        raise RuntimeError(
+            "Weather MCP server is not reachable. Start it first with "
+            "`uv run langChain/function_calling/mcp/weather_mcp_server.py` and "
+            "leave that terminal running while this client runs."
+        ) from exc
+
+
 async def build_oci_model():
+    await assert_weather_server_available()
+
     # MCP client connection using langchain mcp
     client = MultiServerMCPClient(  
             {
@@ -77,17 +96,21 @@ async def build_oci_model():
                     "url": "http://localhost:8000/mcp",
                 },
                 "bill_server": {
-                    "command": "python",
-                    # TODO: Make sure to update to the full absolute path to your
-                    # local run file
-                    # bill_server.py file
-                    "args": ["./langChain/function_calling/mcp/bill_mcp_server.py"],
+                    "command": sys.executable,
+                    "args": [str(MCP_DIR / "bill_mcp_server.py")],
                     "transport": "stdio",
                 },
             }
         )
 
-    tools = await client.get_tools()
+    try:
+        tools = await client.get_tools()
+    except Exception as exc:
+        raise RuntimeError(
+            "Could not discover MCP tools. Start the weather server first with "
+            "`uv run langChain/function_calling/mcp/weather_mcp_server.py` and "
+            "leave that terminal running while this client runs."
+        ) from exc
     tooled_model = llm_client.bind_tools(tools)
     tools_by_name = {tool.name: tool for tool in tools}
 
@@ -144,4 +167,8 @@ async def call_manual_agent():
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(call_manual_agent())
+    try:
+        asyncio.run(call_manual_agent())
+    except RuntimeError as exc:
+        print(f"Setup error: {exc}")
+        sys.exit(1)

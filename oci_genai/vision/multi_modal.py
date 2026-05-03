@@ -34,6 +34,7 @@ from envyaml import EnvYAML
 import oci
 import base64
 import os
+from pathlib import Path
 
 #####
 # Make sure your sandbox.yaml and .env files are set up for your environment.
@@ -59,7 +60,7 @@ user_text = "tell me this image"
 
 llm_client = None
 llm_payload = None
-image_path = "./vision/dussera-b.jpg"
+image_path = Path(__file__).with_name("dussera-b.jpg")
 
 # Helper function to load configuration
 
@@ -144,10 +145,15 @@ for model_id in MODEL_LIST:
     banner = "=" * 80
     print(f"\n{banner}\nRESULTS FOR MODEL: {model_id}\n{banner}")
     start_time = time.time()
-    llm_payload = get_chat_detail(get_chat_request(),
-                                  compartment_id,
-                                  model_id)
-    llm_response = llm_client.chat(llm_payload)
+    try:
+        llm_payload = get_chat_detail(get_chat_request(),
+                                      compartment_id,
+                                      model_id)
+        llm_response = llm_client.chat(llm_payload)
+    except Exception as exc:
+        print(f"SKIPPED {model_id}: unavailable for this tenancy, endpoint, or input image.")
+        print(f"Reason: {exc}")
+        continue
     if llm_response is not None and hasattr(llm_response, 'data') and hasattr(llm_response.data, 'chat_response') and llm_response.data.chat_response is not None and hasattr(llm_response.data.chat_response, 'choices') and llm_response.data.chat_response.choices:
         llm_text = llm_response.data.chat_response.choices[0].message.content[0].text
         print(llm_text)

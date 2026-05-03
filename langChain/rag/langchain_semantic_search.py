@@ -18,6 +18,7 @@ Relevant Slack channels:
 Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
 - .env: Loads environment variables if needed.
+- Enter a non-empty search query at the prompt. Press `q` to quit.
 
 How to run the file:
 uv run langChain/rag/langchain_semantic_search.py
@@ -103,8 +104,12 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=200,
     add_start_index=True
 )
-splits = text_splitter.split_documents(docs)
-texts = [chunk.page_content for chunk in splits]
+splits = [
+    chunk
+    for chunk in text_splitter.split_documents(docs)
+    if chunk.page_content.strip()
+]
+texts = [chunk.page_content.strip() for chunk in splits]
 
 print(f"Created {len(splits)} text chunks for embedding.")
 
@@ -191,9 +196,16 @@ def semantic_search(query, top_k=3):
 
 # Step 7: Interactive loop for user queries
 while True:
-    q = input("\nAsk a semantic search query (or 'q' to quit): ").strip()
+    try:
+        q = input("\nAsk a semantic search query (or 'q' to quit): ").strip()
+    except EOFError:
+        print("\nNo interactive input received. Exiting semantic search loop.")
+        break
     if q.lower() == "q":
         break
+    if not q:
+        print("Please enter a non-empty query, or 'q' to quit.")
+        continue
 
     # Change the top_k parameter to retrieve the closest k results
     semantic_search(q,top_k=5)

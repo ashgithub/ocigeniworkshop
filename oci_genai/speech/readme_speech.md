@@ -2,6 +2,9 @@
 
 This module explores Oracle Cloud Infrastructure (OCI) Speech services for **Text-to-Speech (TTS)** and **Speech-to-Text (STT)** workflows.
 
+> **GA project note**  
+> This `oci_genai` tree intentionally shows the OCI Python SDK and service-specific APIs, many of which still use compartment-oriented setup. For new OpenAI-compatible GA project work, start with `openai_sdk/` instead; that tree uses project headers and the Responses API patterns used by the current Generative AI Platform.
+
 ## What You Will Learn
 
 1. **Text-to-Speech (TTS)** – Explore available voice models, convert text to speech, and experiment with different languages.

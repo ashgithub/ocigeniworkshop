@@ -2,6 +2,9 @@
 
 This module explores OCI AI services that work with images, documents, videos, and multimodal prompts. It demonstrates how to analyze visual content by using OCI Vision, OCI Document Understanding, and multimodal LLMs.
 
+> **GA project note**  
+> This `oci_genai` tree intentionally shows the OCI Python SDK and service-specific APIs, many of which still use compartment-oriented setup. For new OpenAI-compatible GA project work, start with `openai_sdk/` instead; that tree uses project headers and the Responses API patterns used by the current Generative AI Platform.
+
 ## What You Will Learn
 
 In this module, you will learn how to:

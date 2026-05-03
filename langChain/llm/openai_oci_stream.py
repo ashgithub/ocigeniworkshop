@@ -14,7 +14,7 @@ Relevant Slack channels:
 - #igiu-ai-learning: Help with the sandbox environment or with running this code
 
 Environment setup:
-- sandbox.yaml: Contains OCI config, compartment details.
+- sandbox.yaml: Contains OCI config and Generative AI project details.
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
@@ -57,23 +57,34 @@ MESSAGE = """
 
 # Step 2: Define supported models for testing
 selected_llms = [
-    "openai.gpt-4.1",
+    "openai.gpt-5.4",
     "openai.gpt-5.2",
-    # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
-    # "cohere.command-r-08-2024",      # Cohere doesn't support OpenAI compatible APIs yet
-    "meta.llama-4-maverick-17b-128e-instruct-fp8",
-    "meta.llama-4-scout-17b-16e-instruct",
-    "xai.grok-4",
-    "xai.grok-4-fast-non-reasoning"
+    "openai.gpt-oss-120b",
+    "xai.grok-4-1-fast-non-reasoning",
+    # "xai.grok-4.3",  # Newly documented by OCI, but not yet accepted by this endpoint/project.
+    "google.gemini-2.5-pro",
 ]
 
 # Step 3: Test invoke method for each model
+def extract_text(content):
+    """Return readable text from LangChain string or Responses API list content."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(
+            item.get("text", "")
+            for item in content
+            if isinstance(item, dict) and item.get("type") == "text"
+        )
+    return str(content)
+
+
 def test_invoke_method(client, model_id, message):
     """Test the invoke method with timing."""
     print(f"\n**************************Chat Result (invoke) for {model_id} **************************")
     start = time.perf_counter()
     response = client.invoke(message)
-    print(response.content)
+    print(extract_text(response.content))
     print(f"\nInvoke done in {time.perf_counter() - start:.2f}s")
 
 # Step 4: Test streaming method for each model
@@ -85,7 +96,7 @@ def test_stream_method(client, model_id, message):
         if hasattr(chunk, 'additional_kwargs') and 'finish_reason' in chunk.additional_kwargs:
             print(f"\nFinish Reason: {chunk.additional_kwargs['finish_reason']}")
             break
-        print(getattr(chunk, 'content', ''), end='', flush=True)
+        print(extract_text(getattr(chunk, 'content', '')), end='', flush=True)
     print(f"\nStream done in {time.perf_counter() - start:.2f}s")
 
 # Step 5: Compare performance between invoke and stream
@@ -96,5 +107,15 @@ if __name__ == "__main__":
             config=scfg
         )
 
-        test_invoke_method(client, model_id, MESSAGE)
-        test_stream_method(client, model_id, MESSAGE)
+        try:
+            test_invoke_method(client, model_id, MESSAGE)
+        except Exception as exc:
+            print(f"\nSKIPPED {model_id}: unavailable for this project or endpoint.")
+            print(f"Reason: {exc}")
+            continue
+
+        try:
+            test_stream_method(client, model_id, MESSAGE)
+        except Exception as exc:
+            print(f"\nSKIPPED streaming for {model_id}: invoke works, but streaming is unavailable or returned an unsupported stream event.")
+            print(f"Reason: {exc}")

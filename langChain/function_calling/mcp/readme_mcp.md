@@ -18,7 +18,9 @@ This MCP example set includes:
 
 - `sandbox.yaml`: Contains OCI configuration and related settings.
 - `.env`: Loads environment variables if required.
-- Ensure the necessary MCP servers are running before using the client examples.
+- Use `uv run ...` for every command.
+- Start the weather MCP server before using the LangChain client examples.
+- The bill MCP server is a stdio server launched automatically by the clients.
 
 ## Files in This Folder
 
@@ -31,6 +33,7 @@ This MCP example set includes:
    - Local stdio MCP server for bill calculations
    - Exposes `get_projection_bill`
    - Typically started automatically by an MCP client
+   - Do not run directly as a workshop step
 
 3. **`langchain_mcp_manual.py`**
    - Demonstrates manual MCP tool orchestration with a LangChain model
@@ -55,23 +58,24 @@ This MCP example set includes:
 ## Suggested Study Order
 
 1. `weather_mcp_server.py`
-2. `bill_mcp_server.py`
-3. `langchain_mcp_manual.py`
-4. `langchain_mcp_auto.py`
-5. `openai_responses_mcp.py`
-6. `langchain_mcp.ipynb`
+2. `langchain_mcp_manual.py`
+3. `langchain_mcp_auto.py`
+4. `openai_responses_mcp.py`
+5. `langchain_mcp.ipynb`
 
 ## How to Run the Examples
 
 ### Recommended path
 
-1. Start the weather MCP server:
+1. Terminal 1: start the weather MCP server and leave it running. A timeout in an automated runner is expected because this command starts a long-running server.
 
 ```bash
 uv run langChain/function_calling/mcp/weather_mcp_server.py
 ```
 
-2. Run the manual or automatic LangChain MCP client:
+Wait until you see Uvicorn running on `http://localhost:8000`.
+
+2. Terminal 2: run the manual or automatic LangChain MCP client. These clients connect to the weather server and auto-launch `bill_mcp_server.py` over stdio.
 
 ```bash
 uv run langChain/function_calling/mcp/langchain_mcp_manual.py
@@ -101,16 +105,20 @@ uv run langChain/function_calling/mcp/openai_responses_mcp.py
 ## Troubleshooting
 
 - **Weather queries fail**
-  - Make sure `weather_mcp_server.py` is running on port `8000`.
+  - Make sure `weather_mcp_server.py` is running on port `8000` in another terminal.
+  - If you ran a client first, start the weather server and rerun the client.
 
 - **Bill server is not found**
-  - Check the `bill_server` command path in the MCP client config.
+  - The LangChain clients use the current Python executable and an absolute path to `bill_mcp_server.py`.
+  - Do not run `bill_mcp_server.py` directly; it is a stdio server launched by the client.
 
 - **Responses API example cannot reach weather MCP**
   - Verify the ngrok tunnel URL and make sure the weather server is exposed correctly.
 
 - **No tools are discovered**
   - Confirm that the MCP client transport configuration matches the server type.
+  - Weather uses `streamable_http` at `http://localhost:8000/mcp`.
+  - Bill projection uses local `stdio`.
 
 ## Resources
 

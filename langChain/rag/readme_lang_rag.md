@@ -22,6 +22,7 @@ Oracle AI Database is used in this module. Refer to [this page](https://confluen
 - `sandbox.yaml`: Contains OCI config, compartment, DB details, and wallet path.
 - `.env`: Loads environment variables if needed.
 - Ensure you have access to Oracle 26 AI Database and OCI Generative AI services.
+- Interactive examples require a non-empty query. Press `q` to quit.
 
 ## Suggested Study Order and File Descriptions
 The files are designed to build upon each other. Study them in this order for a progressive understanding:
@@ -39,16 +40,19 @@ The files are designed to build upon each other. Study them in this order for a 
 3. **langchain_semantic_search.py**: Demonstrates a semantic search example using OCI Generative AI for embeddings and Oracle DB for vector storage and retrieval. Perform vector similarity searches over stored embeddings.
    - Key features: Embeds queries, stores chunks in Oracle DB, retrieves top results using cosine similarity.
    - How to run: `uv run langChain/rag/langchain_semantic_search.py`.
+   - Example query: `How did communication change in the 20th century?`
    - Docs: [Oracle DB Vectors](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/), [OCI GenAI SDK](https://github.com/oracle/oci-python-sdk/tree/master/src/oci/generative_ai_inference/models).
 
 4. **langchain_rag_26ai.py**: Demonstrates a full RAG (Retrieval-Augmented Generation) example using OCI Generative AI for embeddings and LLM, with Oracle DB for vector storage and semantic search.
    - Key features: Embeds documents, stores in DB, retrieves context, generates answers via LLM with citations.
    - How to run: `uv run langChain/rag/langchain_rag_26ai.py`.
+   - Example question: `What role did the telegraph play in communication?`
    - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview).
 
-5. **aia_rerank.py**: Demonstrates reranking by using AIA services with Cohere models to improve retrieval quality in RAG pipelines.
+5. **aia_rerank.py**: Optional/internal example that demonstrates reranking by using AIA services with Cohere models to improve retrieval quality in RAG pipelines.
    - Key features: Uses AIA reranking API for reordering retrieved documents based on relevance.
    - How to run: `uv run langChain/rag/aia_rerank.py`.
+   - Prerequisites: private AIA SDK installation, AIA IDCS settings in `sandbox.yaml`, OCI Vault access to the configured client secret, and internal network/VPN access when required.
    - Docs: [AIA Rerank Service Details](https://gbuconfluence.oraclecorp.com/display/AIAcc/Technical+Design+-+AIA+Services+APIs#:~:text=%7D-,AIA%20Service%20Endpoints%20Details,-Service), [Cohere Reranking](https://docs.cohere.com/docs/rerank).
 
 6. **langchain_rag_26ai.ipynb**: A Jupyter notebook variation of the langchain_rag_26ai.py script, demonstrating the full RAG example with markdown explanations and interactive cells.
@@ -56,7 +60,7 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: Open in Jupyter or VS Code and run cells sequentially.
    - Docs: [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai), [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview).
 
-Note: AIA provides a toolkit that can make RAG workflows more production-ready. Refer to [IGIU AI Accelerator Toolkit Capabilities](https://gbuconfluence.oraclecorp.com/display/AIAcc/I-GIU+AI+Accelerator+Toolkit+Capabilities) for more details.
+Note: AIA provides a toolkit that can make RAG workflows more production-ready, but `aia_rerank.py` is optional/internal and requires the AIA SDK and service access. Refer to [IGIU AI Accelerator Toolkit Capabilities](https://gbuconfluence.oraclecorp.com/display/AIAcc/I-GIU+AI+Accelerator+Toolkit+Capabilities) for more details.
 
 ## Project Ideas
 Here are some ideas for projects you can build upon these examples:

@@ -1,8 +1,7 @@
 """
 What this file does:
 Demonstrates stateful conversations by using OCI's OpenAI-compatible Responses
-API. It shows both previous-response chaining and persistent conversation store
-usage.
+API. It shows previous-response chaining scoped by a Generative AI Project.
 
 Documentation to reference:
 - OCI Gen AI Chat Models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
@@ -16,7 +15,7 @@ Relevant Slack channels:
 - #igiu-ai-learning: Help with the sandbox environment or with running this code
 
 Environment setup:
-- sandbox.yaml: Contains OCI config and compartment details.
+- sandbox.yaml: Contains OCI config and a Generative AI Project OCID.
 - .env: Loads environment variables if needed.
 
 How to run the file:
@@ -26,7 +25,6 @@ Important sections:
 - Step 1: Load configuration and initialize the client
 - Step 2: Define the conversation questions
 - Step 3: Demonstrate previous-response chaining
-- Step 4: Demonstrate persistent conversation store usage
 """
 
 import os
@@ -42,9 +40,9 @@ import openai
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-# Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+# GA model families come from the Generative AI Platform Agentic Capabilities guide.
 LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
-#LLM_MODEL = "openai.gpt-4.1"
+# LLM_MODEL = "openai.gpt-5.4"
 # Step 1: Load config and initialize client
 def load_config(config_path: str) -> EnvYAML | None:
     """Load configuration from a YAML file."""
@@ -98,10 +96,10 @@ def demonstrate_stateful_conversation(client, questions):
         print(f"\nUSER {idx+1}: {q}")
         print(f"RESPONSE {idx+1}: {response.output_text}")
 
-# Step 4: Interactive demo of conversation store using OCI APIs.
-def demonstrate_conversation_store(client, questions):
-    """Demonstrate persistent conversation store with user-provided ID."""
-    print("\n====== WITH Conversation Store (Persistent Across Runs) ======")
+# Step 4: Optional interactive demo using project-scoped conversations.
+def demonstrate_project_conversation(client, questions):
+    """Demonstrate persistent conversation state with a user-provided conversation ID."""
+    print("\n====== WITH Project-Scoped Conversation (Persistent Across Runs) ======")
     topic = "workshop demo"
     
     # Ask user for ID
@@ -138,10 +136,7 @@ def demonstrate_conversation_store(client, questions):
 
         
 if __name__ == "__main__":
-    client = OCIOpenAIHelper.get_sync_openai_client(
-        model_name=LLM_MODEL,
-        config=scfg
-    )
+    client = OCIOpenAIHelper.get_sync_openai_client(config=scfg)
 
     demonstrate_stateful_conversation(client, questions)
-    #demonstrate_conversation_store(client, questions)
+    # demonstrate_project_conversation(client, questions)

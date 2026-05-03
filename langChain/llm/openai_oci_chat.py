@@ -14,7 +14,7 @@ Relevant Slack channels:
 - #igiu-ai-learning: Help with the sandbox environment or with running this code
 
 Environment setup:
-- sandbox.yaml: Contains OCI config, compartment details.
+- sandbox.yaml: Contains OCI config and Generative AI project details.
 - .env: Load environment variables (e.g., API keys if needed).
 
 How to run the file:
@@ -43,8 +43,8 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 
-LLM_MODEL = "openai.gpt-4.1"
-# Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
+LLM_MODEL = "openai.gpt-5.4"
+# GA model families come from the Generative AI Platform Agentic Capabilities guide.
 
 MESSAGE = """
     why is the sky blue? explain in 2 sentences like i am 5
@@ -71,29 +71,41 @@ llm_client = OCIOpenAIHelper.get_langchain_openai_client(
 print(f"\n\n**************************Chat Result for {LLM_MODEL} **************************")
 response = llm_client.invoke(MESSAGE)
 print(response)
+base_response = response
 
-# Step 4: Model performance comparison with timing
 selected_llms = [
-    "openai.gpt-oss-20b",
-    "openai.gpt-4.1",
+    "openai.gpt-5.4",
     "openai.gpt-5.2",
-    # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
-    # "cohere.command-r-08-2024",      # Cohere doesn't support OpenAI compatible APIs yet
-    "meta.llama-4-maverick-17b-128e-instruct-fp8",
-    "meta.llama-4-scout-17b-16e-instruct",
-    "xai.grok-4",
-    "xai.grok-4-fast-non-reasoning"
+    "openai.gpt-oss-120b",
+    "xai.grok-4-1-fast-non-reasoning",
+    # "xai.grok-4.3",  # Newly documented by OCI, but not yet accepted by this endpoint/project.
+    "google.gemini-2.5-pro",
 ]
 
-# Test each model with timing
+# Step 4: Model performance comparison with timing
 for llm_id in selected_llms:
     print(f"\n\n**************************Chat Result for {llm_id} **************************")
-    llm_client.model_name = llm_id
+    model_client = OCIOpenAIHelper.get_langchain_openai_client(
+        model_name=llm_id,
+        config=scfg
+    )
     start_time = time.time()
-    response = llm_client.invoke(MESSAGE)
+    try:
+        response = model_client.invoke(MESSAGE)
+    except Exception as exc:
+        print(f"SKIPPED {llm_id}: unavailable for this project or endpoint.")
+        print(f"Reason: {exc}")
+        continue
     end_time = time.time()
     print(response)
     print(f"\n Time taken for {llm_id}: {end_time - start_time:.2f} seconds\n\n")
+
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
+    model_name=LLM_MODEL,
+    config=scfg
+)
+llm_id = LLM_MODEL
+response = base_response
 
 print(f"\n\n**************************Chat Full LangChain result for {llm_id} **************************")
 print(response)
@@ -112,8 +124,8 @@ except AttributeError:
         print(f"Q: {q}\nA: {r}")
 
 # Step 6: Max tokens parameter demonstration
-print(f"\n\n**************************Chat Result With max_tokens 10 for {llm_id}**************************")
-llm_client.max_tokens = 10
+print(f"\n\n**************************Chat Result With max_tokens 16 for {llm_id}**************************")
+llm_client.max_tokens = 16
 response = llm_client.invoke(MESSAGE)
 try:
     print(response.additional_kwargs['finish_reason'])
@@ -122,6 +134,10 @@ except Exception:
 print(response)
 
 # Step 7: System and user prompt types demonstration
+llm_client = OCIOpenAIHelper.get_langchain_openai_client(
+    model_name=LLM_MODEL,
+    config=scfg
+)
 print(f"\n\n**************************Chat Result with system & user prompts for {llm_id} **************************")
 system_message = {"role": "system", "content": "You are a poetic assistant who responds in exactly four lines."}
 user_message = {"role": "user", "content": "What is the meaning of life?"}

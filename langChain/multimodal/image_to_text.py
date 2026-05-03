@@ -16,7 +16,7 @@ Relevant Slack channels:
 - #igiu-ai-learning: Help with the sandbox environment or with running this code
 
 Environment setup:
-- sandbox.yaml: Contains OCI configuration and profile details.
+- sandbox.yaml: Contains OCI configuration and Generative AI project details.
 - .env: Loads environment variables if required.
 
 How to run the file:
@@ -60,9 +60,10 @@ if sandbox_config is None or 'oci' not in sandbox_config or 'profile' not in san
 
 # Step 2: Define models and image to analyze
 MODEL_LIST = [
-    "meta.llama-4-scout-17b-16e-instruct",
-    "openai.gpt-4.1",
-    "xai.grok-4"
+    "openai.gpt-5.4",
+    "xai.grok-4-1-fast-non-reasoning",
+    # "xai.grok-4.3",  # Newly documented by OCI, but not yet accepted by this endpoint/project.
+    "google.gemini-2.5-pro",
 ]
 
 USER_PROMPT_TEXT = "Tell me about this image."
@@ -93,13 +94,18 @@ for model_id in MODEL_LIST:
             {
                "type": "image_url",
                 "image_url": {
-                "url": f"data:image/jpeg;base64,{encoded_image}"
+                "url": f"data:image/png;base64,{encoded_image}"
                 }
             },
         ]
     }
 
-    response = llm_client.invoke([message])
+    try:
+        response = llm_client.invoke([message])
+    except Exception as exc:
+        print(f"SKIPPED {model_id}: unavailable for this project or endpoint.")
+        print(f"Reason: {exc}")
+        continue
     print(response.content)
 
     end_time = time.time()

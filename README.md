@@ -19,14 +19,15 @@ Welcome. This README is the home page for the repository and points you to the f
 2. [Quick Start](#quick-start)
 3. [Environment and Sandbox Setup](#environment-and-sandbox-setup)
 4. [Running Code](#running-code)
-5. [Recommended Learning Paths](#recommended-learning-paths)
-6. [Module Index](#module-index)
-7. [Learning Stack Guidance (Recommended vs Legacy)](#learning-stack-guidance-recommended-vs-legacy)
-8. [OCI Object Storage Helper Commands](#oci-object-storage-helper-commands)
-9. [Environment Variables](#environment-variables)
-10. [Repository Conventions](#repository-conventions)
-11. [Primary SDKs and Libraries Used](#primary-sdks-and-libraries-used)
-12. [Need Help?](#need-help)
+5. [OCI Generative AI GA Project Migration](#oci-generative-ai-ga-project-migration)
+6. [Recommended Learning Paths](#recommended-learning-paths)
+7. [Module Index](#module-index)
+8. [Learning Stack Guidance (Recommended vs Legacy)](#learning-stack-guidance-recommended-vs-legacy)
+9. [OCI Object Storage Helper Commands](#oci-object-storage-helper-commands)
+10. [Environment Variables](#environment-variables)
+11. [Repository Conventions](#repository-conventions)
+12. [Primary SDKs and Libraries Used](#primary-sdks-and-libraries-used)
+13. [Need Help?](#need-help)
 
 ## Who This Repository Is For
 
@@ -116,6 +117,23 @@ This repository uses **UV** for dependency management and execution.
    ```bash
    uv run AISandboxEnvCheck.py
    ```
+
+## OCI Generative AI GA Project Migration
+
+OCI Generative AI OpenAI-compatible APIs now use a **Generative AI Project** as the required scope for responses, conversations, files, containers, skills, memory, and related artifacts.
+
+For OpenAI-compatible examples in this repository:
+
+- use `oci.project` in `sandbox.yaml`
+- pass the project as `project=<project_ocid>` for direct OpenAI SDK clients
+- pass `default_headers={"OpenAI-Project": <project_ocid>}` for LangChain `ChatOpenAI`
+- prefer the Responses API for project-based GA examples, especially with OCI IAM authentication
+- do not pass `opc-compartment-id`
+- do not pass `opc-conversation-store-id`
+
+The helper in `langChain/oci_openai_helper.py` follows this GA behavior for supported OpenAI-compatible clients. Legacy helper methods that depend on compartment ID or conversation store ID raise `MigrationRequiredError` and point users to the project-based replacement methods.
+
+Reference: [Generative AI Platform Agentic Capabilities User Guide - GA Migration Guidance](https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+User+Guide#GenerativeAIPlatformAgenticCapabilitiesUserGuide-GAMigrationGuidanceforLAorBetacustomer)
 
 ## Running Code
 
@@ -279,7 +297,7 @@ Refer to each module's README for setup details, study order, experiments, and S
 Use this sequence when onboarding new users:
 
 1. **Start with `openai_sdk`**
-   - Best default for OpenAI-compatible APIs and modern agentic/retrieval workflows on OCI.
+   - Best default for project-based OpenAI-compatible APIs and modern agentic/retrieval workflows on OCI.
 2. **Then use `langChain`**
    - Best for framework-based orchestration, chains, and ecosystem integrations.
 3. **Use `oci_genai` as legacy path**
