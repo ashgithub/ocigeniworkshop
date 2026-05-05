@@ -3,8 +3,14 @@ What this file does:
 Implements the city agent executor, including structured output generation and
 A2A request handling.
 
+In simple terms:
+- this file defines the shape of a city recommendation
+- this file creates a model that returns structured city data instead of free text
+- this file receives A2A requests and sends the structured result back to the caller
+
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
+- Agent executor adapted from: https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/helloworld/agent_executor.py
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
 - Structured Output: https://python.langchain.com/docs/how_to/structured_output/
@@ -54,7 +60,13 @@ load_dotenv()
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from oci_openai_helper import OCIOpenAIHelper
 
-# Step 1: Define structured output schema
+
+# ============================================================================
+# STEP 1: STRUCTURED OUTPUT SCHEMA
+# ============================================================================
+# Pydantic gives the model a strict schema. This helps beginners see how we can
+# ask an LLM for a predictable JSON-like response instead of plain prose.
+
 class CityRecommendation(BaseModel):
     """City recommendation with details."""
     city_name: str = Field(description="Name of the recommended city")
@@ -63,9 +75,16 @@ class CityRecommendation(BaseModel):
     population: Optional[int] = Field(default=None, description="Approximate population of the city")
     state: Optional[str] = Field(default=None, description="State or region where the city is located")
 
-# Step 2: Implement CityAgent class with config and LLM setup
+
+# ============================================================================
+# STEP 2: STRUCTURED CITY AGENT
+# ============================================================================
+# This class loads the OCI-compatible model client and wraps it with
+# `with_structured_output(...)` so the result follows `CityRecommendation`.
+
 class CityAgent:
     """City Agent using structured output."""
+
     def __init__(self):
         SANDBOX_CONFIG_FILE = "sandbox.yaml"
         LLM_MODEL = "xai.grok-4-fast-non-reasoning"
@@ -93,10 +112,14 @@ class CityAgent:
             print(f"Error: Configuration file '{config_path}' not found.")
             return None
 
-    # Step 3: Define invoke method for agent execution
+    # =========================================================================
+    # STEP 3: REQUEST -> STRUCTURED RESPONSE
+    # =========================================================================
+    # This is the main learning point in this file: we turn a user request into
+    # a prompt, ask the model for structured output, and serialize the result.
     async def invoke(self, context: RequestContext) -> str:
         user_input = context.get_user_input()
-        print(f"User input: {user_input}")
+        print(f"City agent received request: {user_input}")
 
         # Create prompt for structured output
         prompt = f"""Based on the user's request: "{user_input}"
@@ -107,7 +130,6 @@ class CityAgent:
         try:
             # Get structured output from the model
             response = self.structured_model.invoke(prompt)
-            print(f"Structured response: {response}")
 
             # Ensure response is a CityRecommendation instance
             if isinstance(response, CityRecommendation):
@@ -121,7 +143,13 @@ class CityAgent:
             # Fallback response
             return "I'm sorry, I couldn't generate a city recommendation at this time."
 
-# Step 4: Implement CityAgentExecutor with execute and cancel methods
+
+# ============================================================================
+# STEP 4: A2A EXECUTOR WRAPPER
+# ============================================================================
+# The executor is the A2A-facing layer. It creates tasks, emits progress
+# updates, and returns the final city recommendation as an A2A artifact.
+
 class CityAgentExecutor(AgentExecutor):
     """City Agent Executor Implementation."""
 

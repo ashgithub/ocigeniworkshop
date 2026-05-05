@@ -3,10 +3,16 @@ What this file does:
 Runs the A2A clothes agent server and publishes its agent card directly from
 the service endpoint.
 
+In simple terms:
+- this file starts the clothes specialist as a web server
+- this file exposes the public A2A card used by the host agent for discovery
+- this file connects incoming A2A requests to the clothes executor
+
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+- Connected agent adapted from: https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/helloworld/__main__.py
 
 Relevant Slack channels:
 - #generative-ai-users: Questions about OCI Generative AI
@@ -46,8 +52,17 @@ from agent_executor import ClothesAgentExecutor
 
 AGENT_URL = "http://localhost:9998/"
 
+
+# ============================================================================
+# STEP 1: SERVER ENTRY POINT
+# ============================================================================
+# This module is usually run directly. It publishes the clothes agent metadata,
+# creates the request routes, and starts the Starlette app.
+
 if __name__ == '__main__':
-    # Step 1: Define agent skill
+    # =========================================================================
+    # STEP 2: PUBLIC AGENT SKILL
+    # =========================================================================
     skill = AgentSkill(
         id='get_clothes',
         name='get_clothes',
@@ -56,7 +71,9 @@ if __name__ == '__main__':
         examples=['get clothes for male, rain weather'],
     )
 
-    # Step 2: Create public agent card
+    # =========================================================================
+    # STEP 3: PUBLIC AGENT CARD
+    # =========================================================================
     public_agent_card = AgentCard(
         name="clothes_agent",
         description='Recommend suitable clothing for the supplied conditions',
@@ -73,7 +90,9 @@ if __name__ == '__main__':
         skills=[skill],
     )
 
-    # Step 3: Set up request handler and server
+    # =========================================================================
+    # STEP 4: REQUEST HANDLER AND ROUTES
+    # =========================================================================
     request_handler = DefaultRequestHandler(
         agent_executor=ClothesAgentExecutor(),
         task_store=InMemoryTaskStore(),
@@ -85,5 +104,8 @@ if __name__ == '__main__':
     routes.extend(create_jsonrpc_routes(request_handler, '/'))
     app = Starlette(routes=routes)
 
-    # Step 4: Start server
+    # =========================================================================
+    # STEP 5: START SERVER
+    # =========================================================================
+    print(f"Clothes agent server is starting at {AGENT_URL}")
     uvicorn.run(app, host='0.0.0.0', port=9998)

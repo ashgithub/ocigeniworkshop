@@ -114,19 +114,24 @@ class OCIOpenAIHelper:
        # base_url = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1"
         region = "us-chicago-1"
 
-        client = ChatOpenAI(
-            
-            base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+        default_headers = {
+            "opc-compartment-id": config['oci']['compartment'],
+            "CompartmentId": config['oci']['compartment'],
+            "OpenAI-Project": config['oci']['project'],
+        }
 
-            http_client=httpx.Client(auth=OciUserPrincipalAuth(profile_name=config['oci']['profile'])),  # or OciResourcePrincipalAuth | OciInstancePrincipalAuth | OciUserPrincipalAuth,
-                default_headers={
-             #   "opc-compartment-id": config['oci']['compartment'],  # a compartment of your tenancy that this caller identity has access to 
-                "OpenAI-Project": config['oci']['project']
-                },
+        client = ChatOpenAI(
+            base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+            http_client=httpx.Client(
+                auth=OciUserPrincipalAuth(profile_name=config['oci']['profile'])
+            ),
+            http_async_client=httpx.AsyncClient(
+                auth=OciUserPrincipalAuth(profile_name=config['oci']['profile'])
+            ),
+            default_headers=default_headers,
             api_key=config['oci']['api_key'],
             model=model_name,
-            store = False,
-            
+            store=store,
             **kwargs
         )
         return client

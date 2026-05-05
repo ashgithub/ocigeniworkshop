@@ -1,13 +1,40 @@
 """
 What this file does:
-Provides A2A discovery and connection management for the LangGraph host agent.
-It supports direct agent-card resolution from agent URLs, cached clients, and
-remote task continuation across calls.
+Manages direct connections from the host agent to the remote A2A specialist
+agents.
 
-How to use this file:
-- Import `RemoteAgentConnections` from `langgraph_a2a_agent.py` or
-  `host_agent.py`.
-- By default it discovers the workshop agents from their known local URLs.
+In simple terms:
+- this file knows where the specialist agents live
+- this file downloads each agent card from its published A2A route
+- this file builds reusable A2A clients
+- this file sends messages to remote agents and collects their replies
+- this file remembers remote task IDs so multi-step conversations can continue
+
+Documentation to reference:
+- A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+- Agent connections adapted from: https://github.com/a2aproject/a2a-samples/blob/main/samples/python/hosts/multiagent/remote_agent_connection.py
+
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
+
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
+
+How to run the file:
+This file is not run directly. It is imported by `langgraph_a2a_agent.py`.
+
+Important sections:
+- Step 1: Shared timeout and URL configuration
+- Step 2: Remote task session tracking
+- Step 3: Initialize HTTP and A2A client helpers
+- Step 4: Discover remote agents from published agent cards
+- Step 5: Send a message to a selected remote agent
+- Step 6: Read streamed A2A events and extract text
 """
 
 from __future__ import annotations
@@ -32,6 +59,11 @@ from a2a.types.a2a_pb2 import (
 from a2a.utils.constants import TransportProtocol
 
 
+# ============================================================================
+# STEP 1: SHARED CONNECTION SETTINGS
+# ============================================================================
+# These values are shared by every remote agent call made by the host agent.
+
 GLOBAL_TIMEOUT = httpx.Timeout(
     timeout=30.0,
     connect=5.0,
@@ -54,6 +86,12 @@ TERMINAL_TASK_STATES = {
 }
 
 
+# ============================================================================
+# STEP 2: REMOTE TASK SESSION STATE
+# ============================================================================
+# A remote A2A conversation may continue over more than one request. These IDs
+# let the host continue the same remote task instead of starting from scratch.
+
 @dataclass
 class RemoteTaskSession:
     """Tracks the remote task identifiers for a host conversation."""
@@ -61,6 +99,11 @@ class RemoteTaskSession:
     task_id: str | None = None
     context_id: str | None = None
 
+
+# ============================================================================
+# STEP 3: REMOTE CONNECTION MANAGER
+# ============================================================================
+# This is the main utility class used by the LangGraph host agent.
 
 class RemoteAgentConnections:
     """Discover remote agents and send A2A requests to them."""
@@ -86,6 +129,11 @@ class RemoteAgentConnections:
         self._client_cache: dict[str, Client] = {}
         self._task_sessions: dict[tuple[str, str], RemoteTaskSession] = {}
 
+    # =========================================================================
+    # STEP 4: AGENT DISCOVERY
+    # =========================================================================
+    # Discovery means: visit each known agent URL, download its agent card, and
+    # store the card so the host agent can later describe and call that agent.
     async def discover_agents(self, force_refresh: bool = False) -> list[AgentCard]:
         """Discover remote agents from direct URLs."""
         if self._agent_cards and not force_refresh:
@@ -97,6 +145,7 @@ class RemoteAgentConnections:
             discovered_cards[card.name] = card
 
         self._agent_cards = discovered_cards
+        print(f"Discovered {len(self._agent_cards)} remote A2A agent(s).")
         return list(self._agent_cards.values())
 
     async def list_agent_summaries(self) -> list[dict[str, str]]:
@@ -110,6 +159,11 @@ class RemoteAgentConnections:
             for card in cards
         ]
 
+    # =========================================================================
+    # STEP 5: REMOTE AGENT CALL
+    # =========================================================================
+    # This method builds an A2A request, sends it to the chosen specialist, and
+    # returns the combined text response to the host agent.
     async def call_agent(
         self,
         agent_name: str,
@@ -174,6 +228,11 @@ class RemoteAgentConnections:
             cards.append(card)
         return cards
 
+    # =========================================================================
+    # STEP 6: STREAM PROCESSING
+    # =========================================================================
+    # A2A responses can arrive as multiple events. These helpers track the task
+    # state and convert the stream into simple text for the host agent.
     async def _consume_response_stream(
         self,
         client: Client,

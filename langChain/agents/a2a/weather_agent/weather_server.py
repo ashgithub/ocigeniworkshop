@@ -3,10 +3,16 @@ What this file does:
 Runs the A2A weather agent server and publishes its agent card directly from
 the service endpoint.
 
+In simple terms:
+- this file starts the weather agent as a web server
+- this file publishes the public A2A agent card for discovery
+- this file connects incoming JSON-RPC A2A requests to the weather executor
+
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
 - OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
 - OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+- Connected agent adapted from: https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/helloworld/__main__.py
 
 Relevant Slack channels:
 - #generative-ai-users: Questions about OCI Generative AI
@@ -46,8 +52,18 @@ from agent_executor import WeatherAgentExecutor
 
 AGENT_URL = "http://localhost:9999/"
 
+
+# ============================================================================
+# STEP 1: SERVER ENTRY POINT
+# ============================================================================
+# This module is usually run directly. It defines the public metadata for the
+# weather agent, wires the A2A request handler, and starts the Starlette app.
+
 if __name__ == '__main__':
-    # Step 1: Define agent skill
+    # =========================================================================
+    # STEP 2: PUBLIC AGENT SKILL
+    # =========================================================================
+    # The skill tells other agents what this specialist can do.
     skill = AgentSkill(
         id='get_weather',
         name='get_weather',
@@ -56,7 +72,11 @@ if __name__ == '__main__':
         examples=['get Chicago Weather'],
     )
 
-    # Step 2: Create public agent card
+    # =========================================================================
+    # STEP 3: PUBLIC AGENT CARD
+    # =========================================================================
+    # The agent card is the document discovered by the host agent at the
+    # well-known A2A route.
     public_agent_card = AgentCard(
         name="weather_agent",
         description='Provide weather details for the supplied location',
@@ -73,6 +93,10 @@ if __name__ == '__main__':
         skills=[skill],
     )
 
+    # =========================================================================
+    # STEP 4: REQUEST HANDLER AND ROUTES
+    # =========================================================================
+    # These pieces connect incoming HTTP/A2A requests to the executor logic.
     request_handler = DefaultRequestHandler(
         agent_executor=WeatherAgentExecutor(),
         task_store=InMemoryTaskStore(),
@@ -85,5 +109,8 @@ if __name__ == '__main__':
     routes.extend(create_jsonrpc_routes(request_handler, '/'))
     app = Starlette(routes=routes)
 
-    # Step 4: Start server
+    # =========================================================================
+    # STEP 5: START SERVER
+    # =========================================================================
+    print(f"Weather agent server is starting at {AGENT_URL}")
     uvicorn.run(app, host='0.0.0.0', port=9999)

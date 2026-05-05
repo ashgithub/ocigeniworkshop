@@ -1,8 +1,39 @@
 """
-LangGraph-based host agent for the workshop A2A flow.
+What this file does:
+Builds the main LangGraph host agent for the A2A workshop.
 
-The host agent discovers remote specialist agents, builds a prompt from their
-cards, and delegates work to them through LangChain tools backed by the A2A SDK.
+In simple terms:
+- this file creates the host model
+- this file gives the model access to a tool that can call remote agents
+- this file builds the LangGraph loop that alternates between model thinking
+  and tool execution
+- this file contains a small demo `main()` function
+
+Documentation to reference:
+- A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+- LangGraph: https://langchain-ai.github.io/langgraph/
+- Host agent sample adapted from: https://github.com/a2aproject/a2a-samples/blob/main/samples/python/hosts/multiagent/host_agent.py
+
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with the sandbox environment or with running this code
+
+Environment setup:
+- sandbox.yaml: Contains OCI configuration and workshop settings.
+- .env: Loads environment variables if required.
+
+How to run the file:
+uv run langChain/agents/a2a/langgraph_a2a_agent.py
+
+Important sections:
+- Step 1: Load dependencies and environment variables
+- Step 2: Build the LangGraph workflow
+- Step 3: Initialize the main host agent and model
+- Step 4: Create the host agent plus remote connections
+- Step 5: Run a demo request through the graph
 """
 
 from __future__ import annotations
@@ -26,6 +57,15 @@ load_dotenv()
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from oci_openai_helper import OCIOpenAIHelper
 
+
+# ============================================================================
+# STEP 2: LANGGRAPH WORKFLOW
+# ============================================================================
+# LangGraph lets us express the host agent as a loop:
+# 1. the model reads the conversation
+# 2. if needed, it asks to use a tool
+# 3. the tool result is added back to the conversation
+# 4. the model continues until it can answer
 
 def build_langgraph_agent_graph(
     model_with_tools,
@@ -68,6 +108,12 @@ def build_langgraph_agent_graph(
     return graph_builder.compile(checkpointer=InMemorySaver())
 
 
+# ============================================================================
+# STEP 3: MAIN HOST AGENT CLASS
+# ============================================================================
+# This class wires together the OCI model, the host-side prompt, and the
+# LangChain tool that delegates work to remote A2A agents.
+
 class MainAgent:
     """LangGraph host agent that coordinates remote A2A specialists."""
 
@@ -77,6 +123,7 @@ class MainAgent:
     def __init__(self, host_agent: HostAgent) -> None:
         self.host_agent = host_agent
         self.scfg = self._load_config(self.SANDBOX_CONFIG_FILE)
+        print(f"Main host agent is loading model '{self.LLM_MODEL}'.")
         self.openai_llm_client = OCIOpenAIHelper.get_langchain_openai_client(
             model_name=self.LLM_MODEL,
             config=self.scfg,
@@ -100,6 +147,13 @@ class MainAgent:
             return None
 
 
+# ============================================================================
+# STEP 4: FACTORY FOR THE FULL HOST AGENT
+# ============================================================================
+# This helper creates both parts needed by the demo:
+# - the remote connection manager
+# - the LangGraph host agent that uses it
+
 async def build_main_agent() -> tuple[MainAgent, RemoteAgentConnections]:
     """Create the remote connection manager and the LangGraph host agent."""
     remote_connections = RemoteAgentConnections()
@@ -108,6 +162,11 @@ async def build_main_agent() -> tuple[MainAgent, RemoteAgentConnections]:
     main_agent = MainAgent(host_agent)
     return main_agent, remote_connections
 
+
+# ============================================================================
+# STEP 5: DEMO ENTRY POINT
+# ============================================================================
+# This is a small runnable example that shows the full host flow for learners.
 
 async def main() -> None:
     """Demonstrate the LangGraph host agent delegating to remote A2A agents."""
