@@ -10,12 +10,16 @@ Documentation to reference:
 
 How to run the file:
 This server is typically launched automatically by an MCP client via stdio.
+Do not run it directly as a workshop step. Stdio MCP servers communicate over
+standard input/output and should not print lifecycle messages to stdout.
 
 Important sections:
 - Step 1: Initialize the MCP server
 - Step 2: Define the bill projection tool
 - Step 3: Run the stdio server
 """
+
+import sys
 
 from mcp.server.fastmcp import FastMCP
 
@@ -36,6 +40,4 @@ if __name__ == "__main__":
         # Step 3: Run the server over stdio.
         mcp.run(transport='stdio')
     except KeyboardInterrupt:
-        print("Closing server")
-    finally:
-        print("Server closed")
+        print("Bill MCP server interrupted.", file=sys.stderr)

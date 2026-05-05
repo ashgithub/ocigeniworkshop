@@ -45,8 +45,8 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 # Step 1: Import dependencies and define schemas
-# Supported models for structured output: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
-LLM_MODEL = "openai.gpt-4o"  # Cohere/Meta models don't support structured output
+# GA model families come from the Generative AI Platform Agentic Capabilities guide.
+LLM_MODEL = "openai.gpt-5.4"
 
 MESSAGE = """
   Give me the information about the current science fiction books.

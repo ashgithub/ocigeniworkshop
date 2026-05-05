@@ -39,7 +39,7 @@ from envyaml import EnvYAML
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "openai.gpt-4.1"
+LLM_MODEL = "openai.gpt-5.4"
 # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
 LLM_SERVICE_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
@@ -73,7 +73,7 @@ llm_client = ChatOCIGenAI(
     model_kwargs={
 #        "temperature":0.7, # higer value means more random, default = 0.3
 #        "max_tokens": 500, # max token to generate, can lead to incomplete responses, used by cohere & llama 
-#        "maxCompletionTokens": 500, # max token to generate, can lead to incomplete responses, used by openai
+#        "max_completion_tokens": 500, # max token to generate, can lead to incomplete responses, used by openai
 #        "preamble_override": PREAMBLE, # Not supported by openai / grok / meta models
         "is_stream": False,
     }
@@ -83,29 +83,35 @@ llm_client = ChatOCIGenAI(
 print(f"\n\n**************************Chat Result for {llm_client.model_id} **************************")
 response = llm_client.invoke(MESSAGE)
 print(response.content)
+base_response = response
 
 # Step 4: Model performance comparison with timing
 selected_llms = [
-    "openai.gpt-4.1",
     "openai.gpt-5.4",
-    "cohere.command-a-03-2025",
-    "cohere.command-r-08-2024",
-    "meta.llama-4-maverick-17b-128e-instruct-fp8",
-    "meta.llama-4-scout-17b-16e-instruct",
-    "xai.grok-4",
-    "xai.grok-4-fast-non-reasoning"
+    "openai.gpt-5.2",
+    "openai.gpt-oss-120b",
+    "xai.grok-4-1-fast-non-reasoning",
+    # "xai.grok-4.3",  # Newly documented by OCI, but not yet accepted by this endpoint/project.
+    "google.gemini-2.5-pro",
 ]
 
 for llm_id in selected_llms:
     llm_client.model_id = llm_id
     print(f"\n\n**************************Chat Result for {llm_client.model_id} **************************")
     start_time = time.time()
-    response = llm_client.invoke(MESSAGE)
+    try:
+        response = llm_client.invoke(MESSAGE)
+    except Exception as exc:
+        print(f"SKIPPED {llm_id}: unavailable for this project or endpoint.")
+        print(f"Reason: {exc}")
+        continue
     end_time = time.time()
     print(response.content)
     print(f"\n Time taken for {llm_client.model_id}: {end_time - start_time:.2f} seconds\n\n")
 
+llm_client.model_id = LLM_MODEL
 print(f"\n\n**************************Chat Full LangChain result for {llm_client.model_id} **************************")
+response = base_response
 print(response)
 
 # Step 5: Batch processing example
@@ -114,14 +120,15 @@ response = llm_client.batch(["why is sky blue", "why is it dark at night"])
 # print(response.additional_kwargs['finish_reason']) # extra parameters contained in response
 print(response) # main content parameter that has the string readable response from the model
 
-# Step 6: Max tokens parameter demonstration
-llm_client.model_kwargs['max_tokens'] = 10
-print(f"\n\n**************************Chat Result With max_tokens {llm_client.model_kwargs['max_tokens']} for {llm_client.model_id}**************************")
+# Step 6: Max completion tokens parameter demonstration
+llm_client.model_kwargs['max_completion_tokens'] = 16
+print(f"\n\n**************************Chat Result With max_completion_tokens {llm_client.model_kwargs['max_completion_tokens']} for {llm_client.model_id}**************************")
 response = llm_client.invoke(MESSAGE) # Notice this response is using the same modified seed from previous iteration
 print(response.additional_kwargs['finish_reason'])
 print(response.content)
 
 # Step 7: System and user prompt types demonstration
+llm_client.model_kwargs.pop('max_completion_tokens', None)
 print(f"\n\n**************************Chat Result with system & user prompts for {llm_client.model_id} **************************")
 system_message = {"role": "system", "content": "You are a poetic assistant who responds in exactly four lines."}
 user_message = {"role": "user", "content": "What are teh best tourist spots in mexico?"}

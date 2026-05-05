@@ -16,8 +16,9 @@ Relevant Slack channels:
 - #igiu-ai-learning: Help with the sandbox environment or with running this code
 
 Environment setup:
-- sandbox.yaml: Contains OCI tenancy, compartment, and wallet details.
+- sandbox.yaml: Contains OCI config and Generative AI project details.
 - .env: Load environment variables (e.g., API keys) consumed by load_dotenv.
+- Start `weather_mcp_server.py` first in a separate terminal and leave it running.
 
 How to run the file:
 uv run langChain/function_calling/mcp/langchain_mcp_auto.py
@@ -32,7 +33,9 @@ Important sections:
 import asyncio
 import os
 import sys
+from pathlib import Path
 
+import httpx
 from envyaml import EnvYAML
 from dotenv import load_dotenv
 from langchain.agents import create_agent
@@ -45,7 +48,8 @@ from oci_openai_helper import OCIOpenAIHelper
 load_dotenv()
 
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
-LLM_MODEL = "openai.gpt-5.2"
+LLM_MODEL = "openai.gpt-5.4"
+MCP_DIR = Path(__file__).resolve().parent
 
 MCP_SERVER_CONFIG = {
     "weather": {
@@ -53,8 +57,8 @@ MCP_SERVER_CONFIG = {
         "url": "http://localhost:8000/mcp",
     },
     "bill_server": {
-        "command": "python",
-        "args": ["./langChain/function_calling/mcp/bill_mcp_server.py"],
+        "command": sys.executable,
+        "args": [str(MCP_DIR / "bill_mcp_server.py")],
         "transport": "stdio",
     },
 }
@@ -80,11 +84,33 @@ def create_llm_client(config: EnvYAML):
     )
 
 
+async def assert_weather_server_available() -> None:
+    """Fail early with workshop guidance if the local weather MCP server is off."""
+    try:
+        async with httpx.AsyncClient(timeout=2) as client:
+            await client.get("http://localhost:8000/mcp")
+    except httpx.HTTPError as exc:
+        raise RuntimeError(
+            "Weather MCP server is not reachable. Start it first with "
+            "`uv run langChain/function_calling/mcp/weather_mcp_server.py` and "
+            "leave that terminal running while this client runs."
+        ) from exc
+
+
 async def run_mcp_agent(prompt: str, llm_client, server_config):
     """Create an MCP-enabled agent and stream responses for the given prompt."""
 
+    await assert_weather_server_available()
+
     client = MultiServerMCPClient(server_config)
-    tools = await client.get_tools()
+    try:
+        tools = await client.get_tools()
+    except Exception as exc:
+        raise RuntimeError(
+            "Could not discover MCP tools. Start the weather server first with "
+            "`uv run langChain/function_calling/mcp/weather_mcp_server.py` and "
+            "leave that terminal running while this client runs."
+        ) from exc
 
     agent = create_agent(model=llm_client, tools=tools)
     response = await agent.ainvoke(
@@ -109,4 +135,8 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except RuntimeError as exc:
+        print(f"Setup error: {exc}")
+        sys.exit(1)

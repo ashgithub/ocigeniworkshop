@@ -13,7 +13,7 @@ In this module, you will learn how to:
 
 ## Environment Setup
 
-- `sandbox.yaml`: Contains OCI configuration and compartment details.
+- `sandbox.yaml`: Contains OCI configuration and the OCI Generative AI Project OCID.
 - `.env`: Loads environment variables for optional overrides.
 - Ensure you have access to OCI Generative AI services before running the examples.
 
@@ -22,18 +22,18 @@ In this module, you will learn how to:
 Work through the assets below to cover each capability end-to-end. All commands assume `uv run` from the repo root.
 
 1. **`langChain/multimodal/text_to_image.py`**
-   - Generates brand-new images using `openai.gpt-image-1.5`
-   - Highlights: prompt customization, output sizing, base64 decoding, and file persistence
+   - Generates brand-new images through the Responses API `image_generation` tool
+   - Highlights: prompt customization, output sizing, base64 decoding, project headers, and file persistence
    - Run: `uv run langChain/multimodal/text_to_image.py`
 
 2. **`langChain/multimodal/text_to_speech.py`**
-   - Converts prompts into speech clips with `openai.gpt-audio`
-   - Highlights: voice selection, output formats, and saved audio artifacts
+   - Migration placeholder for text-to-speech audio
+   - Current status: the old chat-completions audio path still requires compartment metadata, so the script raises `MigrationRequiredError` until a GA project-compatible audio API is confirmed
    - Run: `uv run langChain/multimodal/text_to_speech.py`
 
 3. **`langChain/multimodal/speech_to_text.py`**
-   - Downloads or reuses an audio file and produces a transcript
-   - Highlights: caching downloads, base64 encoding, and transcript extraction
+   - Migration placeholder for speech-to-text audio
+   - Current status: the old chat-completions audio path still requires compartment metadata, so the script raises `MigrationRequiredError` until a GA project-compatible audio API is confirmed
    - Run: `uv run langChain/multimodal/speech_to_text.py`
 
 4. **`langChain/multimodal/image_to_text.py`**

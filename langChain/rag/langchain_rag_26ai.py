@@ -19,6 +19,7 @@ Relevant Slack channels:
 Environment setup:
 - sandbox.yaml: Contains OCI config, compartment, DB details, and wallet path.
 - .env: Loads environment variables if needed.
+- Enter a non-empty question at the prompt. Press `q` to exit.
 
 How to run the file:
 uv run langChain/rag/langchain_rag_26ai.py
@@ -67,7 +68,7 @@ EMBED_MODEL = "cohere.embed-english-light-v3.0"
 
 OCI_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-LLM_MODEL = "openai.gpt-4.1"
+LLM_MODEL = "openai.gpt-5.4"
 
 # Step 1: Load config and initialize clients
 def load_config(config_path: str) -> EnvYAML | None:
@@ -97,8 +98,12 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=200,
     add_start_index=True
 )
-splits = text_splitter.split_documents(docs)
-texts = [chunk.page_content for chunk in splits]
+splits = [
+    chunk
+    for chunk in text_splitter.split_documents(docs)
+    if chunk.page_content.strip()
+]
+texts = [chunk.page_content.strip() for chunk in splits]
 
 print(f"Created {len(splits)} text chunks for embedding.")
 
@@ -207,6 +212,18 @@ def build_context_snippet(results):
         context_parts.append(f"[{i}] (Source: {r['source']}) {snippet}")
     return "\n\n".join(context_parts)
 
+def extract_text(content):
+    """Return readable text from LangChain string or Responses API list content."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(
+            item.get("text", "")
+            for item in content
+            if isinstance(item, dict) and item.get("type") == "text"
+        )
+    return str(content)
+
 # Step 8: RAG workflow: retrieve, augment, generate
 def rag_answer(query):
     """Perform RAG"""
@@ -227,7 +244,7 @@ def rag_answer(query):
     # G: generate the response from chat model given the full context
     response = llm_client.invoke([HumanMessage(content=context_prompt)])
     print("\n************************** MODEL ANSWER **************************")
-    print(response.content)
+    print(extract_text(response.content))
     print("\n************************** CITATIONS **************************")
     for i, r in enumerate(results, 1):
         print(f"[{i}] Source: {r['source']} (distance={r['distance']:.4f})")
@@ -235,9 +252,16 @@ def rag_answer(query):
 
 # Step 9: Interactive loop for user queries
 while True:
-    q = input("\nAsk a question (or 'q' to exit): ").strip()
+    try:
+        q = input("\nAsk a question (or 'q' to exit): ").strip()
+    except EOFError:
+        print("\nNo interactive input received. Exiting RAG loop.")
+        break
     if q.lower() == "q":
         break
+    if not q:
+        print("Please enter a non-empty question, or 'q' to exit.")
+        continue
     rag_answer(q)
 
 # Close DB connections

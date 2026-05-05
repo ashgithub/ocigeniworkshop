@@ -14,7 +14,7 @@ Relevant Slack channels:
 - #igiu-ai-learning: Help with the sandbox environment or with running this code
 
 Environment setup:
-- sandbox.yaml: Contains OCI config, compartment details.
+- sandbox.yaml: Contains OCI config and Generative AI project details.
 - .env: Load environment variables (e.g., API keys if needed).
 - Note: Uses OpenAI native client for async operations as LangChain async is not fully compatible with OCI clients.
 
@@ -43,7 +43,7 @@ from oci_openai_helper import OCIOpenAIHelper
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "openai.gpt-4.1"
+LLM_MODEL = "openai.gpt-5.4"
 
 MESSAGE = """
     why is the sky blue? explain in 2 sentences like I am 5
@@ -62,14 +62,12 @@ scfg = load_config(SANDBOX_CONFIG_FILE)
 
 # Supported models for async operations (OpenAI-compatible models only)
 selected_llms = [
-    "openai.gpt-4.1",
+    "openai.gpt-5.4",
     "openai.gpt-5.2",
-    # "cohere.command-a-03-2025",      # Cohere doesn't support OpenAI compatible APIs yet
-    # "cohere.command-r-08-2024",      # Cohere doesn't support OpenAI compatible APIs yet
-    # "meta.llama-4-maverick-17b-128e-instruct-fp8",
-    # "meta.llama-4-scout-17b-16e-instruct",
-    "xai.grok-4",
-    "xai.grok-4-fast-non-reasoning"
+    "openai.gpt-oss-120b",
+    "xai.grok-4-1-fast-non-reasoning",
+    # "xai.grok-4.3",  # Newly documented by OCI, but not yet accepted by this endpoint/project.
+    "google.gemini-2.5-pro",
 ]
 
 # Step 2: Define async invoke function
@@ -101,8 +99,12 @@ async def sequential_run():
     print(f"\n\n*************** Sequential Run ***************\n")
     for llm_id in selected_llms:
         client = OCIOpenAIHelper.get_async_openai_client(config=scfg)
-        await call_ainvoke(client, llm_id, MESSAGE)
-        await call_astream(client, llm_id, MESSAGE)
+        try:
+            await call_ainvoke(client, llm_id, MESSAGE)
+            await call_astream(client, llm_id, MESSAGE)
+        except Exception as exc:
+            print(f"\nSKIPPED {llm_id}: unavailable for this project or endpoint.")
+            print(f"Reason: {exc}")
 
 # Step 5: Concurrent execution with gather
 async def gather_run():
@@ -113,7 +115,10 @@ async def gather_run():
         client = OCIOpenAIHelper.get_async_openai_client(config=scfg)
         tasks.append(call_ainvoke(client, llm_id, MESSAGE))
         tasks.append(call_astream(client, llm_id, MESSAGE))
-    await asyncio.gather(*tasks)
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    for result in results:
+        if isinstance(result, Exception):
+            print(f"\nSKIPPED async task: {result}")
 
 # Step 6: Performance comparison
 async def main():

@@ -75,13 +75,9 @@ class OpenAIClientProvider:
         value = section_data.get(key, default)
         return value
 
-    # Helper for adding the necessary headers to make the sandbox connection
+    # Helper for adding project headers to OpenAI-compatible API calls.
     def _default_headers(self) -> dict[str, str]:
-        headers: dict[str, str] = {}
-        if self.oci_compartment_id:
-            headers["opc-compartment-id"] = self.oci_compartment_id
-            headers["CompartmentId"] = self.oci_compartment_id
-        return headers
+        return {"OpenAI-Project": self.oci_openai_project}
 
     # Client for responses.create use cases
     def build_oci_openai_client(self) -> OpenAI:

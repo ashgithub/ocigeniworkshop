@@ -39,7 +39,7 @@ from envyaml import EnvYAML
 SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
-LLM_MODEL = "xai.grok-4.20-multi-agent-0309"
+LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
 # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
 LLM_SERVICE_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"

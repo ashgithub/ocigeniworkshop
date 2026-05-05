@@ -4,6 +4,7 @@ Demonstrates document reranking by using AIA services with a Cohere reranking
 model.
 
 Important notes:
+0. This is an optional/internal example, not part of the default public RAG path.
 1. The AIA client must be installed (`aia_common_sdk` or newer).
 2. Access to the AIA service and credentials must be requested from the AIA team.
 3. Access currently depends on the relevant internal environment and may require VPN connectivity.
@@ -34,8 +35,18 @@ Important sections:
 import os
 from dotenv import load_dotenv
 from envyaml import EnvYAML
-from aia_common.authentication.idcs_provider import IDCSTokenProvider
-from aia_common.secrets_helper import OCISecretsHelper, OCIAuthConfig
+
+try:
+    from aia_common.authentication.idcs_provider import IDCSTokenProvider
+    from aia_common.secrets_helper import OCISecretsHelper, OCIAuthConfig
+except ModuleNotFoundError as exc:
+    raise SystemExit(
+        "Optional AIA dependency is not installed. `aia_rerank.py` is an "
+        "internal AIA example and requires the private AIA SDK, OCI Vault "
+        "access, IDCS settings in sandbox.yaml, and internal network access. "
+        "Install the AIA SDK from the documented internal package source before "
+        "running this file."
+    ) from exc
 
 import requests
 

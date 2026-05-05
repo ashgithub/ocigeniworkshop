@@ -2,6 +2,9 @@
 
 This module explores how to build Retrieval-Augmented Generation (RAG) workflows by using OCI Generative AI services, OCI Agents, and Oracle Database vector search.
 
+> **GA project note**  
+> This `oci_genai` tree intentionally shows the OCI Python SDK and service-specific APIs, many of which still use compartment-oriented setup. For new OpenAI-compatible GA project work, start with `openai_sdk/` instead; that tree uses project headers and the Responses API patterns used by the current Generative AI Platform.
+
 ## What You Will Learn
 
 In this module, you will learn how to:

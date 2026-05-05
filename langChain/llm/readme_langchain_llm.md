@@ -17,7 +17,7 @@ OCI Gen AI provides OpenAI-compatible APIs that support advanced features like s
 
 ## Environment Setup
 
-- `sandbox.yaml`: Contains OCI config, compartment details.
+- `sandbox.yaml`: Contains OCI config and the Generative AI Project OCID used by OpenAI-compatible examples.
 - `.env`: Load environment variables (e.g., API keys if needed).
 - Ensure you have access to OCI Generative AI services and proper authentication configured.
 
@@ -61,8 +61,8 @@ The files are designed to build upon each other. Study them in this order for a 
    - How to run: `uv run langChain/llm/openai_oci_reasoning.py`.
    - Docs: [OpenAI Reasoning API](https://platform.openai.com/docs/guides/reasoning), [OCI OpenAI Compatible SDK](https://github.com/oracle-samples/oci-openai).
 
-8. **openai_oci_responses_stateful.py**: Demonstrates stateful responses and persistent multi-turn conversations by using OCI-hosted conversation stores.
-   - Key features: Uses `previous_response_id` and conversation stores for persistent context.
+8. **openai_oci_responses_stateful.py**: Demonstrates stateful responses and project-scoped multi-turn conversation state.
+   - Key features: Uses `previous_response_id` for request chaining and optional project-scoped conversations for persistent context.
    - How to run: `uv run langChain/llm/openai_oci_responses_stateful.py`.
    - Docs: [OpenAI Conversation State Support](https://developers.openai.com/api/docs/guides/conversation-state)
 

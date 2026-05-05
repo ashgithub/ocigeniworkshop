@@ -43,7 +43,7 @@ SANDBOX_CONFIG_FILE = "sandbox.yaml"
 load_dotenv()
 
 
-LLM_MODEL = "xai.grok-4.20-multi-agent-0309"
+LLM_MODEL = "xai.grok-4-1-fast-non-reasoning"
 # Available models: https://docs.oracle.com/en-us/iaas/Content/generative-ai/chat-models.htm
 
 MESSAGE = """
@@ -72,5 +72,4 @@ llm_client = OCIOpenAIHelper.get_langchain_openai_client(
 print(f"\n\n**************************Chat Result for {LLM_MODEL} **************************")
 response = llm_client.invoke(MESSAGE)
 print(response)
-
 
