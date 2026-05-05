@@ -1,49 +1,37 @@
 """
 What this file does:
-Provides cached A2A client connections for the main orchestrator so it can call
-specialized agents efficiently.
+Provides A2A discovery and connection management for the LangGraph host agent.
+It supports direct agent-card resolution from agent URLs, cached clients, and
+remote task continuation across calls.
 
-Documentation to reference:
-- A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
-- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
-- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
-
-Relevant Slack channels:
-- #generative-ai-users: Questions about OCI Generative AI
-- #igiu-innovation-lab: General project discussions
-- #igiu-ai-learning: Help with the sandbox environment or with running this code
-
-Environment setup:
-- sandbox.yaml: Contains OCI configuration and workshop settings.
-- .env: Loads environment variables if required.
-
-How to run the file:
-This file is not run directly. It is imported by `langgraph_a2a_agent.py`.
-
-Important sections:
-- Step 1: Imports and shared configuration
-- Step 2: Shared HTTP client lifecycle management
-- Step 3: Cached client lookup and registry-based client creation
-- Step 4: A2A message sending
-- Step 5: Cleanup and local test helper
-
-Registry URL: http://localhost:9990
+How to use this file:
+- Import `RemoteAgentConnections` from `langgraph_a2a_agent.py` or
+  `host_agent.py`.
+- By default it discovers the workshop agents from their known local URLs.
 """
 
-import asyncio
-from contextlib import asynccontextmanager
-from typing import Optional, Dict
+from __future__ import annotations
+
+from collections import OrderedDict
+from dataclasses import dataclass
+from typing import Iterable
 
 import httpx
-from a2a.client import (
-    Client,
-    ClientConfig,
-    ClientFactory,
+from a2a.client import A2ACardResolver, Client, ClientConfig, ClientFactory
+from a2a.helpers import get_artifact_text, get_message_text, new_text_message
+from a2a.types.a2a_pb2 import (
+    AgentCard,
+    Role,
+    SendMessageRequest,
+    StreamResponse,
+    Task,
+    TaskArtifactUpdateEvent,
+    TaskState,
+    TaskStatusUpdateEvent,
 )
-from a2a.types import TransportProtocol, AgentCard
+from a2a.utils.constants import TransportProtocol
 
-# Step 1: Imports and shared configuration
-# Configure global timeout behavior for shared A2A HTTP calls.
+
 GLOBAL_TIMEOUT = httpx.Timeout(
     timeout=30.0,
     connect=5.0,
@@ -51,116 +39,223 @@ GLOBAL_TIMEOUT = httpx.Timeout(
     write=5.0,
 )
 
-# Registry endpoint used for dynamic agent discovery.
-REGISTRY_URL = "http://localhost:9990"
+DEFAULT_REMOTE_AGENT_URLS = (
+    "http://localhost:9997",
+    "http://localhost:9998",
+    "http://localhost:9999",
+)
+TERMINAL_TASK_STATES = {
+    TaskState.TASK_STATE_COMPLETED,
+    TaskState.TASK_STATE_FAILED,
+    TaskState.TASK_STATE_CANCELED,
+    TaskState.TASK_STATE_REJECTED,
+    TaskState.TASK_STATE_INPUT_REQUIRED,
+    TaskState.TASK_STATE_AUTH_REQUIRED,
+}
 
-# Shared HTTP client used across cached A2A clients.
-_shared_httpx_client: Optional[httpx.AsyncClient] = None
 
-# Cache A2A client objects to avoid repeated creation.
-_client_cache: Dict[str, Client] = {}
+@dataclass
+class RemoteTaskSession:
+    """Tracks the remote task identifiers for a host conversation."""
 
-# Step 2: Shared HTTP client lifecycle management
-@asynccontextmanager
-async def _get_shared_httpx_client():
-    """Get or create the shared httpx client."""
-    global _shared_httpx_client
-    if _shared_httpx_client is None:
-        _shared_httpx_client = httpx.AsyncClient(timeout=GLOBAL_TIMEOUT)
-    try:
-        yield _shared_httpx_client
-    except Exception:
-        # If client fails, reset it for next use
-        if _shared_httpx_client:
-            await _shared_httpx_client.aclose()
-        _shared_httpx_client = None
-        raise
+    task_id: str | None = None
+    context_id: str | None = None
 
-# Step 3: Cached client lookup and registry-based client creation
-async def _get_cached_client(agent_name: str) -> Optional[Client]:
-    """Get cached client or create new one from registry."""
-    # Step 3.1: Return the cached client when available.
-    if agent_name in _client_cache:
-        return _client_cache[agent_name]
 
-    # Step 3.2: Query the registry and build a client for the matching agent.
-    try:
-        async with _get_shared_httpx_client() as httpx_client:
-            response = await httpx_client.get(f"{REGISTRY_URL}/registry/agents")
-            response.raise_for_status()
-            agents = response.json()
+class RemoteAgentConnections:
+    """Discover remote agents and send A2A requests to them."""
 
-            # Step 3.3: Find the agent card by name and create the A2A client.
-            for agent_data in agents:
-                if agent_data.get('name') == agent_name:
-                    agent_card = AgentCard(**agent_data)
+    def __init__(
+        self,
+        remote_agent_urls: Iterable[str] | None = None,
+    ) -> None:
+        self.remote_agent_urls = list(
+            remote_agent_urls or DEFAULT_REMOTE_AGENT_URLS
+        )
+        self._httpx_client = httpx.AsyncClient(timeout=GLOBAL_TIMEOUT)
+        self._client_factory = ClientFactory(
+            ClientConfig(
+                httpx_client=self._httpx_client,
+                supported_protocol_bindings=[
+                    TransportProtocol.JSONRPC,
+                    TransportProtocol.HTTP_JSON,
+                ],
+            )
+        )
+        self._agent_cards: dict[str, AgentCard] = {}
+        self._client_cache: dict[str, Client] = {}
+        self._task_sessions: dict[tuple[str, str], RemoteTaskSession] = {}
 
-                    config = ClientConfig(
-                        httpx_client=httpx_client,
-                        supported_transports=[
-                            TransportProtocol.jsonrpc,
-                            TransportProtocol.http_json,
-                        ],
-                        streaming=agent_card.capabilities.streaming or False,
-                    )
-                    client = ClientFactory(config).create(agent_card)
+    async def discover_agents(self, force_refresh: bool = False) -> list[AgentCard]:
+        """Discover remote agents from direct URLs."""
+        if self._agent_cards and not force_refresh:
+            return list(self._agent_cards.values())
 
-                    _client_cache[agent_name] = client
-                    return client
+        discovered_cards: dict[str, AgentCard] = {}
 
-            return None
-    except Exception:
-        return None
+        for card in await self._discover_from_urls():
+            discovered_cards[card.name] = card
 
-async def call_a2a_agent(agent_name: str, message: str) -> str:
-    """
-    High-performance A2A agent call using client caching and global timeout configuration.
+        self._agent_cards = discovered_cards
+        return list(self._agent_cards.values())
 
-    Args:
-        agent_name: Name of the agent to call (city_agent, clothes_agent, weather_agent)
-        message: The message/query to send to the agent
+    async def list_agent_summaries(self) -> list[dict[str, str]]:
+        """Return lightweight agent metadata for prompting and diagnostics."""
+        cards = await self.discover_agents()
+        return [
+            {
+                "name": card.name,
+                "description": card.description,
+            }
+            for card in cards
+        ]
 
-    Returns:
-        str: Agent response or error message
-    """
-    # Step 4: A2A message sending
-    try:
-        # Step 4.1: Retrieve or create the cached client for the requested agent.
-        client = await _get_cached_client(agent_name)
-        if not client:
-            return f"Agent '{agent_name}' not found in registry"
+    async def call_agent(
+        self,
+        agent_name: str,
+        message: str,
+        *,
+        thread_id: str = "default",
+    ) -> str:
+        """Send a text request to a remote agent and return consolidated text."""
+        await self.discover_agents()
 
-        from a2a.client import create_text_message_object
+        if agent_name not in self._agent_cards:
+            available = ", ".join(sorted(self._agent_cards))
+            return (
+                f"Agent '{agent_name}' is not available. "
+                f"Available agents: {available or 'none'}"
+            )
 
-        # Step 4.2: Build the request payload.
-        request = create_text_message_object(content=message)
+        client = self._client_cache.get(agent_name)
+        if client is None:
+            client = self._client_factory.create(self._agent_cards[agent_name])
+            self._client_cache[agent_name] = client
 
-        # Step 4.3: Stream the response and collect all parts.
-        response_parts = []
+        session_key = (thread_id, agent_name)
+        session = self._task_sessions.setdefault(session_key, RemoteTaskSession())
+        request = SendMessageRequest(
+            message=new_text_message(
+                text=message,
+                task_id=session.task_id,
+                context_id=session.context_id,
+                role=Role.ROLE_USER,
+            )
+        )
+
+        try:
+            response_text = await self._consume_response_stream(
+                client,
+                request,
+                session,
+            )
+        except Exception as exc:
+            self._client_cache.pop(agent_name, None)
+            return f"Error calling {agent_name}: {exc}"
+
+        return response_text or "No response received"
+
+    async def close(self) -> None:
+        """Release network resources owned by the connection manager."""
+        for client in self._client_cache.values():
+            await client.close()
+        self._client_cache.clear()
+        await self._httpx_client.aclose()
+
+    async def _discover_from_urls(self) -> list[AgentCard]:
+        """Resolve agent cards directly from known agent base URLs."""
+        cards: list[AgentCard] = []
+        for url in self.remote_agent_urls:
+            try:
+                resolver = A2ACardResolver(self._httpx_client, url)
+                card = await resolver.get_agent_card()
+            except Exception:
+                continue
+            cards.append(card)
+        return cards
+
+    async def _consume_response_stream(
+        self,
+        client: Client,
+        request: SendMessageRequest,
+        session: RemoteTaskSession,
+    ) -> str:
+        """Aggregate text from A2A stream responses and track task IDs."""
+        text_chunks: OrderedDict[str, None] = OrderedDict()
+
         async for response in client.send_message(request):
-            response_parts.append(str(response))
+            self._update_session_from_response(response, session)
 
-        return " ".join(response_parts) if response_parts else "No response received"
+            chunk = self._extract_text(response)
+            if chunk:
+                text_chunks[chunk] = None
 
-    except Exception as e:
-        _client_cache.pop(agent_name, None)
-        return f"Error calling {agent_name}: {str(e)}"
+        return "\n".join(text_chunks.keys())
 
-# Step 5: Cleanup and local test helper
-async def cleanup_clients():
-    """Cleanup cached clients and shared httpx client."""
-    # Step 5.1: Clear cached clients and close the shared HTTP client.
-    global _shared_httpx_client
-    _client_cache.clear()
-    if _shared_httpx_client:
-        await _shared_httpx_client.aclose()
-        _shared_httpx_client = None
+    def _update_session_from_response(
+        self,
+        response: StreamResponse,
+        session: RemoteTaskSession,
+    ) -> None:
+        """Persist remote task identifiers so a later call can continue it."""
+        task: Task | None = None
 
-async def test():
-    """Test function for development."""
-    # Step 5.2: Run a simple local connectivity test.
-    response = await call_a2a_agent("city_agent", "What is the city where are most pyramids?")
-    print(response)
+        if response.HasField("task"):
+            task = response.task
+        elif response.HasField("status_update"):
+            status_update: TaskStatusUpdateEvent = response.status_update
+            session.task_id = status_update.task_id or session.task_id
+            session.context_id = status_update.context_id or session.context_id
+        elif response.HasField("artifact_update"):
+            artifact_update: TaskArtifactUpdateEvent = response.artifact_update
+            session.task_id = artifact_update.task_id or session.task_id
+            session.context_id = artifact_update.context_id or session.context_id
 
-if __name__ == "__main__":
-    asyncio.run(test())
+        if task is None:
+            return
+
+        session.task_id = task.id or session.task_id
+        session.context_id = task.context_id or session.context_id
+
+        if task.status.state in TERMINAL_TASK_STATES:
+            # Keep identifiers for input/auth-required states so a future turn can resume.
+            if task.status.state in {
+                TaskState.TASK_STATE_COMPLETED,
+                TaskState.TASK_STATE_FAILED,
+                TaskState.TASK_STATE_CANCELED,
+                TaskState.TASK_STATE_REJECTED,
+            }:
+                session.task_id = None
+                session.context_id = None
+
+    def _extract_text(self, response: StreamResponse) -> str:
+        """Extract human-readable text from a stream response without duplicates."""
+        if response.HasField("message"):
+            return get_message_text(response.message).strip()
+
+        if response.HasField("task"):
+            task = response.task
+            artifact_text = "\n".join(
+                get_artifact_text(artifact).strip()
+                for artifact in task.artifacts
+                if get_artifact_text(artifact).strip()
+            )
+            if artifact_text:
+                return artifact_text
+            if task.status.HasField("message"):
+                return get_message_text(task.status.message).strip()
+            return ""
+
+        if response.HasField("status_update"):
+            status_update = response.status_update
+            if (
+                status_update.status.state in TERMINAL_TASK_STATES
+                and status_update.status.HasField("message")
+            ):
+                return get_message_text(status_update.status.message).strip()
+            return ""
+
+        if response.HasField("artifact_update"):
+            return get_artifact_text(response.artifact_update.artifact).strip()
+
+        return ""

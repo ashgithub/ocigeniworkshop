@@ -1,7 +1,7 @@
 """
 What this file does:
-Runs the A2A weather agent server, publishes its agent card, and registers the
-service with the central registry.
+Runs the A2A weather agent server and publishes its agent card directly from
+the service endpoint.
 
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
@@ -23,43 +23,28 @@ uv run langChain/agents/a2a/weather_agent/weather_server.py
 Important sections:
 - Step 1: Define the agent skill metadata
 - Step 2: Build the public agent card
-- Step 3: Register with the central registry
-- Step 4: Configure the request handler and server
-- Step 5: Start the server
+- Step 3: Configure the request handler and server
+- Step 4: Start the server
 """
 
-import asyncio
 import uvicorn
-import httpx
 
-from a2a.server.apps import A2AStarletteApplication
+from starlette.applications import Starlette
 from a2a.server.request_handlers import DefaultRequestHandler
+from a2a.server.routes import (
+    create_agent_card_routes,
+    create_jsonrpc_routes,
+)
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import (
     AgentCapabilities,
     AgentCard,
+    AgentInterface,
     AgentSkill,
 )
 from agent_executor import WeatherAgentExecutor
 
-# Constants
-REGISTRY_URL = "http://localhost:9990"
 AGENT_URL = "http://localhost:9999/"
-
-async def register_with_registry(agent_card: AgentCard):
-    """Register the agent with the central registry at startup."""
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{REGISTRY_URL}/registry/register",
-                json=agent_card.model_dump()
-            )
-            if response.status_code == 201:
-                print(f"Successfully registered {agent_card.name} with registry")
-            else:
-                print(f"Failed to register {agent_card.name}: {response.status_code} - {response.text}")
-    except Exception as e:
-        print(f"Error registering {agent_card.name} with registry: {e}")
 
 if __name__ == '__main__':
     # Step 1: Define agent skill
@@ -74,28 +59,31 @@ if __name__ == '__main__':
     # Step 2: Create public agent card
     public_agent_card = AgentCard(
         name="weather_agent",
-        url=AGENT_URL,
-        skills=[skill],
-        default_input_modes=['text'],
-        default_output_modes=['text'],
         description='Provide weather details for the supplied location',
         version='1.0.0',
+        default_input_modes=['text/plain'],
+        default_output_modes=['text/plain'],
         capabilities=AgentCapabilities(streaming=True),
+        supported_interfaces=[
+            AgentInterface(
+                protocol_binding='JSONRPC',
+                url=AGENT_URL
+            )
+        ],
+        skills=[skill],
     )
 
-    # Step 3: Register with central registry
-    asyncio.run(register_with_registry(public_agent_card))
-
-    # Step 4: Set up request handler and server
     request_handler = DefaultRequestHandler(
         agent_executor=WeatherAgentExecutor(),
         task_store=InMemoryTaskStore(),
-    )
-
-    server = A2AStarletteApplication(
         agent_card=public_agent_card,
-        http_handler=request_handler
+        # extended_agent_card=extended_agent_card,
     )
 
-    # Step 5: Start server
-    uvicorn.run(server.build(), host='0.0.0.0', port=9999)
+    routes = []
+    routes.extend(create_agent_card_routes(public_agent_card))
+    routes.extend(create_jsonrpc_routes(request_handler, '/'))
+    app = Starlette(routes=routes)
+
+    # Step 4: Start server
+    uvicorn.run(app, host='0.0.0.0', port=9999)

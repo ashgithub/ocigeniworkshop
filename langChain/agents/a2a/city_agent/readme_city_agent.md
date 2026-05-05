@@ -41,13 +41,7 @@ Before running this agent, make sure:
 
 - `sandbox.yaml` is configured correctly.
 - Any required environment variables are available in `.env`.
-- The central registry is running if you want this agent to register itself.
-
-Start the registry with:
-
-```bash
-uv run langChain/agents/a2a/agent_registry.py
-```
+- The agent port (`9997`) is available.
 
 ## How to Run
 
@@ -67,7 +61,7 @@ uv run langChain/agents/a2a/city_agent/test_client.py
 
 ### Use it through the main orchestrator
 
-If the registry and all remote agents are running:
+If the remote agents are running:
 
 ```bash
 uv run langChain/agents/a2a/langgraph_a2a_agent.py
@@ -85,14 +79,14 @@ Try prompts such as:
 
 - **Structured Output**: Use of a Pydantic model for predictable responses
 - **A2A Protocol**: Agent-to-agent communication over HTTP
-- **Registry Registration**: Automatic discovery through the shared registry
+- **Published Agent Card**: Direct discovery through the standard A2A card route
 - **LLM Orchestration**: Turning free-form requests into typed outputs
 - **Type Safety**: Response validation through schema-driven generation
 
 ## Troubleshooting
 
 - **Agent does not appear in the orchestrator**
-  - Make sure `agent_registry.py` is running before you start `city_server.py`.
+  - Make sure `city_server.py` is running on port `9997`.
 
 - **Port 9997 is already in use**
   - Stop the conflicting process or change the configured port in `city_server.py`.

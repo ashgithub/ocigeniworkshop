@@ -41,13 +41,7 @@ Before running this agent, make sure:
 
 - `sandbox.yaml` is configured correctly.
 - Any required environment variables are available in `.env`.
-- The central registry is running if you want this agent to register itself.
-
-Start the registry with:
-
-```bash
-uv run langChain/agents/a2a/agent_registry.py
-```
+- The agent port (`9999`) is available.
 
 ## How to Run
 
@@ -67,7 +61,7 @@ uv run langChain/agents/a2a/weather_agent/test_client.py
 
 ### Use it through the main orchestrator
 
-If the registry and all remote agents are running:
+If the remote agents are running:
 
 ```bash
 uv run langChain/agents/a2a/langgraph_a2a_agent.py
@@ -85,19 +79,19 @@ Try prompts such as:
 
 - **LangChain Tools**: Tool-backed weather lookup flow
 - **A2A Protocol**: Agent-to-agent communication over HTTP
-- **Registry Registration**: Automatic discovery through the shared registry
+- **Published Agent Card**: Direct discovery through the standard A2A card route
 - **Tool Calling**: Converting a prompt into structured weather inputs
 - **Specialized Services**: Acting as a weather expert inside a multi-agent system
 
 ## API Endpoints
 
-- `GET /.well-known/agent.json`: Agent card discovery
-- `POST /message`: A2A message processing
+- `GET /.well-known/agent-card.json`: Agent card discovery
+- `POST /`: A2A JSON-RPC message processing
 
 ## Troubleshooting
 
 - **Agent does not appear in the orchestrator**
-  - Make sure `agent_registry.py` is running before you start `weather_server.py`.
+  - Make sure `weather_server.py` is running on port `9999`.
 
 - **Port 9999 is already in use**
   - Stop the conflicting process or change the configured port in `weather_server.py`.

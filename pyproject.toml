@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "a2a-sdk[http-server]>=0.3.11",
     "envyaml>=1.10.211231",
+    "fastapi>=0.136.1",
     "ipykernel>=7.1.0",
     "langchain>=1.0.3",
     "langchain-community>=0.3.31",

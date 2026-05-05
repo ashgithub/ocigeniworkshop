@@ -31,9 +31,19 @@ import sys
 import os
 
 from envyaml import EnvYAML
+from a2a.helpers import (
+    new_task_from_user_message,
+    new_text_artifact,
+    new_text_message,
+)
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
-from a2a.utils import new_agent_text_message
+from a2a.types.a2a_pb2 import (
+    TaskArtifactUpdateEvent,
+    TaskState,
+    TaskStatus,
+    TaskStatusUpdateEvent,
+)
 from dotenv import load_dotenv
 load_dotenv()
 from langchain.tools import tool
@@ -134,10 +144,47 @@ class ClothesAgentExecutor(AgentExecutor):
         self.agent = ClothesAgent()
 
     async def execute(
-        self, context: RequestContext, event_queue: EventQueue,
+        self,
+        context: RequestContext,
+        event_queue: EventQueue,
     ) -> None:
+        message = context.message
+        if context.current_task is not None:
+            task = context.current_task
+        elif message is not None:
+            task = new_task_from_user_message(message)
+        else:
+            raise ValueError('RequestContext.message is required to create a new task')
+
+        await event_queue.enqueue_event(task)
+
+        await event_queue.enqueue_event(
+            TaskStatusUpdateEvent(
+                task_id=task.id,
+                context_id=task.context_id,
+                status=TaskStatus(
+                    state=TaskState.TASK_STATE_WORKING,
+                    message=new_text_message('Processing request...'),
+                ),
+            )
+        )
+
         result = await self.agent.invoke(context)
-        await event_queue.enqueue_event(new_agent_text_message(result))
+
+        await event_queue.enqueue_event(
+            TaskArtifactUpdateEvent(
+                task_id=task.id,
+                context_id=task.context_id,
+                artifact=new_text_artifact(name='result', text=result),
+            )
+        )
+        await event_queue.enqueue_event(
+            TaskStatusUpdateEvent(
+                task_id=task.id,
+                context_id=task.context_id,
+                status=TaskStatus(state=TaskState.TASK_STATE_COMPLETED),
+            )
+        )
 
     async def cancel(
         self, context: RequestContext, event_queue: EventQueue
