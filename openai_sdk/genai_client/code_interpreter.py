@@ -42,7 +42,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from openai_client_provider import OpenAIClientProvider
 
-MODEL_ID = "openai.gpt-4.1"
+MODEL_ID = "openai.gpt-5.2"
 PROMPT_LINEAR = "I need to solve the equation 3x + 11 = 14. Can you help me?"
 PROMPT_NESTED_ROOT = "Use the python tool to find the square root of the square root of (4 * 3.82)."
 PROMPT_REQUIRED_TOOL = "Use the python tool to calculate what is 4 * 3.82, then find its square root, then find the square root of that result."

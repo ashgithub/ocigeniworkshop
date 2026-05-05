@@ -32,14 +32,8 @@ from openai import OpenAI
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
-
-
-MODEL_ID = "openai.gpt-5.2"
-BASIC_PROMPT = "When did the Roman Empire fall?"
-STREAM_PROMPT = "Why the sky is blue?"
 
 def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
@@ -47,25 +41,31 @@ def main():
 
     # Step 2a: Create container.
     container = client.containers.create(
-        name="name",
+        name="workshop_container",
+        # expires_after=
     )
+    print(f"Created container with name: {container.name} and ID:")
     print(container.id)
 
     # Step 2b: List available containers.
     page = client.containers.list()
-    page = page.data[0]
-    print(page.id)
+    print(f"Available containers:")
+    for container in page.data:
+        print(container.name)
+        print(container.id)
 
     # Step 2c: Retrieve container by id.
     container = client.containers.retrieve(
-        "container_id",
+        container_id=container.id,
     )
+    print(f"Retrieved container with ID:")
     print(container.id)
 
     # Step 2d: Delete container by id.
     client.containers.delete(
-        "container_id",
+        container_id=container.id,
     )
+    print(f"Deleted container with ID: {container.id}")
 
 if __name__ == "__main__":
     main()

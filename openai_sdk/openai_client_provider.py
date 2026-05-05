@@ -17,6 +17,7 @@ load_dotenv()
 
 DEFAULT_SANDBOX_CONFIG = "sandbox.yaml"
 DEFAUL_OPENAI_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
+DEFAUL_OPENAI_VECTOR_ENDPOINT = "https://generativeai.us-chicago-1.oci.oraclecloud.com/20231130/openai/v1"
 
 class SandBoxConfigKeyNotSetException(Exception):
     """Raised when required config keys are missing."""
@@ -28,6 +29,7 @@ class OpenAIClientProvider:
         
         # get the values from env variables
         self.oci_openai_endpoint = DEFAUL_OPENAI_ENDPOINT
+        self.oci_openai_vector_endpoint = DEFAUL_OPENAI_VECTOR_ENDPOINT
         self.oci_openai_api_key = self.scfg['oci']['api_key']
         self.oci_openai_project = self.scfg['oci']['project']
         self.oci_compartment_id = self.scfg['oci']['compartment']
@@ -38,6 +40,7 @@ class OpenAIClientProvider:
 
         # build the clients for responses and agent mode
         self.oci_openai_client = self.build_oci_openai_client()
+        self.oci_openai_vector_client = self.build_oci_openai_vector_client()
         self.oci_openai_async_client = self.build_oci_openai_async_client()
 
     def load_config(self, config_path: str) -> EnvYAML | None:
@@ -86,6 +89,19 @@ class OpenAIClientProvider:
             base_url=self.oci_openai_endpoint,
             api_key=self.oci_openai_api_key,
             project=self.oci_openai_project,
+            default_headers=self._default_headers(),
+            http_client=httpx.Client(
+                auth=OciUserPrincipalAuth(profile_name=self.oci_openai_profile)
+            ),
+        )
+
+        return client
+    
+    def build_oci_openai_vector_client(self) -> OpenAI:
+        client = OpenAI(
+            base_url=self.oci_openai_vector_endpoint,
+            api_key="not-used",
+            # project=self.oci_openai_project,
             default_headers=self._default_headers(),
             http_client=httpx.Client(
                 auth=OciUserPrincipalAuth(profile_name=self.oci_openai_profile)

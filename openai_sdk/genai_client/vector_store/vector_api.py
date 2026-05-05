@@ -46,7 +46,18 @@ DELETE_VECTOR_STORE_AT_END = False  # Set True if you want cleanup in same run.
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
-    client: OpenAI = OpenAIClientProvider().oci_openai_client
+    client: OpenAI = OpenAIClientProvider().oci_openai_vector_client
+    normal_client: OpenAI = OpenAIClientProvider().oci_openai_vector_client
+
+    vector_store = normal_client.vector_stores.create(
+        name=VECTOR_STORE_NAME,
+        description=VECTOR_STORE_DESCRIPTION,
+        expires_after={"anchor": "last_active_at", "days": 30},
+        metadata={"topic": "oci", "sample": "vector_api"},
+    )
+    print("Vector store created with oci client. Result:")
+    print(vector_store)
+    vector_store_id = vector_store.id
 
     # Step 2: Create vector store.
     vector_store = client.vector_stores.create(

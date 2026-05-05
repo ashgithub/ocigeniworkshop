@@ -33,43 +33,43 @@ from openai import OpenAI
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
-
-MODEL_ID = "openai.gpt-5.2"
-BASIC_PROMPT = "When did the Roman Empire fall?"
-STREAM_PROMPT = "Why the sky is blue?"
 
 def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
+    # Get a container ID from the base_example.py file on this same folder
+
     # Step 2a: Upload file to container.
     container_file = client.containers.files.create(
-        container_id="container_id",
-        file=open("data.csv", "rb"),
+        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
+        file=open("./openai_sdk/output/fema_outage_flyer.pdf", "rb"),
     )
+    print("Uploaded file with ID:")
     print(container_file.id)
 
     # Step 2b: List container files.
     page = client.containers.files.list(
-        container_id="container_id",
+        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
     )
     page = page.data[0]
+    print("File data found:")
     print(page.id)
 
     # Step 2c: Retrieve file metadata.
     file = client.containers.files.retrieve(
-        file_id="file_id",
-        container_id="container_id",
+        file_id=container_file.id,
+        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
     )
+    print("File data retrieved")
     print(file.id)
 
     # Step 2d: Retrieve file content stream.
     content = client.containers.files.content.retrieve(
-        file_id="file_id",
-        container_id="container_id",
+        file_id=container_file.id,
+        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
     )
     print(content)
     data = content.read()
@@ -77,6 +77,9 @@ def main():
 
     # Step 2e: Delete file from container.
     client.containers.files.delete(
-        file_id="file_id",
-        container_id="container_id",
+        file_id=container_file.id,
+        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
     )
+
+if __name__ == "__main__":
+    main()

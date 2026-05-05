@@ -16,7 +16,7 @@ Environment setup:
 - Set `TARGET_FILE_ID` or env var `VECTOR_SAMPLE_FILE_ID` when skipping upload.
 
 How to run from repo root:
-uv run openai_sdk/genai_client/vector_store/file_management.py
+`uv run openai_sdk/genai_client/vector_store/file_management.py`
 
 Safe experiments:
 1. Start with a small text or CSV file for easier inspection.
@@ -36,7 +36,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
-UPLOAD_FILE_PATH = ""  # Set local file path here, or create env var VECTOR_SAMPLE_FILE_PATH.
+UPLOAD_FILE_PATH = "./openai_sdk/output/fema_outage_flyer.pdf"  # Set local file path here, or create env var VECTOR_SAMPLE_FILE_PATH.
 TARGET_FILE_ID = ""  # Set an existing file id here, or create env var VECTOR_SAMPLE_FILE_ID.
 DELETE_FILE_AT_END = False  # Set True to delete the file after running.
 
