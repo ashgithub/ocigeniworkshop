@@ -39,7 +39,7 @@ To run the A2A examples, start the registry and remote agents before running the
    - `uv run langChain/agents/a2a/weather_agent/weather_server.py`
    - `uv run langChain/agents/a2a/city_agent/city_server.py`
    - `uv run langChain/agents/a2a/clothes_agent/clothes_server.py`
-2. Confirm that the running ports match the `remote_addresses` configuration in `langChain/agents/a2a/remote_agent_connections.py`.
+2. Confirm that the running ports match the `DEFAULT_REMOTE_AGENT_URLS` configuration in `langChain/agents/a2a/remote_agent_connections.py`.
 3. Run the main orchestrator:
    - `uv run langChain/agents/a2a/langgraph_a2a_agent.py`
 

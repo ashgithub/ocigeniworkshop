@@ -2,9 +2,18 @@
 What this file does:
 Provides a simple test client for the weather A2A agent.
 
+In simple terms:
+- this file checks whether the weather server is reachable
+- this file downloads the public agent card exposed by the server
+- this file sends one sample request in non-streaming mode
+- this file sends the same request in streaming mode when supported
+
 Documentation to reference:
 - A2A protocol: https://a2a-protocol.org/latest/topics/key-concepts/, https://a2a-protocol.org/latest/tutorials/python/1-introduction/#tutorial-sections
-- A2A samples: https://github.com/a2aproject/a2a-samples/tree/main/samples/python/agents/travel_planner_agent
+- OCI Gen AI: https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- OCI OpenAI compatible SDK: https://github.com/oracle-samples/oci-openai
+- Connected agent adapted from: https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/helloworld/__main__.py
+- Test client adapted from: https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/helloworld/test_client.py
 
 Relevant Slack channels:
 - #generative-ai-users: Questions about OCI Generative AI
@@ -18,84 +27,130 @@ Environment setup:
 How to run the file:
 uv run langChain/agents/a2a/weather_agent/test_client.py
 
-This test client was adapted from:
-https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/helloworld/test_client.py
+Important sections:
+- Step 1: Define the test server URL and sample request
+- Step 2: Fetch and display the public agent card
+- Step 3: Run a non-streaming test message
+- Step 4: Run a streaming test message
 """
+
+import asyncio
+
 import httpx
 
 from a2a.client import A2ACardResolver, ClientConfig, create_client
-from a2a.helpers import display_agent_card, new_text_message
-from a2a.types.a2a_pb2 import (
-    GetExtendedAgentCardRequest,
-    Role,
-    SendMessageRequest,
+from a2a.helpers import (
+    display_agent_card,
+    get_stream_response_text,
+    new_text_message,
 )
+from a2a.types.a2a_pb2 import Role, SendMessageRequest
 from a2a.utils.constants import AGENT_CARD_WELL_KNOWN_PATH
 
 
-async def main() -> None:
-    # --8<-- [start:A2ACardResolver]
-    base_url = 'http://127.0.0.1:9999'
+# ============================================================================
+# STEP 1: TEST SETTINGS
+# ============================================================================
+# Keeping the URL and the sample request together makes it easy for beginners
+# to point this client at a different agent server later.
 
-    async with httpx.AsyncClient() as httpx_client:
-        # Initialize A2ACardResolver
-        resolver = A2ACardResolver(
-            httpx_client=httpx_client,
-            base_url=base_url,
-            # agent_card_path uses default
+AGENT_NAME = "weather_agent"
+AGENT_BASE_URL = "http://127.0.0.1:9999"
+TEST_QUERY = "What is the weather for zipcode 60601 on 2026-05-10?"
+
+
+# ============================================================================
+# STEP 2: AGENT CARD DISCOVERY
+# ============================================================================
+# Before we can call the agent, we fetch its public card from the standard
+# A2A well-known route. This confirms the server is online and discoverable.
+
+async def fetch_public_agent_card(httpx_client: httpx.AsyncClient):
+    """Resolve and display the public card exposed by the weather server."""
+    resolver = A2ACardResolver(
+        httpx_client=httpx_client,
+        base_url=AGENT_BASE_URL,
+    )
+
+    print(
+        f"Fetching {AGENT_NAME} card from "
+        f"{AGENT_BASE_URL}{AGENT_CARD_WELL_KNOWN_PATH}"
+    )
+    public_card = await resolver.get_agent_card()
+    display_agent_card(public_card)
+    return public_card
+
+
+# ============================================================================
+# STEP 3: NON-STREAMING TEST
+# ============================================================================
+# This is the simplest request style: send one message and wait for the final
+# response payload.
+
+async def run_non_streaming_test(public_card) -> None:
+    """Send one non-streaming request and print the final text response."""
+    client = await create_client(
+        agent=public_card,
+        client_config=ClientConfig(streaming=False),
+    )
+    try:
+        request = SendMessageRequest(
+            message=new_text_message(TEST_QUERY, role=Role.ROLE_USER)
         )
 
-        # --8<-- [end:A2ACardResolver]
-
-        print(
-            f'Attempting to fetch public agent card from: {base_url}{AGENT_CARD_WELL_KNOWN_PATH}'
-        )
-        public_card = await resolver.get_agent_card()
-        print('\nSuccessfully fetched public agent card:')
-        display_agent_card(public_card)
-
-        print('\n--- Non-Streaming Call ---')
-        # --8<-- [start:message_send]
-        config = ClientConfig(streaming=False)
-        client = await create_client(agent=public_card, client_config=config)
-        print('\nNon-streaming Client initialized.')
-
-        message = new_text_message('Say hello.', role=Role.ROLE_USER)
-        request = SendMessageRequest(message=message)
-
-        print('Response:')
-        async for chunk in client.send_message(request):
-            print(chunk)
-        # --8<-- [end:message_send]
-
-        print('\n--- Streaming Call ---')
-        # --8<-- [start:message_stream]
-        streaming_config = ClientConfig(streaming=True)
-        streaming_client = await create_client(
-            agent=public_card, client_config=streaming_config
-        )
-        print('\nStreaming Client initialized.')
-
-        streaming_response = streaming_client.send_message(request)
-
-        async for chunk in streaming_response:
-            print('Response chunk:')
-            print(chunk)
-        # --8<-- [end:message_stream]
-
-        await streaming_client.close()
-
-        print('\n--- Extended Card Call ---')
-        extended_card = await client.get_extended_agent_card(
-            GetExtendedAgentCardRequest()
-        )
-        print('\nSuccessfully fetched authenticated extended agent card:')
-        display_agent_card(extended_card)
-
+        print(f"Testing {AGENT_NAME} in non-streaming mode with: {TEST_QUERY}")
+        async for response in client.send_message(request):
+            response_text = get_stream_response_text(response).strip()
+            if response_text:
+                print(f"Non-streaming response: {response_text}")
+    finally:
         await client.close()
 
 
-if __name__ == '__main__':
-    import asyncio
+# ============================================================================
+# STEP 4: STREAMING TEST
+# ============================================================================
+# The refactored servers advertise streaming support, so we also verify the
+# event stream path used by the host agent.
 
+async def run_streaming_test(public_card) -> None:
+    """Send one streaming request and print each text update received."""
+    if not public_card.capabilities.streaming:
+        print(f"{AGENT_NAME} does not advertise streaming support.")
+        return
+
+    client = await create_client(
+        agent=public_card,
+        client_config=ClientConfig(streaming=True),
+    )
+    try:
+        request = SendMessageRequest(
+            message=new_text_message(TEST_QUERY, role=Role.ROLE_USER)
+        )
+
+        print(f"Testing {AGENT_NAME} in streaming mode with: {TEST_QUERY}")
+        async for response in client.send_message(request):
+            response_text = get_stream_response_text(response).strip()
+            if response_text:
+                print(f"Streaming response: {response_text}")
+    finally:
+        await client.close()
+
+
+async def main() -> None:
+    """Run discovery plus both request styles against the weather server."""
+    timeout_config = httpx.Timeout(
+        timeout=60.0,
+        connect=5.0,
+        read=50.0,
+        write=5.0,
+    )
+
+    async with httpx.AsyncClient(timeout=timeout_config) as httpx_client:
+        public_card = await fetch_public_agent_card(httpx_client)
+        await run_non_streaming_test(public_card)
+        await run_streaming_test(public_card)
+
+
+if __name__ == '__main__':
     asyncio.run(main())
