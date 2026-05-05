@@ -16,7 +16,7 @@ Environment setup:
 - Set `TARGET_FILE_ID` or env var `VECTOR_SAMPLE_FILE_ID` when skipping upload.
 
 How to run from repo root:
-`uv run openai_sdk/genai_client/vector_store/file_management.py`
+uv run openai_sdk/genai_client/vector_store/file_management.py
 
 Safe experiments:
 1. Start with a small text or CSV file for easier inspection.

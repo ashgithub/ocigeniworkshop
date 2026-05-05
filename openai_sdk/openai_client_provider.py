@@ -77,7 +77,7 @@ class OpenAIClientProvider:
 
     # Helper for adding project headers to OpenAI-compatible API calls.
     def _default_headers(self) -> dict[str, str]:
-        return {"OpenAI-Project": self.oci_openai_project}
+        return {"OpenAI-Project": self.oci_openai_project, "opc-compartment-id": self.oci_compartment_id}
 
     # Client for responses.create use cases
     def build_oci_openai_client(self) -> OpenAI:

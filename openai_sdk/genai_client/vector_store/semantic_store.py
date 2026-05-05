@@ -31,7 +31,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
-VECTOR_STORE_ID = ""  # Set here, or create env var VECTOR_STORE_ID.
+VECTOR_STORE_ID = "vs_ord_tgcknsijp4c5zcc64s37ftoddmegpnquxepj7zkmvyhfdpfi"  # Set here, or create env var VECTOR_STORE_ID.
 SEARCH_QUERY = "Summarize the business meaning of these documents."
 MAX_RESULTS = 8
 

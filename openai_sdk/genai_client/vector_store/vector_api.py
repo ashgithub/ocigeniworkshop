@@ -31,6 +31,8 @@ Important sections:
 3. Step 6-7: Optional file attach and cleanup.
 """
 
+# this kind of files requires execution time to wait since the job of creating vector store and file processing is long
+
 from openai import OpenAI
 import os
 import sys
@@ -41,34 +43,25 @@ from openai_client_provider import OpenAIClientProvider
 VECTOR_STORE_NAME = "workshop-vector-store"
 VECTOR_STORE_DESCRIPTION = "Sample vector store created by vector_api.py"
 SEARCH_QUERY = "Give me the key points from these documents."
-ATTACH_FILE_ID = ""  # Set file id here, or create env var VECTOR_SAMPLE_FILE_ID.
-DELETE_VECTOR_STORE_AT_END = False  # Set True if you want cleanup in same run.
+ATTACH_FILE_ID = "file-ord-459fa3aa-6e29-46ab-a1ce-e0e8a7683873"  # Set file id here, or create env var VECTOR_SAMPLE_FILE_ID.
+DELETE_VECTOR_STORE_AT_END = True  # Set True if you want cleanup in same run.
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
     client: OpenAI = OpenAIClientProvider().oci_openai_vector_client
-    normal_client: OpenAI = OpenAIClientProvider().oci_openai_vector_client
-
-    vector_store = normal_client.vector_stores.create(
-        name=VECTOR_STORE_NAME,
-        description=VECTOR_STORE_DESCRIPTION,
-        expires_after={"anchor": "last_active_at", "days": 30},
-        metadata={"topic": "oci", "sample": "vector_api"},
-    )
-    print("Vector store created with oci client. Result:")
-    print(vector_store)
-    vector_store_id = vector_store.id
+    search_client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 2: Create vector store.
-    vector_store = client.vector_stores.create(
-        name=VECTOR_STORE_NAME,
-        description=VECTOR_STORE_DESCRIPTION,
-        expires_after={"anchor": "last_active_at", "days": 30},
-        metadata={"topic": "oci", "sample": "vector_api"},
-    )
-    print("Vector store created. Result:")
-    print(vector_store)
-    vector_store_id = vector_store.id
+    # vector_store = client.vector_stores.create(
+    #     name=VECTOR_STORE_NAME,
+    #     description=VECTOR_STORE_DESCRIPTION,
+    #     expires_after={"anchor": "last_active_at", "days": 30},
+    #     metadata={"topic": "oci", "sample": "vector_api"},
+    # )
+    # print("Vector store created. Result:")
+    # print(vector_store)
+    # vector_store_id = vector_store.id
+    vector_store_id = "vs_ord_tgcknsijp4c5zcc64s37ftoddmegpnquxepj7zkmvyhfdpfi"
 
     # Step 3: Retrieve vector store.
     retrieve_result = client.vector_stores.retrieve(vector_store_id=vector_store_id)
@@ -85,7 +78,7 @@ def main():
     print(update_result)
 
     # Step 5: Search vector store.
-    search_results = client.vector_stores.search(
+    search_results = search_client.vector_stores.search(
         vector_store_id=vector_store_id,
         query=SEARCH_QUERY,
         max_num_results=10,
@@ -96,26 +89,29 @@ def main():
     # Step 6: Optional vector-store file operations.
     attach_file_id = ATTACH_FILE_ID or os.getenv("VECTOR_SAMPLE_FILE_ID", "").strip()
     if attach_file_id:
-        create_file_result = client.vector_stores.files.create(
-            vector_store_id=vector_store_id,
-            file_id=attach_file_id,
-            attributes={"category": "sample"},
-        )
-        print("created file:")
-        print(create_file_result)
+        try:
+            create_file_result = search_client.vector_stores.files.create(
+                vector_store_id=vector_store_id,
+                file_id=attach_file_id,
+                attributes={"category": "sample"},
+            )
+            print("created file:")
+            print(create_file_result)
+        except Exception:
+            print("File already on store")
 
-        file_list = client.vector_stores.files.list(vector_store_id=vector_store_id, limit=20)
+        file_list = search_client.vector_stores.files.list(vector_store_id=vector_store_id, limit=20)
         print("List of files on vector store:")
         print(file_list)
 
-        retrieve_file_result = client.vector_stores.files.retrieve(
+        retrieve_file_result = search_client.vector_stores.files.retrieve(
             vector_store_id=vector_store_id,
             file_id=attach_file_id,
         )
         print(f"Retrieved file with id: {attach_file_id}")
         print(retrieve_file_result)
 
-        content_result = client.vector_stores.files.content(
+        content_result = search_client.vector_stores.files.content(
             vector_store_id=vector_store_id,
             file_id=attach_file_id,
         )

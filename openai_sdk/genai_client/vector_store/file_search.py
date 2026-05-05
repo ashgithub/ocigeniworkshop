@@ -34,7 +34,7 @@ from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
 DEFAULT_PROMPT = "What does this knowledge base say about OCI GPU shapes?"
-VECTOR_STORE_ID = ""  # Set your vector store id here, or use env var VECTOR_STORE_ID.
+VECTOR_STORE_ID = "vs_ord_tgcknsijp4c5zcc64s37ftoddmegpnquxepj7zkmvyhfdpfi"  # Set your vector store id here, or use env var VECTOR_STORE_ID.
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.

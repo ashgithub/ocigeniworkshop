@@ -98,11 +98,18 @@ class CityAgent:
         # Step 2.2: Create LLM client
         llm_client = OCIOpenAIHelper.get_langchain_openai_client(
             model_name=LLM_MODEL,
-            config=scfg
+            config=scfg,
+            use_responses_api=False,
         )
 
         # Step 2.3: Create structured output model
-        self.structured_model = llm_client.with_structured_output(CityRecommendation)
+        # We explicitly use function calling here instead of the newer
+        # Responses API path because it produces cleaner Pydantic handling for
+        # this beginner demo and avoids noisy serializer warnings.
+        self.structured_model = llm_client.with_structured_output(
+            CityRecommendation,
+            method="function_calling",
+        )
 
     def load_config(self, config_path: str) -> EnvYAML | None:
         """Load configuration from a YAML file."""
