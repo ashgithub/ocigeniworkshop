@@ -79,7 +79,7 @@ def main() -> None:
     # Step 3: First call lets the model request tool usage.
     first_response = client.responses.create(
         model=MODEL_ID,
-        tools=FUNCTION_TOOLS,
+        tools=FUNCTION_TOOLS, #type:ignore
         input=USER_PROMPT,
     )
 
@@ -103,7 +103,7 @@ def main() -> None:
     final_response = client.responses.create(
         model=MODEL_ID,
         instructions=FINAL_INSTRUCTIONS,
-        tools=FUNCTION_TOOLS,
+        tools=FUNCTION_TOOLS, #type:ignore
         input=function_outputs,
         previous_response_id=first_response.id,
     )

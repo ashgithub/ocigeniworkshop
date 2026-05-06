@@ -62,7 +62,7 @@ def main() -> None:
     # Step 2: Parse output directly into CalendarEvent.
     response = client.responses.parse(
         model=MODEL_ID,
-        input=INPUT_MESSAGES,
+        input=INPUT_MESSAGES, #type:ignore
         store=False,
         text_format=CalendarEvent,
     )

@@ -73,7 +73,7 @@ def main() -> None:
     # Step 4: Persist generated image to disk.
     print(f"Saving generated image to '{OUTPUT_IMAGE_PATH}'...")
     OUTPUT_IMAGE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_IMAGE_PATH.write_bytes(base64.b64decode(generated_images[0]))
+    OUTPUT_IMAGE_PATH.write_bytes(base64.b64decode(generated_images[0])) #type:ignore
     print(f"Saved generated image to {OUTPUT_IMAGE_PATH}")
 
 if __name__ == "__main__":

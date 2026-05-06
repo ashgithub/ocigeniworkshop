@@ -34,6 +34,7 @@ class OpenAIClientProvider:
         self.oci_openai_project = self.scfg['oci']['project']
         self.oci_compartment_id = self.scfg['oci']['compartment']
         self.oci_openai_profile = self.scfg['oci']['profile']
+        self.oci_openai_vector_store_id = self.scfg['oci']['vector_store_id']
         
         #verify that the env is set correctly
         self._verify_required_config()

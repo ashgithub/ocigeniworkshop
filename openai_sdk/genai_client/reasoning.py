@@ -56,7 +56,7 @@ def main() -> None:
     response = client.responses.create(
         model=MODEL_ID,
         input=USER_PROMPT,
-        reasoning=REASONING_SETTINGS,
+        reasoning=REASONING_SETTINGS, #type:ignore
         store=False,
     )
 

@@ -31,7 +31,6 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
-VECTOR_STORE_ID = "vs_ord_tgcknsijp4c5zcc64s37ftoddmegpnquxepj7zkmvyhfdpfi"  # Set here, or create env var VECTOR_STORE_ID.
 SEARCH_QUERY = "Summarize the business meaning of these documents."
 MAX_RESULTS = 8
 
@@ -40,7 +39,7 @@ def main():
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 2: Resolve required vector store id.
-    vector_store_id = VECTOR_STORE_ID or os.getenv("VECTOR_STORE_ID", "").strip()
+    vector_store_id = OpenAIClientProvider().oci_openai_vector_store_id
     if not vector_store_id:
         raise ValueError(
             "Missing vector store id. Set VECTOR_STORE_ID constant in this file "
@@ -54,8 +53,12 @@ def main():
         max_num_results=MAX_RESULTS,
         ranking_options={"ranker": "auto", "score_threshold": 0.0},
     )
-    print("Semantic search results:")
-    print(result)
+    print("------------------------------- Semantic search results -------------------------------\n")
+    for match in result.data:
+        print(f"Data found on file {match.filename}")
+        print(f"File attributes: {match.attributes}")
+        print(f"Sample content snippet: {match.content[0].text[:100]}")
+        print(f"Score on match: {match.score}\n")
 
 if __name__ == "__main__":
     main()

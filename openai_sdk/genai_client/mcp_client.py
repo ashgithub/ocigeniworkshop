@@ -60,7 +60,7 @@ def main() -> None:
     # Step 2: Run a tool-enabled prompt against the MCP server.
     response = client.responses.create(
         model=MODEL_ID,
-        tools=[MCP_TOOL],
+        tools=[MCP_TOOL], #type:ignore
         input=USER_PROMPT,
     )
 

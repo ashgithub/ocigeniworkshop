@@ -90,14 +90,17 @@ def main() -> None:
     # Step 3: Send PDF as inline file_data + text input.
     # OCI OpenAI-compatible deployments may not expose /files upload endpoint.
     print(f"Sending inline file data for '{FILE_PATH}' with file + text request...")
-    pdf_data_uri = encode_file_data_uri(FILE_PATH, "application/pdf")
+    file = client.files.create(
+        file=open(FILE_PATH, "rb"),
+        purpose="user_data"
+    )
     file_response = client.responses.create(
         model=MODEL_ID,
         input=[
             {
                 "role": "user",
                 "content": [
-                    {"type": "input_file", "filename": FILE_PATH.name, "file_data": pdf_data_uri},
+                    {"type": "input_file", "filename": FILE_PATH.name, "file_id": file.id},
                     {"type": "input_text", "text": FILE_PROMPT},
                 ],
             }
@@ -105,6 +108,10 @@ def main() -> None:
     )
     print("File + text response:")
     print(file_response.output_text)
+
+    # Safe clean for avoiding storage of files, comment for file persistance
+    delete_result = client.files.delete(file_id=file.id)
+    print(f"Delete job result:\n{delete_result}")
 
 if __name__ == "__main__":
     main()

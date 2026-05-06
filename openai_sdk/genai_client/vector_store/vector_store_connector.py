@@ -38,7 +38,6 @@ import oci
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
-VECTOR_STORE_ID = ""  # Set here, or create env var VECTOR_STORE_ID.
 VECTOR_OS_PREFIXES = []  # Optional object storage prefixes.
 CONNECTOR_DISPLAY_NAME = "workshop-vector-connector"
 CONNECTOR_DESCRIPTION = "Connector sample created by vector_store_connector.py"
@@ -50,7 +49,7 @@ def main():
     client, compartment_id = provider.build_oci_generative_ai_control_plane_client()
 
     # Step 2: Resolve required values.
-    vector_store_id = VECTOR_STORE_ID or os.getenv("VECTOR_STORE_ID", "").strip()
+    vector_store_id = OpenAIClientProvider().oci_openai_vector_store_id
     if not vector_store_id:
         raise ValueError(
             "Missing vector store id. Set VECTOR_STORE_ID constant in this file "

@@ -33,19 +33,18 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
-DEFAULT_PROMPT = "What does this knowledge base say about OCI GPU shapes?"
-VECTOR_STORE_ID = "vs_ord_tgcknsijp4c5zcc64s37ftoddmegpnquxepj7zkmvyhfdpfi"  # Set your vector store id here, or use env var VECTOR_STORE_ID.
+DEFAULT_PROMPT = "What does this knowledge base say about outages?"
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
+    vector_store_id = OpenAIClientProvider().oci_openai_vector_store_id
 
     # Step 2: Resolve required runtime values.
-    vector_store_id = VECTOR_STORE_ID or os.getenv("VECTOR_STORE_ID", "").strip()
     if not vector_store_id:
         raise ValueError(
-            "Missing vector store id. Set VECTOR_STORE_ID constant in this file "
-            "or create env var VECTOR_STORE_ID."
+            "Missing vector store id. Set VECTOR_STORE_ID env variable"
+            "or update the value at sandbox.yaml file"
         )
 
     # Step 3: Call Responses API with file_search.

@@ -36,17 +36,16 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
-UPLOAD_FILE_PATH = "./openai_sdk/output/fema_outage_flyer.pdf"  # Set local file path here, or create env var VECTOR_SAMPLE_FILE_PATH.
-TARGET_FILE_ID = ""  # Set an existing file id here, or create env var VECTOR_SAMPLE_FILE_ID.
-DELETE_FILE_AT_END = False  # Set True to delete the file after running.
+UPLOAD_FILE_PATH = "./openai_sdk/output/fema_outage_flyer.pdf"  # Set local file path here
+DELETE_FILE_AT_END = True  # Set False for persistent session files
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 2: Resolve optional file input values.
-    file_path = UPLOAD_FILE_PATH or os.getenv("VECTOR_SAMPLE_FILE_PATH", "").strip()
-    file_id = TARGET_FILE_ID or os.getenv("VECTOR_SAMPLE_FILE_ID", "").strip()
+    file_path = UPLOAD_FILE_PATH
+    file_id = None
 
     # Step 3: Upload (optional).
     if file_path:
@@ -61,21 +60,45 @@ def main():
 
     # Step 4: List files.
     files_list = client.files.list(order="asc", limit=20)
-    print(f"Files listed:\n{files_list}")
+    print("Files listed:\n")
+    for file in files_list.data:
+        print(f"ID: {file.id}\nName: {file.filename}\nStatus: {file.status}\nPurpose: {file.purpose}\n")
+
+    if not file_id:
+        try:
+            file_id = files_list.data[0].id
+        except Exception:
+            print("No files on client list, Upload a file on the previous step")
+            return
 
     # Step 5: Retrieve info/content for one file.
-    if not file_id:
-        print(
-            "Skipping retrieve/content/delete. Set TARGET_FILE_ID constant, "
-            "or upload a file in this run."
-        )
-        return
-
     file_info = client.files.retrieve(file_id=file_id)
     print(f"File metadata found:\n{file_info}")
 
-    content_page = client.files.content(file_id=file_id)
-    print(f"Content page:\n{content_page}")
+    # TODO: fix the ath error: openai.BadRequestError: Error code: 400 - {'error': {'code': 'bad_request', 'message': 'Not allowed to download files of purpose: user_data', 'param': None, 'type': 'invalid_request_error', 'valid': True}}
+    # content_page = client.files.content(file_id=file_id)
+    # print(f"Content page:\n{content_page}")
+
+    print("Calling model to read the latest file uploaded\n")
+    response = client.responses.create(
+        model="openai.gpt-5.2",
+        input=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "input_file",
+                        "file_id": file.id,
+                    },
+                    {
+                        "type": "input_text",
+                        "text": "What's discussed in the file?",
+                    },
+                ]
+            }
+        ]
+    )
+    print(f"Model response:\n{response.output_text}")
 
     # Step 6: Delete (optional).
     if DELETE_FILE_AT_END:
