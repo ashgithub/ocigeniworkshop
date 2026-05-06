@@ -5,6 +5,7 @@ agents.
 
 In simple terms:
 - this file knows where the specialist agents live
+- this file can also ask the central registry which agents are available
 - this file downloads each agent card from its published A2A route
 - this file builds reusable A2A clients
 - this file sends messages to remote agents and collects their replies
@@ -29,10 +30,10 @@ How to run the file:
 This file is not run directly. It is imported by `langgraph_a2a_agent.py`.
 
 Important sections:
-- Step 1: Shared timeout and URL configuration
+- Step 1: Shared timeout, registry, and URL configuration
 - Step 2: Remote task session tracking
 - Step 3: Initialize HTTP and A2A client helpers
-- Step 4: Discover remote agents from published agent cards
+- Step 4: Discover remote agents from the registry and published agent cards
 - Step 5: Send a message to a selected remote agent
 - Step 6: Read streamed A2A events and extract text
 """
@@ -57,6 +58,7 @@ from a2a.types.a2a_pb2 import (
     TaskStatusUpdateEvent,
 )
 from a2a.utils.constants import TransportProtocol
+from google.protobuf.json_format import ParseDict
 
 
 # ============================================================================
@@ -76,6 +78,7 @@ DEFAULT_REMOTE_AGENT_URLS = (
     "http://localhost:9998",
     "http://localhost:9999",
 )
+REGISTRY_URL = "http://localhost:9990"
 TERMINAL_TASK_STATES = {
     TaskState.TASK_STATE_COMPLETED,
     TaskState.TASK_STATE_FAILED,
@@ -111,10 +114,12 @@ class RemoteAgentConnections:
     def __init__(
         self,
         remote_agent_urls: Iterable[str] | None = None,
+        registry_url: str | None = REGISTRY_URL,
     ) -> None:
         self.remote_agent_urls = list(
             remote_agent_urls or DEFAULT_REMOTE_AGENT_URLS
         )
+        self.registry_url = registry_url
         self._httpx_client = httpx.AsyncClient(timeout=GLOBAL_TIMEOUT)
         self._client_factory = ClientFactory(
             ClientConfig(
@@ -132,18 +137,22 @@ class RemoteAgentConnections:
     # =========================================================================
     # STEP 4: AGENT DISCOVERY
     # =========================================================================
-    # Discovery means: visit each known agent URL, download its agent card, and
-    # store the card so the host agent can later describe and call that agent.
+    # Discovery means: first ask the registry which agent cards are currently
+    # registered, then merge that list with any direct URL fallbacks.
     async def discover_agents(self, force_refresh: bool = False) -> list[AgentCard]:
-        """Discover remote agents from direct URLs."""
+        """Discover remote agents from the registry and direct URLs."""
         if self._agent_cards and not force_refresh:
             return list(self._agent_cards.values())
 
         discovered_cards: dict[str, AgentCard] = {}
 
+        for card in await self._discover_from_registry():
+            discovered_cards[card.name] = card
+
         for card in await self._discover_from_urls():
             discovered_cards[card.name] = card
 
+        self._drop_stale_clients(discovered_cards)
         self._agent_cards = discovered_cards
         print(f"Discovered {len(self._agent_cards)} remote A2A agent(s).")
         return list(self._agent_cards.values())
@@ -173,6 +182,9 @@ class RemoteAgentConnections:
     ) -> str:
         """Send a text request to a remote agent and return consolidated text."""
         await self.discover_agents()
+
+        if agent_name not in self._agent_cards:
+            await self.discover_agents(force_refresh=True)
 
         if agent_name not in self._agent_cards:
             available = ", ".join(sorted(self._agent_cards))
@@ -216,6 +228,28 @@ class RemoteAgentConnections:
         self._client_cache.clear()
         await self._httpx_client.aclose()
 
+    async def _discover_from_registry(self) -> list[AgentCard]:
+        """Fetch agent cards from the central registry when available."""
+        if not self.registry_url:
+            return []
+
+        try:
+            response = await self._httpx_client.get(
+                f"{self.registry_url}/registry/agents"
+            )
+            response.raise_for_status()
+            agent_dicts = response.json()
+        except Exception:
+            return []
+
+        cards: list[AgentCard] = []
+        for agent_dict in agent_dicts:
+            try:
+                cards.append(ParseDict(agent_dict, AgentCard()))
+            except Exception:
+                continue
+        return cards
+
     async def _discover_from_urls(self) -> list[AgentCard]:
         """Resolve agent cards directly from known agent base URLs."""
         cards: list[AgentCard] = []
@@ -227,6 +261,30 @@ class RemoteAgentConnections:
                 continue
             cards.append(card)
         return cards
+
+    def _drop_stale_clients(self, discovered_cards: dict[str, AgentCard]) -> None:
+        """Remove cached clients when an agent disappears or changes endpoint."""
+        for agent_name in list(self._client_cache):
+            previous_card = self._agent_cards.get(agent_name)
+            current_card = discovered_cards.get(agent_name)
+
+            if current_card is None:
+                self._client_cache.pop(agent_name, None)
+                continue
+
+            if previous_card is None:
+                continue
+
+            previous_url = self._primary_interface_url(previous_card)
+            current_url = self._primary_interface_url(current_card)
+            if previous_url != current_url:
+                self._client_cache.pop(agent_name, None)
+
+    def _primary_interface_url(self, agent_card: AgentCard) -> str:
+        """Return the first published interface URL for a card."""
+        if not agent_card.supported_interfaces:
+            return ""
+        return agent_card.supported_interfaces[0].url
 
     # =========================================================================
     # STEP 6: STREAM PROCESSING

@@ -6,6 +6,7 @@ service endpoint.
 In simple terms:
 - this file starts the city specialist as a web server
 - this file exposes the public agent card used for direct discovery
+- this file registers that card in the central workshop registry
 - this file connects incoming A2A requests to the city executor
 
 Documentation to reference:
@@ -29,11 +30,15 @@ uv run langChain/agents/a2a/city_agent/city_server.py
 Important sections:
 - Step 1: Define the agent skill metadata
 - Step 2: Build the public agent card
-- Step 3: Configure the request handler and server
-- Step 4: Start the server
+- Step 3: Register the card in the central registry
+- Step 4: Configure the request handler and server
+- Step 5: Start the server
 """
 
+import asyncio
 import uvicorn
+import httpx
+from google.protobuf.json_format import MessageToDict
 
 from starlette.applications import Starlette
 from a2a.server.request_handlers import DefaultRequestHandler
@@ -51,6 +56,7 @@ from a2a.types import (
 from agent_executor import CityAgentExecutor
 
 AGENT_URL = "http://localhost:9997/"
+REGISTRY_URL = "http://localhost:9990"
 
 
 # ============================================================================
@@ -58,6 +64,19 @@ AGENT_URL = "http://localhost:9997/"
 # ============================================================================
 # This module is usually run directly. It defines the public metadata for the
 # city agent, wires the A2A routes, and starts the Starlette application.
+
+async def register_with_registry(public_agent_card: AgentCard) -> None:
+    """Register the public card so the host can discover this agent dynamically."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                f"{REGISTRY_URL}/registry/register",
+                json=MessageToDict(public_agent_card),
+            )
+            response.raise_for_status()
+        print("City agent registered with the central registry.")
+    except Exception as exc:
+        print(f"City agent could not register with the registry: {exc}")
 
 if __name__ == '__main__':
     # =========================================================================
@@ -91,7 +110,12 @@ if __name__ == '__main__':
     )
 
     # =========================================================================
-    # STEP 4: REQUEST HANDLER AND ROUTES
+    # STEP 4: REGISTRY REGISTRATION
+    # =========================================================================
+    asyncio.run(register_with_registry(public_agent_card))
+
+    # =========================================================================
+    # STEP 5: REQUEST HANDLER AND ROUTES
     # =========================================================================
     request_handler = DefaultRequestHandler(
         agent_executor=CityAgentExecutor(),
@@ -105,7 +129,7 @@ if __name__ == '__main__':
     app = Starlette(routes=routes)
 
     # =========================================================================
-    # STEP 5: START SERVER
+    # STEP 6: START SERVER
     # =========================================================================
     print(f"City agent server is starting at {AGENT_URL}")
     uvicorn.run(app, host='0.0.0.0', port=9997)

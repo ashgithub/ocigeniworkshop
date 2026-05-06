@@ -64,7 +64,7 @@ where ALL {request.principal.type='generativeaiapikey', request.principal.id='<a
 # 4. VECTOR STORE (RAG / FILE SEARCH)
 ############################################
 
-allow group <group> to manage generative-ai-vectorstore in compartment <compartment>
+allow group <group> to manage generative-ai-vector-store in compartment <compartment>
 # Create/delete vector stores
 
 allow group <group> to manage generative-ai-vectorstore-file in compartment <compartment>

@@ -68,14 +68,17 @@ from oci_openai_helper import OCIOpenAIHelper
 # 4. the model continues until it can answer
 
 def build_langgraph_agent_graph(
+    host_agent: HostAgent,
     model_with_tools,
-    system_prompt: str,
     tools_by_name: dict[str, Any],
 ):
     """Build a small LangGraph loop that supports async tool execution."""
 
-    def llm_call(state: MessagesState):
-        system_instructions = [SystemMessage(system_prompt)]
+    async def llm_call(state: MessagesState):
+        # Refresh the discovered cards before each reasoning step so the host
+        # can notice newly registered agents without needing a restart.
+        await host_agent.initialize(force_refresh=True)
+        system_instructions = [SystemMessage(host_agent.system_prompt())]
         response = model_with_tools.invoke(system_instructions + state["messages"])
         return {"messages": [response]}
 
@@ -134,8 +137,8 @@ class MainAgent:
         self.tools_by_name = {tool.name: tool for tool in self.tools}
         self.model_with_tools = self.openai_llm_client.bind_tools(self.tools)
         self.agent = build_langgraph_agent_graph(
+            self.host_agent,
             self.model_with_tools,
-            self.host_agent.system_prompt(),
             self.tools_by_name,
         )
 

@@ -93,7 +93,7 @@ client = OpenAI(
 ## 4. Vector Store (RAG / File Search)
 
 ```bash
-allow group <group> to manage generative-ai-vectorstore in compartment <compartment>
+allow group <group> to manage generative-ai-vector-store in compartment <compartment>
 allow group <group> to manage generative-ai-vectorstore-file in compartment <compartment>
 allow group <group> to manage generative-ai-file in compartment <compartment>
 ```
@@ -188,7 +188,7 @@ allow group <group> to manage generative-ai-container in compartment <compartmen
 
 No extra policy required beyond:
 
-* `generative-ai-vectorstore-file`
+* `generative-ai-vector-store-file`
 * `generative-ai-family (use)`
 
 > Uses vector store internally
@@ -261,7 +261,7 @@ allow group <group> to manage generative-ai-hosted-deployment in compartment <co
 
 | Error                        | Cause                                       |
 | ---------------------------- | ------------------------------------------- |
-| couldn't create vector store | Missing `generative-ai-vectorstore`         |
+| couldn't create vector store | Missing `generative-ai-vector-store`        |
 | permission denied inference  | Missing `generative-ai-family (use)`        |
 | file upload fails            | Missing `generative-ai-file`                |
 | NL2SQL fails                 | Missing DB / DB Tools / secrets             |

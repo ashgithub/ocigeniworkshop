@@ -33,15 +33,35 @@ See `langfuse_agent.py` and `langfuse_graph.py` for examples of trace metadata a
 
 ## A2A Setup
 
-To run the A2A examples, start the registry and remote agents before running the main orchestrator.
+The `a2a/` folder now demonstrates a beginner-friendly multi-agent system with:
 
-1. Start the sample remote agents:
+- a small central registry for dynamic discovery
+- three specialist agents that register themselves at startup
+- a LangGraph host agent that discovers specialists and delegates work to them
+
+To run the A2A examples, start the registry first, then the specialist agents, and finally the main orchestrator.
+
+1. Start the registry:
+   - `uv run langChain/agents/a2a/agent_registry.py`
+2. Start the sample remote agents:
    - `uv run langChain/agents/a2a/weather_agent/weather_server.py`
    - `uv run langChain/agents/a2a/city_agent/city_server.py`
    - `uv run langChain/agents/a2a/clothes_agent/clothes_server.py`
-2. Confirm that the running ports match the `DEFAULT_REMOTE_AGENT_URLS` configuration in `langChain/agents/a2a/remote_agent_connections.py`.
-3. Run the main orchestrator:
+3. Optional registry check:
+   - `http localhost:9990/registry/agents`
+4. Confirm that the running ports match the `DEFAULT_REMOTE_AGENT_URLS` configuration in `langChain/agents/a2a/remote_agent_connections.py`.
+5. Run the main orchestrator:
    - `uv run langChain/agents/a2a/langgraph_a2a_agent.py`
+
+What happens during this flow:
+
+1. Each specialist server publishes its public A2A agent card.
+2. Each specialist server sends that card to `agent_registry.py`.
+3. The LangGraph host asks the registry which agents are available.
+4. The host rebuilds its prompt from the discovered agent cards.
+5. The host calls the selected specialist through the A2A SDK.
+
+If you want the deeper A2A walkthrough, see `langChain/agents/a2a/readme_a2a.md`.
 
 ## Suggested Study Order
 
@@ -69,8 +89,9 @@ The examples are designed to build on one another.
    - Includes observation decorators and manual trace updates
 
 6. **`a2a/`**
-   - Contains a multi-agent example with specialized services and a LangGraph-based orchestrator
-   - Start by reviewing the individual agent folders, then run the orchestrator
+   - Contains a multi-agent example with a registry, specialist services, and a LangGraph-based orchestrator
+   - Shows both public agent-card publishing and registry-based dynamic discovery
+   - Start with `a2a/readme_a2a.md`, then review the individual specialist folders, then run the orchestrator
    - This part of the workshop is intentionally more script-driven because it requires multiple cooperating services to run in parallel
 
 ## Slack Channels

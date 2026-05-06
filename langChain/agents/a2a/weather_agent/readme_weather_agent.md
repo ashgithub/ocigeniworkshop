@@ -9,6 +9,7 @@ The Weather Agent is an A2A (agent-to-agent) service that returns sample weather
 This agent is one of the specialized services used by the main orchestrator.
 
 - It registers itself with the shared registry at startup.
+- It also publishes its own public agent card at the standard A2A route.
 - It exposes an A2A endpoint that other agents can call.
 - It is typically discovered and used by `langgraph_a2a_agent.py`.
 - Default local port: `9999`
@@ -35,12 +36,21 @@ This agent is one of the specialized services used by the main orchestrator.
 4. The tool generates sample weather output for the request.
 5. The result is returned to the caller as the A2A response.
 
+## Dynamic Discovery Flow
+
+1. Start `agent_registry.py`.
+2. Start `weather_server.py`.
+3. The weather server registers its public agent card with the registry.
+4. The host asks the registry which agents are available.
+5. The host can then route weather-related requests to this specialist.
+
 ## Prerequisites
 
 Before running this agent, make sure:
 
 - `sandbox.yaml` is configured correctly.
 - Any required environment variables are available in `.env`.
+- `agent_registry.py` is running if you want dynamic host discovery.
 - The agent port (`9999`) is available.
 
 ## How to Run
@@ -49,6 +59,12 @@ Before running this agent, make sure:
 
 ```bash
 uv run langChain/agents/a2a/weather_agent/weather_server.py
+```
+
+Optional check for registration:
+
+```bash
+http localhost:9990/registry/agents
 ```
 
 ### Test the agent directly
@@ -80,6 +96,7 @@ Try prompts such as:
 - **LangChain Tools**: Tool-backed weather lookup flow
 - **A2A Protocol**: Agent-to-agent communication over HTTP
 - **Published Agent Card**: Direct discovery through the standard A2A card route
+- **Registry Registration**: Dynamic discovery through the shared workshop registry
 - **Tool Calling**: Converting a prompt into structured weather inputs
 - **Specialized Services**: Acting as a weather expert inside a multi-agent system
 
@@ -88,10 +105,18 @@ Try prompts such as:
 - `GET /.well-known/agent-card.json`: Agent card discovery
 - `POST /`: A2A JSON-RPC message processing
 
+## Registry Interaction
+
+At startup, `weather_server.py` sends its public agent card to:
+
+- `POST http://localhost:9990/registry/register`
+
 ## Troubleshooting
 
 - **Agent does not appear in the orchestrator**
+  - Make sure `agent_registry.py` is running on port `9990`.
   - Make sure `weather_server.py` is running on port `9999`.
+  - Restart the weather server and confirm the registration print appears.
 
 - **Port 9999 is already in use**
   - Stop the conflicting process or change the configured port in `weather_server.py`.
