@@ -22,9 +22,11 @@ This module covers the following topics:
 9. Running a basic voice pipeline and saving WAV output
 10. Using built-in tools (`web_search`, `mcp`, `code_interpreter`, `image_generation`)
 11. Running multimodal inputs (image + text, file + text)
-12. Managing container lifecycle and container files
-13. Configuring and validating memory behavior across conversations
-14. Building vector-store retrieval workflows (semantic search, file search, batches, connectors, NL2SQL)
+12. Using Shell Tool with hosted and local execution modes
+13. Managing container lifecycle, container files, generated artifacts, and Skill-enabled containers
+14. Packaging and attaching Skills in local, inline, hosted, and curated modes
+15. Configuring and validating memory behavior across conversations
+16. Building vector-store retrieval workflows (semantic search, file search, batches, connectors, NL2SQL)
 
 OCI Generative AI provides OpenAI-compatible APIs that support features such as structured output, function calling, orchestration, and built-in tools. These examples use `OpenAIClientProvider` so the SDK runs with OCI-backed configuration.
 
@@ -92,7 +94,15 @@ Over here there are information about the main folders and tracks to follow acco
      - `genai_client/readme_genai.md`: complete beginner walkthrough for this folder.
      - `genai_client/genai_client.ipynb`: interactive notebook path.
 
-5. **Support folders and global reference files**
+5. **Shell, Skills, and Containers concept path**
+   - Start here when learning how tool execution, containers, container files, and Skills connect:
+     - `readme_shell_skills_containers.md`
+   - Then move through:
+     - `genai_client/shell_tool.py`
+     - `genai_client/containers/readme_containers.md`
+     - `skills/readme_skills.md`
+
+6. **Support folders and global reference files**
    - `output/`: shared sample artifacts used by demos (image input/output, PDF input, voice WAV output).
    - `openai_client_provider.py`: shared OCI auth + client provider used by both `agent_sdk` and `genai_client`.
 

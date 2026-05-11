@@ -9,6 +9,10 @@ This folder teaches the **most important beginner skills flows** in the OCI GenA
 5. **Curated skills**: attach provider-managed Skill references when they are available.
 6. **Skill usage**: attach a hosted skill to the Shell tool and ask the model to use it.
 
+For the shared explanation of how Skills connect to Shell Tool, containers, and tool execution, read:
+
+- `openai_sdk/readme_shell_skills_containers.md`
+
 ## Suggested learning path
 
 1. Start with `local_skill_usage.py`
@@ -85,6 +89,8 @@ This folder teaches the **most important beginner skills flows** in the OCI GenA
 
 ## Notes
 
+- Skills guide the model, while Shell Tool and containers provide the execution environment.
+- Skills can be attached to hosted containers, inline requests, or local shell workflows depending on the mode.
 - Hosted skills are versioned bundles.
 - If you see `Path doesn't map to a registered service`, check `OCI_OPENAI_SKILLS_ENDPOINT` or `oci.skills_endpoint`; the May PDF lists Skills on the `/20231130/openai/v1` early-access base.
 - Local shell mode means your application executes commands and returns `shell_call_output`; OCI does not execute local commands for you.

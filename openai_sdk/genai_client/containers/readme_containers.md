@@ -2,6 +2,10 @@
 
 This module introduces **container resources** and **container file operations** using the OpenAI-compatible client configured through OCI.
 
+For the shared explanation of how containers connect to Shell Tool, Skills, and tool execution, read:
+
+- `openai_sdk/readme_shell_skills_containers.md`
+
 Use this folder when you want to learn how to:
 
 1. Create, list, retrieve, and delete containers.

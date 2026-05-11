@@ -40,6 +40,10 @@ Run commands from project root using:
 
 - `uv run openai_sdk/genai_client/<script_name>.py`
 
+For the shared explanation of Shell Tool, hosted/local execution, containers, container files, and Skills, read:
+
+- `openai_sdk/readme_shell_skills_containers.md`
+
 ## Folder Breakdown
 
 This folder is organized by learning layers. Start at top-level core examples, then move into focused submodules.
@@ -120,6 +124,7 @@ The files are designed to build progressively from core API usage to advanced re
      - local shell request plus `shell_call_output` loop
    - Defaults to preview mode so it is safe while Shell Tool access is rolling out.
    - Run: `uv run openai_sdk/genai_client/shell_tool.py`.
+   - Concept guide: `openai_sdk/readme_shell_skills_containers.md`.
 
 12. **`containers/readme_containers.md`**
    - Read this first for container-focused workflows.
