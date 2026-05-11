@@ -10,6 +10,7 @@ oci:
   profile: $OCI_PROFILE|DEFAULT               # Profile inside the OCI config file that has access to AI-Sandbox
   compartment: $OCI_COMPARTMENT_OCID|ocid1.compartment.oc1..aaaaaaaaboqoghc43bbqvei5y4pmnzia36wuh7fpcxn6fia7pfyelyg4rj7a          # OCID of compartment you have access to in AI sandbox
   project: $OCI_PROJECT|ocid1.generativeaiproject.oc1.us-chicago-1.amaaaaaaghwivzaayhqtgla464kakelp3fwi6afhx5ca7l4h4k67rpnsesvq
+  skills_endpoint: $OCI_OPENAI_SKILLS_ENDPOINT|https://ppe.inference.generativeai.eu-frankfurt-1.oci.oraclecloud.com/20231130/openai/v1
   api_key: $OCI_AI_API_KEY| OCI
   vector_store_id: $VECTOR_STORE_ID|vs_ord_tgcknsijp4c5zcc64s37ftoddmegpnquxepj7zkmvyhfdpfi
 db:

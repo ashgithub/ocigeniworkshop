@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Team communication plan",
+  "type": "object",
+  "required": ["title", "status", "audience", "change_summary", "impact", "ask", "owner"],
+  "properties": {
+    "title": {"type": "string"},
+    "status": {"type": "string"},
+    "audience": {"type": "string"},
+    "change_summary": {"type": "string"},
+    "impact": {"type": "string"},
+    "ask": {"type": "string"},
+    "owner": {"type": "string"},
+    "try_it": {"type": "string"},
+    "next_steps": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "feedback_path": {"type": "string"},
+    "risks": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}

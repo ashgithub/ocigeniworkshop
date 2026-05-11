@@ -1,0 +1,33 @@
+{
+  "title": "Handoff: Local-first Skills examples",
+  "purpose": "Help beginner developers practice Skills packaging and usage patterns while hosted Skill upload is waiting for release/access.",
+  "audience": "Innovation workshop developers, solution engineers, and teams adopting reusable agent workflows.",
+  "change_summary": "Added request-shape examples for local Skills, inline Skills, and curated Skill references, plus two mid-level Skill folders with scripts and references.",
+  "files": [
+    "openai_sdk/skills/local_skill_usage.py",
+    "openai_sdk/skills/inline_skill_usage.py",
+    "openai_sdk/skills/curated_skill_usage.py",
+    "openai_sdk/skills/samples/team-comms-brief/SKILL.md",
+    "openai_sdk/skills/samples/dev-handoff-kit/SKILL.md"
+  ],
+  "run_steps": [
+    "Run `uv run openai_sdk/skills/local_skill_usage.py` to preview the local Skills request shape.",
+    "Run `python openai_sdk/skills/samples/team-comms-brief/scripts/build_message_plan.py --input openai_sdk/skills/samples/team-comms-brief/examples/workshop_update.json`.",
+    "Run `python openai_sdk/skills/samples/dev-handoff-kit/scripts/build_handoff.py --input openai_sdk/skills/samples/dev-handoff-kit/examples/local_skills_handoff.json`."
+  ],
+  "verification": [
+    "Python files compile with py_compile.",
+    "Both bundled Skill scripts run with their example JSON inputs.",
+    "Live API calls remain disabled by default."
+  ],
+  "risks": [
+    "Curated Skill IDs vary by model, provider, region, and release.",
+    "Inline and hosted shell examples need cloud support in the target environment.",
+    "Local shell mode requires application-owned command validation and audit logging."
+  ],
+  "open_questions": [
+    "Which curated Skill IDs will be enabled in the workshop tenancy?",
+    "Which approval workflow should local shell commands use for team demos?"
+  ],
+  "follow_up": "Share this handoff in Slack with a request for reviewers to run the preview scripts and confirm the beginner flow."
+}

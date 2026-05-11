@@ -20,7 +20,7 @@ In this module, you will learn how to:
 3. Parse structured output into `pydantic` models.
 4. Configure reasoning settings and inspect response output blocks.
 5. Handle manual tool-calling loops with `previous_response_id`.
-6. Use built-in tools (`web_search`, `image_generation`, `mcp`, `code_interpreter`, `file_search`).
+6. Use built-in tools (`web_search`, `image_generation`, `mcp`, `code_interpreter`, `shell`, `file_search`).
 7. Send multimodal requests (image + text, file + text).
 8. Work with container lifecycle and container file operations.
 9. Test conversation memory behaviors and access policies.
@@ -49,7 +49,7 @@ This folder is organized by learning layers. Start at top-level core examples, t
    - Focus: baseline Responses API, streaming, schemas, reasoning, function-loop state handling.
 
 2. **Built-in tools and multimodal (top-level files)**
-   - `web_search.py`, `image_generator.py`, `mcp_client.py`, `code_interpreter.py`, `multimodal.py`.
+   - `web_search.py`, `image_generator.py`, `mcp_client.py`, `code_interpreter.py`, `shell_tool.py`, `multimodal.py`.
    - Focus: tool usage, multimodal input handling, remote MCP, code interpreter interactions.
 
 3. **Containers module (`containers/`)**
@@ -111,28 +111,40 @@ The files are designed to build progressively from core API usage to advanced re
    - Demonstrates code interpreter containers and reuse patterns.
    - Run: `uv run openai_sdk/genai_client/code_interpreter.py`.
 
-11. **`containers/readme_containers.md`**
+11. **`shell_tool.py`**
+   - Demonstrates Shell Tool usage from the May guide:
+     - hosted shell with `container_auto`
+     - hosted shell with explicit `container_reference`
+     - hosted shell with network allowlist
+     - hosted shell artifact generation
+     - local shell request plus `shell_call_output` loop
+   - Defaults to preview mode so it is safe while Shell Tool access is rolling out.
+   - Run: `uv run openai_sdk/genai_client/shell_tool.py`.
+
+12. **`containers/readme_containers.md`**
    - Read this first for container-focused workflows.
    - Then run:
      - `uv run openai_sdk/genai_client/containers/base_example.py`
      - `uv run openai_sdk/genai_client/containers/container_files.py`
+     - `uv run openai_sdk/genai_client/containers/container_files_shell_workflow.py`
+     - `uv run openai_sdk/genai_client/containers/container_shell_skills.py`
 
-12. **`memory/readme_memory.md`**
+13. **`memory/readme_memory.md`**
    - Read this first for memory policy and subject workflows.
    - Then run:
      - `uv run openai_sdk/genai_client/memory/memory_subject.py`
      - `uv run openai_sdk/genai_client/memory/memory_access.py`
      - `uv run openai_sdk/genai_client/memory/memory_optimization.py`
 
-13. **`vector_store/readme_vector_store.md`**
+14. **`vector_store/readme_vector_store.md`**
    - Read this first for vector retrieval workflows.
    - Then run module scripts in the order listed in that README.
 
-14. **`langfuse_client.py`**
+15. **`langfuse_client.py`**
    - Demonstrates tracing-ready client usage via Langfuse wrapper.
    - Run: `uv run openai_sdk/genai_client/langfuse_client.py`.
 
-15. **`genai_client.ipynb`**
+16. **`genai_client.ipynb`**
    - Notebook walkthrough that complements the script-based path.
 
 ## Module Readmes
