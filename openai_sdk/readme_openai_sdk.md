@@ -99,6 +99,7 @@ Over here there are information about the main folders and tracks to follow acco
      - `readme_shell_skills_containers.md`
    - Then move through:
      - `genai_client/shell_tool.py`
+     - `genai_client/shell_tools/`
      - `genai_client/containers/readme_containers.md`
      - `skills/readme_skills.md`
 

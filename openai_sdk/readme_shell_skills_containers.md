@@ -9,6 +9,7 @@ This guide explains how three related concepts fit together in the OCI GenAI Ope
 Use this guide before moving through:
 
 - `genai_client/shell_tool.py`
+- `genai_client/shell_tools/`
 - `genai_client/containers/readme_containers.md`
 - `skills/readme_skills.md`
 
@@ -213,8 +214,13 @@ The common combinations are:
 
 3. Preview Shell Tool request shapes.
    - Run `uv run openai_sdk/genai_client/shell_tool.py`.
-   - Keep `RUN_LIVE_API=False`.
-   - Change `EXAMPLE_TO_RUN` to inspect each mode.
+   - Keep `RUN_LIVE_API=False` in the focused files.
+   - Then run one focused file at a time:
+     - `uv run openai_sdk/genai_client/shell_tools/hosted_container_auto.py`
+     - `uv run openai_sdk/genai_client/shell_tools/hosted_container_reference.py`
+     - `uv run openai_sdk/genai_client/shell_tools/hosted_network_allowlist.py`
+     - `uv run openai_sdk/genai_client/shell_tools/hosted_artifact_generation.py`
+     - `uv run openai_sdk/genai_client/shell_tools/local_shell_loop.py`
 
 4. Learn basic container lifecycle.
    - Read `genai_client/containers/readme_containers.md`.

@@ -52,8 +52,8 @@ This folder is organized by learning layers. Start at top-level core examples, t
    - `base_client.py`, `streaming.py`, `structured_response.py`, `reasoning.py`, `api_state.py`.
    - Focus: baseline Responses API, streaming, schemas, reasoning, function-loop state handling.
 
-2. **Built-in tools and multimodal (top-level files)**
-   - `web_search.py`, `image_generator.py`, `mcp_client.py`, `code_interpreter.py`, `shell_tool.py`, `multimodal.py`.
+2. **Built-in tools and multimodal**
+   - `web_search.py`, `image_generator.py`, `mcp_client.py`, `code_interpreter.py`, `shell_tool.py`, `shell_tools/`, `multimodal.py`.
    - Focus: tool usage, multimodal input handling, remote MCP, code interpreter interactions.
 
 3. **Containers module (`containers/`)**
@@ -115,15 +115,14 @@ The files are designed to build progressively from core API usage to advanced re
    - Demonstrates code interpreter containers and reuse patterns.
    - Run: `uv run openai_sdk/genai_client/code_interpreter.py`.
 
-11. **`shell_tool.py`**
-   - Demonstrates Shell Tool usage from the May guide:
-     - hosted shell with `container_auto`
-     - hosted shell with explicit `container_reference`
-     - hosted shell with network allowlist
-     - hosted shell artifact generation
-     - local shell request plus `shell_call_output` loop
-   - Defaults to preview mode so it is safe while Shell Tool access is rolling out.
-   - Run: `uv run openai_sdk/genai_client/shell_tool.py`.
+11. `shell_tools/`**
+   - Each usage pattern has its own file:
+     - `shell_tools/hosted_container_auto.py`
+     - `shell_tools/hosted_container_reference.py`
+     - `shell_tools/hosted_network_allowlist.py`
+     - `shell_tools/hosted_artifact_generation.py`
+     - `shell_tools/local_shell_loop.py`
+   - Each file defaults to preview mode so it is safe while Shell Tool access is rolling out.
    - Concept guide: `openai_sdk/readme_shell_skills_containers.md`.
 
 12. **`containers/readme_containers.md`**

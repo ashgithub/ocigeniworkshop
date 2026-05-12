@@ -1,5 +1,5 @@
 ---
-name: beginner-study-note
+name: sample-skill
 description: Use when the user asks for a short beginner-friendly explanation or study note.
 ---
 

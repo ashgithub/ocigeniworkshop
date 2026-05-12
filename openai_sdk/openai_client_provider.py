@@ -32,10 +32,7 @@ class OpenAIClientProvider:
         # get the values from env variables
         self.oci_openai_endpoint = DEFAUL_OPENAI_ENDPOINT
         self.oci_openai_vector_endpoint = DEFAUL_OPENAI_VECTOR_ENDPOINT
-        self.oci_openai_skills_endpoint = os.getenv(
-            "OCI_OPENAI_SKILLS_ENDPOINT",
-            self.get_sandbox_value("oci", "skills_endpoint", DEFAULT_OPENAI_SKILLS_ENDPOINT),
-        )
+        self.oci_openai_skills_endpoint = DEFAULT_OPENAI_SKILLS_ENDPOINT
         self.oci_openai_api_key = self.scfg['oci']['api_key']
         self.oci_openai_project = self.scfg['oci']['project']
         self.oci_compartment_id = self.scfg['oci']['compartment']
@@ -85,7 +82,11 @@ class OpenAIClientProvider:
 
     # Helper for adding project headers to OpenAI-compatible API calls.
     def _default_headers(self) -> dict[str, str]:
-        return {"OpenAI-Project": self.oci_openai_project, "opc-compartment-id": self.oci_compartment_id}
+        return {
+            "OpenAI-Project": self.oci_openai_project,
+            "opc-compartment-id": self.oci_compartment_id,
+            "compartment-id": self.oci_compartment_id
+        }
 
     # Client for responses.create use cases
     def build_oci_openai_client(self) -> OpenAI:
@@ -115,16 +116,13 @@ class OpenAIClientProvider:
         return client
 
     def build_oci_openai_skills_client(self) -> OpenAI:
-        config_file = os.path.expanduser(str(self.scfg["oci"].get("configFile", "~/.oci/config")))
         client = OpenAI(
             base_url=self.oci_openai_skills_endpoint,
             api_key="not-used",
+            project=self.oci_openai_project,
             default_headers=self._default_headers(),
             http_client=httpx.Client(
-                auth=OciUserPrincipalAuth(
-                    config_file=config_file,
-                    profile_name=self.oci_openai_profile,
-                )
+                auth=OciUserPrincipalAuth(profile_name=self.oci_openai_profile)
             ),
         )
 
