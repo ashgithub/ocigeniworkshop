@@ -40,11 +40,17 @@ def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    # Get a container ID from the base_example.py file on this same folder
+    # Create a container as in the base_example.py on this same folder.
+    container = client.containers.create(
+        name="workshop_container",
+        expires_after={"anchor":"last_active_at","minutes":5}
+    )
+    print(f"Created container with name: {container.name} and ID:")
+    print(container.id)
 
     # Step 2a: Upload file to container.
     container_file = client.containers.files.create(
-        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
+        container_id=container.id,
         file=open("./openai_sdk/output/fema_outage_flyer.pdf", "rb"),
     )
     print("Uploaded file with ID:")
@@ -52,7 +58,7 @@ def main():
 
     # Step 2b: List container files.
     page = client.containers.files.list(
-        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
+        container_id=container.id,
     )
     page = page.data[0]
     print("File data found:")
@@ -61,7 +67,7 @@ def main():
     # Step 2c: Retrieve file metadata.
     file = client.containers.files.retrieve(
         file_id=container_file.id,
-        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
+        container_id=container.id,
     )
     print("File data retrieved")
     print(file.id)
@@ -69,7 +75,7 @@ def main():
     # Step 2d: Retrieve file content stream.
     content = client.containers.files.content.retrieve(
         file_id=container_file.id,
-        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
+        container_id=container.id,
     )
     print(content)
     data = content.read()
@@ -78,7 +84,7 @@ def main():
     # Step 2e: Delete file from container.
     client.containers.files.delete(
         file_id=container_file.id,
-        container_id="cntr-ord-36sxfvex1p7vfui2osvpyob0coxa0x7kt616cbqopb2awu8q",
+        container_id=container.id,
     )
 
 if __name__ == "__main__":

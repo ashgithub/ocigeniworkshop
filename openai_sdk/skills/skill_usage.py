@@ -61,7 +61,7 @@ def main() -> None:
                     "skills": [
                         {
                             "type": "skill_reference",
-                            "skill_id": SKILL_ID,
+                            "skill_id": SKILL_ID, #type:ignore
                             "version": SKILL_VERSION,
                         }
                     ],

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo Tour Guide"
+  short_description: "Beginner map of this workshop repo"
+  default_prompt: "Use $repo-tour-guide to show me where to start in this repo."

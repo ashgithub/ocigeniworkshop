@@ -20,8 +20,9 @@ For the shared explanation of how Skills connect to Shell Tool, containers, and 
    - See the shell_call / shell_call_output loop needed for customer-managed local execution.
 
 2. Run the bundled Skill scripts
-   - Generate a Slack plus Outlook package from `samples/team-comms-brief`.
-   - Generate a developer handoff from `samples/dev-handoff-kit`.
+   - Start with `samples/repo-tour-guide` for a minimal beginner skill.
+   - Read `samples/module-docs-explainer` for a mid-level skill with references.
+   - Run the local report script from `samples/workshop-result-runner`.
 
 3. Run `inline_skill_usage.py`
    - Learn how to zip a local Skill folder into an inline base64 Skill reference.
@@ -52,36 +53,37 @@ For the shared explanation of how Skills connect to Shell Tool, containers, and 
 
 4. `local_skill_usage.py`
    - Local shell example using local Skill folders:
-     - `samples/team-comms-brief`
-     - `samples/dev-handoff-kit`
-   - Defaults to preview mode so beginners can inspect the request before live API calls.
+     - `samples/repo-tour-guide`
+     - `samples/module-docs-explainer`
+     - `samples/workshop-result-runner`
+   - Requires a configured OCI OpenAI-compatible environment before live API calls.
 
 5. `inline_skill_usage.py`
-   - Builds a base64 zip from `samples/team-comms-brief`.
+   - Builds a base64 zip from `samples/module-docs-explainer`.
    - Attaches it as an inline Skill.
 
 6. `curated_skill_usage.py`
    - Shows provider-managed curated Skills such as `openai-spreadsheets`.
-   - Defaults to preview mode because curated Skill availability varies by model, provider, region, and release.
+   - Run only after confirming the selected curated Skill is available for your model, provider, region, and release.
 
-7. `samples/sample_skill/`
-   - Minimal local skill bundle example.
-   - Use this folder as the simplest content you would zip and upload.
+7. `samples/repo-tour-guide/`
+   - Basic skill: a short repo tour with only `SKILL.md` plus UI metadata.
+   - Use this as the smallest beginner-friendly local Skill example.
 
-8. `samples/team-comms-brief/`
-   - Mid-level Skill for Slack and Outlook communication plans.
-   - Includes `scripts`, `templates`, `schemas`, `references`, `examples`, and `agents`.
+8. `samples/module-docs-explainer/`
+   - Mid-level skill: explains repo modules using a compact `references/` folder.
+   - Good for learning how progressive disclosure works without scripts.
 
-9. `samples/dev-handoff-kit/`
-   - Mid-level Skill for developer handoff notes and adoption checklists.
-   - Includes `scripts`, `templates`, `schemas`, `references`, `examples`, and `agents`.
+9. `samples/workshop-result-runner/`
+   - Scripted skill: scans the repo locally and produces a learning report.
+   - Includes a small `scripts/` helper and a safety reference.
 
 ## Typical beginner workflow
 
-1. Start with `local_skill_usage.py` in preview mode.
+1. Start by reading `local_skill_usage.py`.
 2. Inspect the Skill folders under `samples/`.
-3. Run each bundled script with its example JSON input.
-4. Try `inline_skill_usage.py` in preview mode to see the base64 zip shape.
+3. Run the bundled local report script in `samples/workshop-result-runner`.
+4. Read `inline_skill_usage.py` to see the base64 zip shape.
 5. When hosted Skills are available, zip a Skill folder so the zip contains **one top-level folder**.
 6. Open `upload_skill.py` and update `UPLOAD_MODE`, `SKILL_ZIP_PATH`, and optional skill/version values.
 7. Copy the returned `skill_id`.
@@ -106,7 +108,7 @@ For the shared explanation of how Skills connect to Shell Tool, containers, and 
 - `uv run openai_sdk/skills/local_skill_usage.py`
 - `uv run openai_sdk/skills/inline_skill_usage.py`
 - `uv run openai_sdk/skills/curated_skill_usage.py`
-- `python openai_sdk/skills/samples/team-comms-brief/scripts/build_message_plan.py --input openai_sdk/skills/samples/team-comms-brief/examples/workshop_update.json`
-- `python openai_sdk/skills/samples/dev-handoff-kit/scripts/build_handoff.py --input openai_sdk/skills/samples/dev-handoff-kit/examples/local_skills_handoff.json`
+- `.venv\Scripts\python.exe openai_sdk/skills/samples/workshop-result-runner/scripts/repo_learning_report.py`
+- `.venv\Scripts\python.exe openai_sdk/skills/samples/workshop-result-runner/scripts/repo_learning_report.py --topic skills`
 - `uv run openai_sdk/skills/upload_skill.py`
 - `uv run openai_sdk/skills/skill_usage.py`

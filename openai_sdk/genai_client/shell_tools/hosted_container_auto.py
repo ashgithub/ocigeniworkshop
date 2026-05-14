@@ -58,7 +58,7 @@ Summarize what you found in a short final answer.
 
 def main() -> None:
     # Step 2: Send the hosted shell request.
-    client: OpenAI = OpenAIClientProvider().oci_openai_skills_client
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
     
     response = client.responses.create(
         model=MODEL_ID,

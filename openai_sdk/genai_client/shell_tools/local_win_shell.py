@@ -243,7 +243,7 @@ def command_output_payload(shell_call: Any, executor: GuardedPowerShell) -> dict
     return payload
 
 def main() -> None:
-    client: OpenAI = OpenAIClientProvider().oci_openai_skills_client
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 1: Send a request where the model can ask for local shell commands.
     response = client.responses.create(

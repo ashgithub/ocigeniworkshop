@@ -30,6 +30,7 @@ Run scripts from repo root:
 - `uv run openai_sdk/genai_client/vector_store/semantic_store.py`
 - `uv run openai_sdk/genai_client/vector_store/vector_store_connector.py`
 - `uv run openai_sdk/genai_client/vector_store/nl2sql_tool.py`
+- `uv run openai_sdk/genai_client/vector_store/nl2sql_gen_tool.py`
 
 ## Folder Contents
 
@@ -71,7 +72,13 @@ Run scripts from repo root:
      - Validate semantic store.
      - Generate SQL from natural language via inference API.
 
-8. `vector_store.ipynb`
+8. `nl2sql_gen_tool.py`
+   - Minimal NL2SQL generation-only script:
+     - Uses an existing semantic store ID.
+     - Calls `generateSqlFromNl` directly.
+     - Skips semantic store creation, enrichment jobs, and preflight checks.
+
+9. `vector_store.ipynb`
    - Notebook walkthrough for interactive practice across the module topics.
 
 ## Suggested Learning Path
@@ -83,7 +90,8 @@ Run scripts from repo root:
 5. `semantic_store.py`
 6. `vector_store_connector.py`
 7. `nl2sql_tool.py`
-8. `vector_store.ipynb`
+8. `nl2sql_gen_tool.py`
+9. `vector_store.ipynb`
 
 ## Typical Use Cases
 

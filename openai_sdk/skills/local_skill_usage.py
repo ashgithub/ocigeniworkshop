@@ -15,14 +15,10 @@ request shell actions, then this application validates and executes them in your
 customer-managed runtime and sends shell_call_output back.
 
 Beginner flow:
-1. Keep RUN_LIVE_API=False and run this file to inspect the request shape.
-2. Review the local skill folders under openai_sdk/skills/samples.
-3. Set RUN_LIVE_API=True when local shell is enabled in your environment.
+1. Review the local skill folders under openai_sdk/skills/samples.
+2. Run this file after your OCI OpenAI-compatible environment is configured.
 """
 
-from __future__ import annotations
-
-import json
 import os
 import subprocess
 import sys
@@ -38,24 +34,24 @@ from openai_client_provider import OpenAIClientProvider
 
 
 MODEL_ID = "openai.gpt-5.2"
-RUN_LIVE_API = False
 MAX_LOCAL_SHELL_ROUNDS = 4
 COMMAND_TIMEOUT_SECONDS = 30
 
 SKILLS_DIR = Path(__file__).resolve().parent / "samples"
-TEAM_COMMS_SKILL = SKILLS_DIR / "team-comms-brief"
-DEV_HANDOFF_SKILL = SKILLS_DIR / "dev-handoff-kit"
+REPO_TOUR_SKILL = SKILLS_DIR / "repo-tour-guide"
+MODULE_DOCS_SKILL = SKILLS_DIR / "module-docs-explainer"
+WORKSHOP_RUNNER_SKILL = SKILLS_DIR / "workshop-result-runner"
 
 PROMPT = """
-Use the team-comms-brief Skill and dev-handoff-kit Skill.
+Use the repo-tour-guide, module-docs-explainer, and workshop-result-runner Skills.
 
 Scenario:
-- I added local and inline Skill examples to the OCI GenAI workshop.
-- Hosted Skill upload is on hold until Skills access is released in this environment.
-- The audience is beginner developers in an innovation workshop.
-- I need a short Slack update, an Outlook follow-up email, and a developer handoff note.
+- I am onboarding beginner developers in an innovation lab.
+- They need to understand this OCI AI Developer Learning Path repo.
+- Focus on where to start, which modules matter, and what local checks are safe.
+- Include a short result summary if you use the bundled script.
 
-Use the bundled scripts if helpful, then return the final communication package.
+Use the bundled script if helpful, then return a compact learning path.
 """
 
 
@@ -114,8 +110,8 @@ class GuardedLocalShell:
             )
         except subprocess.TimeoutExpired as exc:
             return CommandResult(
-                stdout=exc.stdout or "",
-                stderr=exc.stderr or "",
+                stdout=exc.stdout or "", #type:ignore
+                stderr=exc.stderr or "", #type:ignore
                 exit_code=None,
                 timed_out=True,
             )
@@ -130,20 +126,28 @@ def attr_or_key(item: Any, name: str, default: Any = None) -> Any:
 def local_skill_specs() -> list[dict[str, str]]:
     return [
         {
-            "name": "team-comms-brief",
+            "name": "repo-tour-guide",
             "description": (
-                "Draft Slack announcements and Outlook follow-up emails for "
-                "developer enablement, launches, releases, and workshop updates."
+                "Give a beginner-friendly map of this OCI AI workshop repo, "
+                "including where to start and which files to open next."
             ),
-            "path": str(TEAM_COMMS_SKILL),
+            "path": str(REPO_TOUR_SKILL),
         },
         {
-            "name": "dev-handoff-kit",
+            "name": "module-docs-explainer",
             "description": (
-                "Create developer handoff notes, adoption checklists, reviewer notes, "
-                "and risk summaries for code or sample-workshop changes."
+                "Explain repo modules using bundled references and current README files "
+                "for OpenAI SDK, LangChain, OCI-native, database, RAG, agents, and skills."
             ),
-            "path": str(DEV_HANDOFF_SKILL),
+            "path": str(MODULE_DOCS_SKILL),
+        },
+        {
+            "name": "workshop-result-runner",
+            "description": (
+                "Run a safe local repo scan and summarize runnable learning paths "
+                "without calling cloud services."
+            ),
+            "path": str(WORKSHOP_RUNNER_SKILL),
         },
     ]
 
@@ -202,19 +206,13 @@ def command_output_payload(shell_call: Any, executor: GuardedLocalShell) -> dict
 def main() -> None:
     tools = build_tools()
 
-    if not RUN_LIVE_API:
-        print("<------------- Local Skills request preview ------------>\n")
-        print(json.dumps({"model": MODEL_ID, "tools": tools, "input": PROMPT.strip()}, indent=2))
-        print("\nSet RUN_LIVE_API=True after local shell is enabled and reviewed.")
-        return
-
     client: OpenAI = OpenAIClientProvider().oci_openai_client
     workspace = Path(__file__).resolve().parents[2]
     executor = GuardedLocalShell(workspace=workspace, timeout_seconds=COMMAND_TIMEOUT_SECONDS)
 
     response = client.responses.create(
         model=MODEL_ID,
-        tools=tools,
+        tools=tools, #type:ignore
         input=PROMPT,
     )
 
@@ -232,7 +230,7 @@ def main() -> None:
         response = client.responses.create(
             model=MODEL_ID,
             previous_response_id=response.id,
-            tools=tools,
+            tools=tools, #type:ignore
             input=follow_up_input,
         )
 

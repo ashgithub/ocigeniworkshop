@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workshop Result Runner"
+  short_description: "Run safe learning checks and summaries"
+  default_prompt: "Use $workshop-result-runner to scan the repo and summarize runnable learning paths."

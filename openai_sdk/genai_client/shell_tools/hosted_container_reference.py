@@ -58,7 +58,7 @@ and summarize why an explicit container is useful.
 """
 
 def main() -> None:
-    client: OpenAI = OpenAIClientProvider().oci_openai_skills_client
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 1: Create a hosted container with explicit lifecycle settings.
     container = client.containers.create(

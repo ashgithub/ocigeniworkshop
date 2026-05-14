@@ -1,0 +1,4 @@
+interface:
+  display_name: "Module Docs Explainer"
+  short_description: "Explain modules using repo docs"
+  default_prompt: "Use $module-docs-explainer to explain the RAG module and point me to the best files."

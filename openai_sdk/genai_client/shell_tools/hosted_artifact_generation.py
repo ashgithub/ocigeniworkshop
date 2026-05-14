@@ -77,7 +77,7 @@ def find_file_by_path(files: list[Any], path_suffix: str) -> Any | None:
     return None
 
 def main() -> None:
-    client: OpenAI = OpenAIClientProvider().oci_openai_skills_client
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 1: Create a named container so generated files can be inspected.
     container = client.containers.create(

@@ -91,7 +91,7 @@ def print_skill_details(client: OpenAI, skill_id: str) -> None:
 
 def main() -> None:
     # Step 1: Build a configured OpenAI client for Skills endpoint usage.
-    client: OpenAI = OpenAIClientProvider().oci_openai_skills_client
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 2: List hosted skills for the current project.
     print_skill_summary(client)

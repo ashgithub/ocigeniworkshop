@@ -58,7 +58,7 @@ whether the allowlisted network workflow succeeded.
 
 def main() -> None:
     # Step 2: Send the hosted shell request with scoped network access.
-    client: OpenAI = OpenAIClientProvider().oci_openai_skills_client
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
     response = client.responses.create(
         model=MODEL_ID,
         tools=[
