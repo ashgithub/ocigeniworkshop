@@ -38,7 +38,7 @@ DEFAULT_PROMPT = "What does this knowledge base say about outages?"
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
-    vector_store_id = OpenAIClientProvider().oci_openai_vector_store_id
+    vector_store_id = OpenAIClientProvider().oci_openai_unstructured_vector_store_id
 
     # Step 2: Resolve required runtime values.
     if not vector_store_id:

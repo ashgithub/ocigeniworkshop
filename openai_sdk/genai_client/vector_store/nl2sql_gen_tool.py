@@ -17,20 +17,11 @@ import os
 import sys
 
 import httpx
-import oracledb
-from oci_genai_auth import OciUserPrincipalAuth
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
-
-# Edit these values for your test.
-NL2SQL_API_VERSION = "20260325"
-NL2SQL_ENDPOINT = "https://inference.generativeai.us-phoenix-1.oci.oraclecloud.com/20260325"
-# SEMANTIC_STORE_ID = "ocid1.generativeaisemanticstore.oc1.phx.amaaaaaaghwivzaa4r3cg2ebniryy7tgq7mfrkyjdmpmushpncla2mdc4gza"
-SEMANTIC_STORE_ID = "ocid1.generativeaisemanticstore.oc1.phx.amaaaaaaghwivzaawbxwlrwvwfvooj2ttgwscxtcfckrki6st7wd7c2jeaoq"
-# NATURAL_LANGUAGE_QUERY = "Give me 5 DB table names that you could find there"
-NATURAL_LANGUAGE_QUERY = "Explain the data on WL_CALLS table"
+NATURAL_LANGUAGE_QUERY = "Explain the data on WL_CALLS table, just the top rows"
 REQUEST_TIMEOUT_SECONDS = 120.0
 MAX_ROWS = 20
 
@@ -55,9 +46,10 @@ def print_table(columns: list[str], rows: list[tuple]) -> None:
 
 def main() -> None:
     provider = OpenAIClientProvider()
-    semantic_store_id = SEMANTIC_STORE_ID
+    semantic_store_id = provider.oci_openai_structured_vector_store_id
     question = NATURAL_LANGUAGE_QUERY
-    endpoint = NL2SQL_ENDPOINT.rstrip("/")
+    endpoint = provider.oci_openai_nl2sql_endpoint.rstrip("/")
+    auth = provider.get_raw_user_auth()
 
     headers = {
         "accept": "application/json",
@@ -67,14 +59,9 @@ def main() -> None:
         "compartment-id": provider.oci_compartment_id,
     }
 
-    auth = OciUserPrincipalAuth(
-        config_file=os.path.expanduser(provider.oci_openai_config_file),
-        profile_name=provider.oci_openai_profile,
-    )
-
+    print(f"Requesting NL2SQL job...")
     print(f"Using endpoint: {endpoint}")
     print(f"Using OCI profile: {provider.oci_openai_profile}")
-    print(f"Using semantic store id: {semantic_store_id}")
     print(f"Question: {question}")
 
     with httpx.Client(timeout=REQUEST_TIMEOUT_SECONDS, auth=auth) as client:
@@ -117,20 +104,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-# {
-#   "mcpServers": {
-#     "nl2sql_sales_database": {
-#       "description": "NL2SQL MCP server for the sales database semantic store. Translates natural language to SQL and delegates execution to sales_database_mcp_server.",
-#       "command": "/opt/homebrew/bin/npx",
-#       "args": [
-#         "-y",
-#         "mcp-remote",
-#         "https://genai.oci.{region-identifier}.oraclecloud.com/nl2sql/toolchain",
-#         "--allow-http"
-#       ],
-#       "transport": "streamable-http"
-#     }
-#   }
-# }

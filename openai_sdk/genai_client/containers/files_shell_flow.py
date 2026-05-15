@@ -12,6 +12,8 @@ This beginner example demonstrates the full shape:
 5. Retrieve generated file content.
 
 By default this file runs in preview mode and does not call the API.
+
+uv run openai_sdk/genai_client/containers/files_shell_flow.py
 """
 
 import os
@@ -34,8 +36,8 @@ CONTAINER_EXPIRES_AFTER_MINUTES = 30
 SAMPLE_INPUT_PATH = Path(__file__).with_name("sample_container_input.md")
 GENERATED_REPORT_PATH = "/mnt/data/container_file_shell_report.md"
 
-DELETE_UPLOADED_FILE_AT_END = False
-DELETE_CONTAINER_AT_END = False
+DELETE_UPLOADED_FILE_AT_END = True
+DELETE_CONTAINER_AT_END = True
 
 def shell_prompt(uploaded_path: str) -> str:
     return f"""

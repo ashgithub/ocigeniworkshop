@@ -46,8 +46,7 @@ VECTOR_STORE_NAME = "workshop-vector-store"
 VECTOR_STORE_DESCRIPTION = "Sample vector store created by vector_api.py"
 SEARCH_QUERY = "Give me the key points from these documents."
 # Set file id here. or use the `files.list` function to list the files on vector store
-ATTACH_FILE_ID = "file-ord-459fa3aa-6e29-46ab-a1ce-e0e8a7683873"  
-DELETE_VECTOR_STORE_AT_END = False  # Set True if you want cleanup in same run.
+ATTACH_FILE_ID = "file-ord-459fa3aa-6e29-46ab-a1ce-e0e8a7683873"
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
@@ -66,7 +65,7 @@ def main():
     # print("Vector store created. Result:")
     # print(vector_store)
     # vector_store_id = vector_store.id
-    vector_store_id = OpenAIClientProvider().oci_openai_vector_store_id
+    vector_store_id = OpenAIClientProvider().oci_openai_unstructured_vector_store_id
 
     # Step 3: Retrieve vector store.
     retrieve_result = client.vector_stores.retrieve(vector_store_id=vector_store_id)
@@ -142,13 +141,6 @@ def main():
             "Skipping file attach flow. Set ATTACH_FILE_ID constant "
             "or create env var VECTOR_SAMPLE_FILE_ID."
         )
-
-    # Step 7: Optional cleanup.
-    if DELETE_VECTOR_STORE_AT_END:
-        delete_result = client.vector_stores.delete(vector_store_id=vector_store_id)
-        print(delete_result)
-    else:
-        print("Keeping vector store for inspection. Set DELETE_VECTOR_STORE_AT_END=True to delete it.")
 
 if __name__ == "__main__":
     main()

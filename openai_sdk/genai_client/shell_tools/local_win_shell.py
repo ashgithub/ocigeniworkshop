@@ -21,7 +21,7 @@ Environment setup:
 - This example executes approved commands with Windows PowerShell explicitly.
 
 How to run from repo root:
-uv run openai_sdk/genai_client/shell_tools/local_shell_loop.py
+uv run openai_sdk/genai_client/shell_tools/local_win_shell.py
 
 Safe experiments:
 1. Keep `RUN_LIVE_API=False` until local shell access is enabled.

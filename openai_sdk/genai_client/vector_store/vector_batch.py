@@ -46,8 +46,7 @@ from openai_client_provider import OpenAIClientProvider
 LOCAL_FILE_PATHS = [
     "./openai_sdk/output/sample_doc.pdf",
 ]  # Replace with one or more local file paths.
-BATCH_ATTRIBUTES = {"category": "sample_py_code"}
-CHUNKING_STRATEGY = {"type": "auto"}
+
 POLL_INTERVAL_SECONDS = 5
 CANCEL_BATCH_IMMEDIATELY = False
 DELETE_VECTOR_STORE_FILES_AT_END = False
@@ -83,18 +82,9 @@ def main():
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 2: Resolve required vector store input.
-    vector_store_id = OpenAIClientProvider().oci_openai_vector_store_id
-    if not vector_store_id:
-        raise ValueError(
-            "Missing vector store id. Set `oci.vector_store_id` in sandbox.yaml."
-        )
+    vector_store_id = OpenAIClientProvider().oci_openai_unstructured_vector_store_id
 
     # Step 3: Upload local files and collect the returned file ids.
-    if not LOCAL_FILE_PATHS:
-        raise ValueError(
-            "LOCAL_FILE_PATHS is empty. Add one or more local files before running this script."
-        )
-
     uploaded_file_ids: list[str] = []
 
     for file_path in LOCAL_FILE_PATHS:
@@ -115,8 +105,8 @@ def main():
     batch = client.vector_stores.file_batches.create(
         vector_store_id=vector_store_id,
         file_ids=uploaded_file_ids,
-        attributes=BATCH_ATTRIBUTES,  # type: ignore[arg-type]
-        chunking_strategy=CHUNKING_STRATEGY,  # type: ignore[arg-type]
+        attributes={"category": "sample_py_code_batch"},
+        chunking_strategy={"type": "auto"},
     )
     print("Created vector store file batch:")
     print(batch)

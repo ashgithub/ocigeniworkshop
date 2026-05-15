@@ -42,7 +42,7 @@ def main():
     # Step 2a: Create container.
     container = client.containers.create(
         name="workshop_container",
-        # expires_after=
+        expires_after={"anchor":"last_active_at","minutes":5}
     )
     print(f"Created container with name: {container.name} and ID:")
     print(container.id)
@@ -53,6 +53,10 @@ def main():
     for container in page.data:
         print(container.name)
         print(container.id)
+        #optional client clean up
+        # client.containers.delete(
+        #     container_id=container.id
+        # )
 
     # Step 2c: Retrieve container by id.
     container = client.containers.retrieve(

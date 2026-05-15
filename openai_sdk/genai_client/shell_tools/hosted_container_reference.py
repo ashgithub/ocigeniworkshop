@@ -49,7 +49,7 @@ CONTAINER_NAME = "workshop-shell-reference"
 CONTAINER_MEMORY_LIMIT = "1g"
 CONTAINER_EXPIRES_AFTER_MINUTES = 5
 
-DELETE_CONTAINER_AT_END = False
+DELETE_CONTAINER_AT_END = True
 
 PROMPT = """
 Use the shell tool in this explicit hosted container.

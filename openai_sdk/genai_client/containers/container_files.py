@@ -36,6 +36,29 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
+PREVIEW_LIMIT = 500
+
+# helper function to preview the content without filling screen
+def print_preview(label, value, limit=PREVIEW_LIMIT):
+    if isinstance(value, bytes):
+        total = len(value)
+        unit = "bytes"
+        preview = repr(value[:limit])
+    else:
+        text = str(value)
+        total = len(text)
+        unit = "characters"
+        preview = text[:limit]
+
+    if len(preview) > limit:
+        preview = f"{preview[:limit]}..."
+    elif total > limit:
+        preview = f"{preview}..."
+
+    print(f"{label} preview ({min(total, limit)} of {total} {unit}):")
+    print(preview)
+
+
 def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
@@ -77,15 +100,20 @@ def main():
         file_id=container_file.id,
         container_id=container.id,
     )
-    print(content)
+    print_preview("File content response", content)
     data = content.read()
-    print(data)
+    print_preview("File data", data)
 
     # Step 2e: Delete file from container.
     client.containers.files.delete(
         file_id=container_file.id,
         container_id=container.id,
     )
+
+    client.containers.delete(
+        container_id=container.id,
+    )
+    print(f"Deleted container with ID: {container.id}")
 
 if __name__ == "__main__":
     main()

@@ -49,7 +49,7 @@ CONTAINER_MEMORY_LIMIT = "1g"
 CONTAINER_EXPIRES_AFTER_MINUTES = 5
 
 GENERATED_REPORT_PATH = "/mnt/data/shell_tool_report.md"
-DELETE_CONTAINER_AT_END = False
+DELETE_CONTAINER_AT_END = True
 
 def shell_prompt() -> str:
     return f"""

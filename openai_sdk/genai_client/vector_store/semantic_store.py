@@ -39,12 +39,7 @@ def main():
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
     # Step 2: Resolve required vector store id.
-    vector_store_id = OpenAIClientProvider().oci_openai_vector_store_id
-    if not vector_store_id:
-        raise ValueError(
-            "Missing vector store id. Set VECTOR_STORE_ID constant in this file "
-            "or create env var VECTOR_STORE_ID."
-        )
+    vector_store_id = OpenAIClientProvider().oci_openai_unstructured_vector_store_id
 
     # Step 3: Run semantic search.
     result = client.vector_stores.search(

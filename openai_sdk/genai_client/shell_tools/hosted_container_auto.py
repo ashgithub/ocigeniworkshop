@@ -37,7 +37,6 @@ from __future__ import annotations
 
 import os
 import sys
-import httpx
 from openai import OpenAI
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))

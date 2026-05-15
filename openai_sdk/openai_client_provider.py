@@ -20,6 +20,7 @@ DEFAULT_SANDBOX_CONFIG = "sandbox.yaml"
 DEFAUL_OPENAI_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
 DEFAUL_OPENAI_VECTOR_ENDPOINT = "https://generativeai.us-chicago-1.oci.oraclecloud.com/20231130/openai/v1"
 DEFAULT_OPENAI_SKILLS_ENDPOINT = "https://ppe.inference.generativeai.eu-frankfurt-1.oci.oraclecloud.com/20231130/openai/v1"
+NL2SQL_ENDPOINT = "https://inference.generativeai.us-phoenix-1.oci.oraclecloud.com/20260325"
 
 class SandBoxConfigKeyNotSetException(Exception):
     """Raised when required config keys are missing."""
@@ -30,14 +31,16 @@ class OpenAIClientProvider:
         self.scfg = self.load_config(self.config_path)       
         
         # get the values from env variables
-        self.oci_openai_endpoint = DEFAUL_OPENAI_ENDPOINT
+        self.oci_openai_endpoint = DEFAULT_OPENAI_SKILLS_ENDPOINT
         self.oci_openai_vector_endpoint = DEFAUL_OPENAI_VECTOR_ENDPOINT
+        self.oci_openai_nl2sql_endpoint = NL2SQL_ENDPOINT
         self.oci_openai_api_key = self.scfg['oci']['api_key']
         self.oci_openai_project = self.scfg['oci']['project']
         self.oci_compartment_id = self.scfg['oci']['compartment']
         self.oci_openai_profile = self.scfg['oci']['profile']
         self.oci_openai_config_file = self.scfg['oci']['configFile']
-        self.oci_openai_vector_store_id = self.scfg['oci']['vector_store_id']
+        self.oci_openai_unstructured_vector_store_id = self.scfg['oci']['unstructured_vector_store_id']
+        self.oci_openai_structured_vector_store_id = self.scfg['oci']['structured_vector_store_id']
         
         #verify that the env is set correctly
         self._verify_required_config()
@@ -94,12 +97,7 @@ class OpenAIClientProvider:
             api_key=self.oci_openai_api_key,
             project=self.oci_openai_project,
             default_headers=self._default_headers(),
-            http_client=httpx.Client(
-                auth=OciUserPrincipalAuth(
-                    config_file=self.oci_openai_config_file,
-                    profile_name=self.oci_openai_profile,
-                )
-            ),
+            http_client=httpx.Client(auth=self.get_raw_user_auth()),
         )
 
         return client
@@ -110,12 +108,7 @@ class OpenAIClientProvider:
             api_key=self.oci_openai_api_key,
             # project=self.oci_openai_project,
             default_headers=self._default_headers(),
-            http_client=httpx.Client(
-                auth=OciUserPrincipalAuth(
-                    config_file=self.oci_openai_config_file,
-                    profile_name=self.oci_openai_profile,
-                )
-            ),
+            http_client=httpx.Client(auth=self.get_raw_user_auth()),
         )
 
         return client
@@ -127,12 +120,7 @@ class OpenAIClientProvider:
             api_key=self.oci_openai_api_key,
             project=self.oci_openai_project,
             default_headers=self._default_headers(),
-            http_client=httpx.AsyncClient(
-                auth=OciUserPrincipalAuth(
-                    config_file=self.oci_openai_config_file,
-                    profile_name=self.oci_openai_profile,
-                )
-            ),
+            http_client=httpx.AsyncClient(auth=self.get_raw_user_auth()),
         )
 
         return async_client
@@ -149,51 +137,14 @@ class OpenAIClientProvider:
             wallet_location=wallet_path,
             wallet_password=db_config["walletPass"],
         )
-
-    def build_oci_generative_ai_control_plane_client(self, service_endpoint: str | None = None):
-        """
-        Build OCI Generative AI control-plane client for vector store connector APIs.
-        Returns:
-            tuple[oci.generative_ai.GenerativeAiClient, str]
-            -> (client, compartment_id)
-        """
-        import oci
-
-        config, signer = self._load_api_key_config_and_signer()
-        compartment_id = self.oci_compartment_id
-        region = config.get("region", "us-chicago-1")
-        endpoint = service_endpoint or f"https://generativeai.{region}.oci.oraclecloud.com"
-
-        client = oci.generative_ai.GenerativeAiClient(
-            config=config,
-            signer=signer,
-            service_endpoint=endpoint,
+    
+    def get_raw_user_auth(self) -> OciUserPrincipalAuth:
+        auth=OciUserPrincipalAuth(
+            config_file=self.oci_openai_config_file,
+            profile_name=self.oci_openai_profile,
         )
-        return client, compartment_id
 
-    def _load_api_key_config_and_signer(self):
-        """Load OCI config and build an API-key signer from sandbox profile settings."""
-        import oci
-
-        profile = self.oci_openai_profile
-        config = oci.config.from_file(self.oci_openai_config_file, profile_name=profile)
-        required_keys = ["tenancy", "user", "fingerprint", "key_file"]
-        missing = [key for key in required_keys if not config.get(key)]
-        if missing:
-            raise SandBoxConfigKeyNotSetException(
-                "API-key OCI auth requires these config values in "
-                f"{self.oci_openai_config_file} profile {profile}: {', '.join(missing)}"
-            )
-
-        signer = oci.signer.Signer(
-            tenancy=config["tenancy"],
-            user=config["user"],
-            fingerprint=config["fingerprint"],
-            private_key_file_location=config["key_file"],
-            pass_phrase=config.get("pass_phrase"),
-            private_key_content=config.get("key_content"),
-        )
-        return config, signer
+        return auth
 
     # Logger for debug, call as:
     # OpenAIClientProvider().get_logger 

@@ -12,6 +12,8 @@ examples in this repo. It uses an inline local Skill by default so beginners can
 see the full request shape while hosted Skill upload is still on hold.
 
 By default this file runs in preview mode and does not call the API.
+
+uv run openai_sdk/genai_client/containers/container_shell_skills.py
 """
 
 from __future__ import annotations
@@ -39,7 +41,7 @@ CONTAINER_EXPIRES_AFTER_MINUTES = 5
 
 # Use inline Skills while cloud hosted Skill upload is unavailable.
 ATTACH_INLINE_SKILL = True
-INLINE_SKILL_FOLDER = Path(__file__).resolve().parents[2] / "skills" / "samples" / "dev-handoff-kit"
+INLINE_SKILL_FOLDER = Path(__file__).resolve().parents[2] / "skills" / "samples" / "repo-tour-guide"
 
 # Later, when cloud Skills are available, set ATTACH_INLINE_SKILL=False and
 # replace this ID with a hosted or curated Skill ID.
@@ -57,7 +59,7 @@ DOMAIN_SECRET_DOMAIN = "api.example.com"
 DOMAIN_SECRET_NAME = "API_TOKEN"
 DOMAIN_SECRET_VALUE = "<secret-value>"
 
-DELETE_CONTAINER_AT_END = False
+DELETE_CONTAINER_AT_END = True
 
 def zip_skill_folder_as_base64(skill_folder: Path) -> str:
     archive_buffer = io.BytesIO()
@@ -96,11 +98,11 @@ def main() -> None:
         #     ]
         # },
         skills=[
-            {
-                "type": "skill_reference",
-                "skill_id":HOSTED_OR_CURATED_SKILL_ID, #type:ignore
-                "version":HOSTED_OR_CURATED_SKILL_VERSION
-            },
+            # {
+            #     "type": "skill_reference",
+            #     "skill_id":HOSTED_OR_CURATED_SKILL_ID, #type:ignore
+            #     "version":HOSTED_OR_CURATED_SKILL_VERSION
+            # },
             {
                 "type": "inline",
                 "name": INLINE_SKILL_FOLDER.name,
@@ -119,7 +121,6 @@ def main() -> None:
     
     print(f"Created shell + skills container: {container.id}\n")
 
-    # Step 2: Use Shell Tool with that exact container so the attached Skills are available.
     response = client.responses.create(
         model=MODEL_ID,
         tools=[
@@ -132,9 +133,12 @@ def main() -> None:
             }
         ],
         input=(
-            "Use the attached Skill to create /mnt/data/container_skill_handoff.md. "
-            "The handoff should explain how container create options, Shell Tool, "
-            "container files, and Skills work together. Print the final handoff."
+            f"Use the `{INLINE_SKILL_FOLDER.name}` Skill. "
+            "The Skill is mounted separately from container files, so do not "
+            "look for the Skill bundle under /mnt/data. "
+            "Create /mnt/data/explain_repo.md. "
+            "The file should explain how container create options, Shell Tool, "
+            "container files, and Skills work together. Print the final report."
         )
     )
 
