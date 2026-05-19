@@ -1,11 +1,12 @@
-"""What this file does:
-Shows end-to-end vector store lifecycle:
-1) Create vector store
-2) Retrieve vector store
-3) Update vector store metadata/name
-4) Run semantic search
-5) Optionally attach and inspect files
-6) Optionally delete vector store
+""" What this file does:
+Shows the main vector store lifecycle calls in one place:
+1) Build the vector CRUD client and the search client.
+2) Select an existing vector store id from `sandbox.yaml`.
+3) Retrieve vector store metadata.
+4) Update vector store name and metadata.
+5) Run semantic search over the vector store.
+6) List files already attached to the vector store.
+7) Optionally attach and inspect one file.
 
 Documentation for reference:
 - OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
@@ -13,25 +14,37 @@ Documentation for reference:
 - Vector store files API reference: https://platform.openai.com/docs/api-reference/vector-stores-files
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
-Environment setup:
-- Configure OCI credentials in `sandbox.yaml`.
-- Optionally provide `ATTACH_FILE_ID` or env var `VECTOR_SAMPLE_FILE_ID`.
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution for this repo
+- #genai-hosted-deployment-users: GA deployment and integration updates with latest SDK
 
-How to run from repo root:
+Environment setup:
+- Configure OCI credentials, project, compartment, and profile in `sandbox.yaml`.
+- Set `oci.unstructured_vector_store_id` in `sandbox.yaml`.
+- Optionally set `ATTACH_FILE_ID` to a Files API id that should be attached to the vector store.
+
+How to run the file:
 uv run openai_sdk/genai_client/vector_store/vector_api.py
 
 Safe experiments:
-1. Keep `DELETE_VECTOR_STORE_AT_END=False` while learning.
+1. Comment out the update call if you only want read/search behavior.
 2. Update metadata keys and inspect retrieval output.
 3. Attach one known file id to validate ingestion flow.
+4. Keep a copy of the original vector store name if you are practicing updates.
 
 Important sections:
-1. Step 1: Build configured OpenAI client.
-2. Step 2-5: Create/retrieve/update/search vector store.
-3. Step 6-7: Optional file attach and cleanup.
+1. Step 1: Build configured OpenAI clients.
+2. Step 2: Resolve the vector store id.
+3. Step 3: Retrieve vector store metadata.
+4. Step 4: Update vector store name and metadata.
+5. Step 5: Search the vector store and list attached files.
+6. Step 6: Optional file attach and content inspection.
 """
 
-# this kind of files requires execution time to wait since the job of creating vector store and file processing is long
+# Vector store changes and file processing can take time, so this sample waits
+# before searching after an update.
 
 from openai import OpenAI
 import os
@@ -50,12 +63,16 @@ ATTACH_FILE_ID = "file-ord-459fa3aa-6e29-46ab-a1ce-e0e8a7683873"
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
-    # the vector store client uses the 2023 endpoint to perform vector store operations
+    print("Step 1 - Building vector CRUD client and search client.")
+    # The vector store client uses the 2023 endpoint for vector store CRUD operations.
     client: OpenAI = OpenAIClientProvider().oci_openai_vector_client
-    # The openai client is used for active data retrieval and interaction with model
+    # The OpenAI client is used for active retrieval and model-facing search operations.
     search_client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    # Step 2: Create vector store.(use this to get vector store ID)
+    # Step 2: Resolve the vector store id. The commented create block below is
+    # useful when you want to create a fresh store and copy its id into sandbox.yaml.
+    print("Step 2 - Resolving vector store id from sandbox.yaml.")
+    # Create vector store. Use this commented block to get a new vector store id.
     # vector_store = client.vector_stores.create(
     #     name=VECTOR_STORE_NAME,
     #     description=VECTOR_STORE_DESCRIPTION,
@@ -67,12 +84,15 @@ def main():
     # vector_store_id = vector_store.id
     vector_store_id = OpenAIClientProvider().oci_openai_unstructured_vector_store_id
 
-    # Step 3: Retrieve vector store.
+    # Step 3: Retrieve vector store metadata.
+    print(f"Step 3 - Retrieving vector store: {vector_store_id}")
     retrieve_result = client.vector_stores.retrieve(vector_store_id=vector_store_id)
     print(f"Vector store retrieved: {retrieve_result.name}")
     print(f"Vector store ID: {retrieve_result.id}")
 
-    # Step 4: Update vector store.
+    # Step 4: Update vector store name and metadata so beginners can see how
+    # server-side metadata changes appear in API responses.
+    print("Step 4 - Updating vector store name and metadata.")
     update_result = client.vector_stores.update(
         vector_store_id=vector_store_id,
         name=f"{VECTOR_STORE_NAME}-updated",
@@ -83,11 +103,13 @@ def main():
     print("Updated vector store on metadata:")
     print(update_result.metadata)
 
-    # Wait for the changes to apply and status Complete achieved on vector store
+    # Wait for the changes to apply and for complete status on the vector store.
+    print("Waiting 30 seconds for vector store changes to settle before searching.")
     time.sleep(30)
-    # After the updates are applied proceed with search
+    # After the updates are applied, proceed with search.
 
-    # Step 5: Search vector store.
+    # Step 5: Search vector store and print the retrieved chunks.
+    print(f"Step 5 - Searching vector store for: {SEARCH_QUERY}")
     search_results = search_client.vector_stores.search(
         vector_store_id=vector_store_id,
         query=SEARCH_QUERY,
@@ -101,15 +123,18 @@ def main():
         print(f"Sample content snippet: {match.content[0].text[:100]}")
         print(f"Score on match: {match.score}\n\n")
 
+    print("Step 5b - Listing files currently attached to the vector store.")
     file_list = search_client.vector_stores.files.list(vector_store_id=vector_store_id, limit=20)
     print("List of files on vector store:")
     for file in file_list.data:
         print(f"ID: {file.id}\nAttributes: {file.attributes}\nStatus: {file.status}\n")
 
-    # Step 6: Optional vector-store file operations.
+    # Step 6: Optional vector store file operations. This is separate from the
+    # Files API upload step: here you attach an existing file id to a vector store.
     attach_file_id = ATTACH_FILE_ID
     if attach_file_id:
         try:
+            print(f"Step 6 - Attaching file id to vector store: {attach_file_id}")
             create_file_result = search_client.vector_stores.files.create(
                 vector_store_id=vector_store_id,
                 file_id=attach_file_id,
@@ -124,22 +149,24 @@ def main():
             vector_store_id=vector_store_id,
             file_id=attach_file_id,
         )
+        print("Step 6b - Retrieving attached file metadata.")
         print(f"Retrieved file with id: {attach_file_id}")
         print(f"Data: {retrieve_file_result}")
 
+        print("Step 6c - Fetching a content snippet for the attached file.")
         content_result = search_client.vector_stores.files.content(
             vector_store_id=vector_store_id,
             file_id=attach_file_id,
         )
         print("Content on file:\n")
-        print(f"File: {content_result.file_name}") #type:ignore
-        print(f"File ID: {content_result.file_id}") #type:ignore
-        print(f"Content snippet: {content_result.content[0]['text'][:100]}\n") #type:ignore
+        print(f"File: {content_result.file_name}")  # type: ignore
+        print(f"File ID: {content_result.file_id}")  # type: ignore
+        print(f"Content snippet: {content_result.content[0]['text'][:100]}\n")  # type: ignore
         
     else:
         print(
             "Skipping file attach flow. Set ATTACH_FILE_ID constant "
-            "or create env var VECTOR_SAMPLE_FILE_ID."
+            "to inspect one existing Files API object."
         )
 
 if __name__ == "__main__":

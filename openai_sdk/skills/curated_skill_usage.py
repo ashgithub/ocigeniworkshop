@@ -7,6 +7,8 @@ by provider, model, region, and release.
 
 This file does not upload anything. It shows how a curated Skill is attached as
 a skill_reference, just like a hosted Skill ID.
+
+uv run openai_sdk/skills/curated_skill_usage.py
 """
 import os
 import sys
@@ -26,7 +28,9 @@ MODEL_ID = "openai.gpt-5.2"
 # - anthropic-docx
 # - anthropic-pdf
 # - anthropic-pptx
-CURATED_SKILL_ID = "openai-spreadsheets"
+# CURATED_SKILL_ID = "openai-spreadsheets"
+CURATED_SKILL_ID = "openai-docs"
+# CURATED_SKILL_ID = "anthropic-pdf"
 CURATED_SKILL_VERSION: str | int | None = "latest"
 
 PROMPT = """

@@ -8,6 +8,8 @@ Beginner flow:
 1. Inspect INLINE_SKILL_FOLDER and the prompt before running.
 2. Change INLINE_SKILL_FOLDER to another folder under openai_sdk/skills/samples.
 3. Run this file only when hosted shell with inline Skills is enabled.
+
+uv run openai_sdk/skills/inline_skill_usage.py
 """
 
 import base64

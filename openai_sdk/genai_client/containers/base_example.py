@@ -1,5 +1,5 @@
-"""What this file does:
-Demonstrates the container lifecycle in a beginner-friendly sequence:
+""" What this file does:
+Demonstrates the basic container lifecycle in a beginner-friendly sequence:
 1) Create a container
 2) List containers
 3) Retrieve one container by id
@@ -13,7 +13,7 @@ Documentation for reference:
 Environment setup:
 - Configure OCI credentials in `sandbox.yaml`.
 - Confirm `projectId`, `compartmentId`, and profile values are valid.
-- Replace placeholder ids (`container_id`) with real ids before running retrieve/delete.
+- This script creates a test container and then uses ids returned by the API.
 
 How to run from repo root:
 uv run openai_sdk/genai_client/containers/base_example.py
@@ -25,21 +25,27 @@ Safe experiments:
 
 Important sections:
 1. Step 1: Build configured OpenAI client.
-2. Step 2: Run create/list/retrieve/delete container calls.
+2. Step 2: Create a short-lived container.
+3. Step 3: List available containers.
+4. Step 4: Retrieve a container by id.
+5. Step 5: Delete a container by id.
 """
 
 from openai import OpenAI
 import os
 import sys
 
+# Allow this sample to import the shared client provider when run from repo root.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
 def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
+    print("<------------- Step 1: Configure OpenAI client ------------>")
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    # Step 2a: Create container.
+    # Step 2: Create a short-lived hosted container for this workshop run.
+    print("\n<------------- Step 2: Create container ------------>")
     container = client.containers.create(
         name="workshop_container",
         expires_after={"anchor":"last_active_at","minutes":5}
@@ -47,25 +53,30 @@ def main():
     print(f"Created container with name: {container.name} and ID:")
     print(container.id)
 
-    # Step 2b: List available containers.
+    # Step 3: List available containers. The list endpoint returns a page object,
+    # and `page.data` contains the container records.
+    print("\n<------------- Step 3: List containers ------------>")
     page = client.containers.list()
-    print(f"Available containers:")
+    print("Available containers:")
     for container in page.data:
         print(container.name)
         print(container.id)
-        #optional client clean up
+        # Optional client clean up while experimenting with test containers.
         # client.containers.delete(
         #     container_id=container.id
         # )
 
-    # Step 2c: Retrieve container by id.
+    # Step 4: Retrieve a container by id to confirm the resource can be fetched.
+    # The current sample uses the `container` variable from the list loop above.
+    print("\n<------------- Step 4: Retrieve container ------------>")
     container = client.containers.retrieve(
         container_id=container.id,
     )
-    print(f"Retrieved container with ID:")
+    print("Retrieved container with ID:")
     print(container.id)
 
-    # Step 2d: Delete container by id.
+    # Step 5: Delete the retrieved container so this learning run cleans up.
+    print("\n<------------- Step 5: Delete container ------------>")
     client.containers.delete(
         container_id=container.id,
     )

@@ -1,12 +1,45 @@
-"""Run vector store connector APIs with the repo-standard OCI user auth.
+""" What this file does:
+Demonstrates the OCI vector store connector REST workflow:
+1) Build OCI user auth with `OpenAIClientProvider.get_raw_user_auth()`.
+2) Resolve the vector store, Object Storage bucket, and connector endpoint.
+3) Create a connector that ingests files from Object Storage.
+4) List and retrieve connector details.
+5) Update connector metadata.
+6) Inspect connector stats and ingestion logs.
+7) Optionally trigger, inspect, cancel, and log a manual file sync.
+8) Optionally delete the connector.
 
-This file is intentionally a direct REST probe:
-1) Build auth from OpenAIClientProvider.get_raw_user_auth()
-2) Create a vector store connector
-3) Inspect connector details, stats, logs, and optional file sync
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
-Run from repo root:
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution for this repo
+- #genai-hosted-deployment-users: GA deployment and integration updates with latest SDK
+
+Environment setup:
+- Configure OCI credentials, project, compartment, and profile in `sandbox.yaml`.
+- Set `oci.unstructured_vector_store_id` in `sandbox.yaml`.
+- Set `bucket.namespace` and `bucket.bucketName` in `sandbox.yaml`.
+- Optionally set `bucket.prefix` or `VECTOR_OS_PREFIXES` to limit ingestion.
+
+How to run the file:
 uv run openai_sdk/genai_client/vector_store/vector_store_connector.py
+
+Safe experiments:
+1. Use a small Object Storage prefix while learning.
+2. Keep `DELETE_CONNECTOR_AT_END=False` until you confirm connector behavior.
+3. Keep `CANCEL_FILE_SYNC_IMMEDIATELY=False` unless you want to test cancel behavior.
+
+Important sections:
+1. Step 1: Load provider and derive the connector endpoint.
+2. Step 2: Resolve vector store and Object Storage source values.
+3. Step 3: Create the connector.
+4. Step 4-8: Inspect connector list, details, stats, and logs.
+5. Step 9-12: Optional manual file sync flow.
+6. Step 13: Optional connector cleanup.
 """
 
 import os
@@ -31,6 +64,7 @@ DELETE_CONNECTOR_AT_END = False
 REQUEST_TIMEOUT_SECONDS = 120.0
 
 def connector_endpoint(provider: OpenAIClientProvider) -> str:
+    """Return the OCI connector control-plane endpoint in `/20231130` form."""
     endpoint = (
         CONNECTOR_ENDPOINT
         or getattr(provider, "oci_openai_connector_endpoint", "")
@@ -55,6 +89,7 @@ def request_json(
     params: dict | None = None,
     body: dict | None = None,
 ) -> dict:
+    """Send one REST request and return JSON so the main flow stays readable."""
     response = client.request(
         method,
         f"{endpoint}{path}",
@@ -73,6 +108,7 @@ def connector_body(
     bucket_name: str,
     storage_prefixes: list[str],
 ) -> dict:
+    """Build the Object Storage connector payload expected by the OCI endpoint."""
     return {
         "compartmentId": compartment_id,
         "vectorStoreId": vector_store_id,
@@ -98,10 +134,14 @@ def connector_body(
 
 
 def total_synced(stats: dict, key: str) -> int:
+    """Read a sync-count bucket from the stats response, defaulting to zero."""
     return (stats.get(key) or {}).get("totalFilesSynced", 0)
 
 
 def main() -> None:
+    # Step 1: Load repo-standard provider config and derive the connector
+    # control-plane endpoint used by the REST calls below.
+    print("Step 1 - Loading provider and deriving connector endpoint.")
     provider = OpenAIClientProvider()
     endpoint = connector_endpoint(provider)
     headers = {
@@ -112,6 +152,9 @@ def main() -> None:
         "compartment-id": provider.oci_compartment_id,
     }
 
+    # Step 2: Resolve vector store and Object Storage source values. Beginners
+    # usually only need to edit sandbox.yaml for this step.
+    print("Step 2 - Resolving vector store and Object Storage source values.")
     compartment_id = provider.oci_compartment_id
     vector_store_id = (
         getattr(provider, "oci_openai_unstructured_vector_store_id", "")
@@ -144,6 +187,9 @@ def main() -> None:
     print(f"Using prefixes: {storage_prefixes if storage_prefixes else '[entire bucket]'}")
 
     with httpx.Client(timeout=REQUEST_TIMEOUT_SECONDS, auth=provider.get_raw_user_auth()) as client:
+        # Step 3: Create a connector that knows which bucket and prefixes should
+        # feed files into the vector store.
+        print("Step 3 - Creating vector store connector.")
         connector = request_json(
             client,
             "POST",
@@ -161,6 +207,9 @@ def main() -> None:
         connector_id = connector["id"]
         print(f"Connector created: {connector_id} ({connector.get('lifecycleState')})")
 
+        # Step 4: List connectors for this vector store so learners can compare
+        # the new connector with any existing connectors.
+        print("Step 4 - Listing connectors for this vector store.")
         connectors = request_json(
             client,
             "GET",
@@ -176,6 +225,8 @@ def main() -> None:
                 f"{item.get('lifecycleState')} | {item.get('displayName')}"
             )
 
+        # Step 5: Retrieve the connector directly by id for full details.
+        print("Step 5 - Fetching connector details.")
         fetched = request_json(
             client,
             "GET",
@@ -191,6 +242,9 @@ def main() -> None:
         print(f"vector_store_id: {fetched.get('vectorStoreId')}")
         print(f"time_created: {fetched.get('timeCreated')}")
 
+        # Step 6: Optionally update connector metadata. This does not change the
+        # bucket source; it only demonstrates the update endpoint.
+        print("Step 6 - Checking whether connector metadata update is enabled.")
         if UPDATE_CONNECTOR_AFTER_CREATE:
             updated_connector = request_json(
                 client,
@@ -210,6 +264,9 @@ def main() -> None:
         else:
             print("Skipping connector update.")
 
+        # Step 7: Read sync statistics to understand how many files were created,
+        # updated, ignored, failed, or are still in progress.
+        print("Step 7 - Reading connector sync statistics.")
         stats = request_json(
             client,
             "GET",
@@ -228,6 +285,9 @@ def main() -> None:
         print(f"unsupported: {total_synced(stats, 'unsupported')}")
         print(f"metadata_updated: {total_synced(stats, 'metadataUpdated')}")
 
+        # Step 8: Read connector-wide ingestion logs. These are useful when a
+        # connector runs on schedule and you want to inspect recent events.
+        print("Step 8 - Reading connector-wide ingestion logs.")
         connector_logs = request_json(
             client,
             "GET",
@@ -241,6 +301,8 @@ def main() -> None:
             print(entry)
 
         file_sync_id = None
+        # Step 9: Optionally trigger a manual sync run for this connector.
+        print("Step 9 - Checking whether manual file sync is enabled.")
         if TRIGGER_FILE_SYNC:
             file_sync = request_json(
                 client,
@@ -263,6 +325,9 @@ def main() -> None:
             print("Skipping manual file sync.")
 
         if file_sync_id:
+            # Step 10: List and retrieve file sync runs so you can inspect
+            # lifecycle state and timing for the manual sync.
+            print("Step 10 - Inspecting file sync run.")
             sync_runs = request_json(
                 client,
                 "GET",
@@ -298,6 +363,9 @@ def main() -> None:
             print(f"time_ended: {fetched_sync.get('timeEnded')}")
             print(f"duration_in_seconds: {fetched_sync.get('durationInSeconds')}")
 
+            # Step 11: Optionally cancel the file sync. The default keeps the
+            # sync running so beginners can observe normal ingestion.
+            print("Step 11 - Checking whether file sync cancel is enabled.")
             if CANCEL_FILE_SYNC_IMMEDIATELY:
                 request_json(
                     client,
@@ -318,6 +386,8 @@ def main() -> None:
             else:
                 print("Skipping file sync cancel.")
 
+            # Step 12: Read ingestion logs scoped to the manual sync run.
+            print("Step 12 - Reading sync-level ingestion logs.")
             sync_logs = request_json(
                 client,
                 "GET",
@@ -330,6 +400,9 @@ def main() -> None:
             for entry in sync_logs:
                 print(entry)
 
+        # Step 13: Optional cleanup. The default is to keep the connector so you
+        # can inspect it in OCI Console after the script finishes.
+        print("Step 13 - Checking whether connector cleanup is enabled.")
         if DELETE_CONNECTOR_AT_END:
             request_json(
                 client,

@@ -1,19 +1,37 @@
-"""Create a Shell-ready container with network policy and Skills.
+""" What this file does:
+Demonstrates how to create a Shell-ready container with network policy and Skills:
+1) Package a local Skill folder as a base64 zip
+2) Create a hosted container with lifecycle, memory, network, and Skill settings
+3) Use the Responses API Shell Tool with that existing container
+4) List generated files in the container
+5) Delete the container when cleanup is enabled
 
-The updated container docs show that `client.containers.create(...)` can include:
-- `expires_after`
-- `file_ids`
-- `memory_limit`
-- `network_policy`
-- `skills`
+Documentation for reference:
+- OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
+- Containers API reference: https://platform.openai.com/docs/api-reference/containers
+- Responses API tools reference: https://platform.openai.com/docs/api-reference/responses/create
+- GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
-This example connects the new container details to the Skills and Shell Tool
-examples in this repo. It uses an inline local Skill by default so beginners can
-see the full request shape while hosted Skill upload is still on hold.
+Environment setup:
+- Configure OCI credentials in `sandbox.yaml`.
+- Confirm Shell Tool and Skills access are enabled for your project.
+- Keep network disabled unless your workflow needs approved outbound domains.
+- Do not put real secrets in this file; use placeholders for learning.
 
-By default this file runs in preview mode and does not call the API.
-
+How to run from repo root:
 uv run openai_sdk/genai_client/containers/container_shell_skills.py
+
+Safe experiments:
+1. Change the local Skill folder after reviewing `openai_sdk/skills/samples`.
+2. Try one of the commented `network_policy` blocks after choosing approved domains.
+3. Set `DELETE_CONTAINER_AT_END=False` while inspecting generated files.
+
+Important sections:
+1. Step 1: Build configured OpenAI client and package the inline Skill.
+2. Step 2: Create the container with lifecycle, memory, network, and Skill settings.
+3. Step 3: Run the Shell Tool in the created container.
+4. Step 4: List generated files for inspection.
+5. Step 5: Clean up the container when enabled.
 """
 
 from __future__ import annotations
@@ -28,13 +46,16 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 from openai import OpenAI
 
+# Allow this sample to import the shared client provider when run from repo root.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
+# Reserved for a future preview/live toggle. The current sample calls the API when run.
 RUN_LIVE_API = False
 
+# Container settings used by the create call below.
 CONTAINER_NAME = "workshop-shell-skills-container"
 CONTAINER_MEMORY_LIMIT = "4g"
 CONTAINER_EXPIRES_AFTER_MINUTES = 5
@@ -52,7 +73,7 @@ HOSTED_OR_CURATED_SKILL_VERSION: str | int | None = "latest"
 ENABLE_NETWORK_ALLOWLIST = False
 ALLOWED_NETWORK_DOMAINS = ["api.example.com"]
 
-# Do not place real secrets in this file. Use a placeholder in preview mode and
+# Do not place real secrets in this file. Use a placeholder while learning and
 # environment variables or a secret manager in real integrations.
 ENABLE_DOMAIN_SECRET_EXAMPLE = False
 DOMAIN_SECRET_DOMAIN = "api.example.com"
@@ -62,6 +83,7 @@ DOMAIN_SECRET_VALUE = "<secret-value>"
 DELETE_CONTAINER_AT_END = True
 
 def zip_skill_folder_as_base64(skill_folder: Path) -> str:
+    """Package a local Skill folder as a base64 zip for inline Skill upload."""
     archive_buffer = io.BytesIO()
     with ZipFile(archive_buffer, mode="w", compression=ZIP_DEFLATED) as archive:
         for path in sorted(skill_folder.rglob("*")):
@@ -71,17 +93,20 @@ def zip_skill_folder_as_base64(skill_folder: Path) -> str:
     return base64.b64encode(archive_buffer.getvalue()).decode("ascii")
 
 def main() -> None:
-
+    # Step 1: Build a configured OpenAI client and package the inline Skill.
+    print("<------------- Step 1: Configure client and package Skill ------------>")
     client: OpenAI = OpenAIClientProvider().oci_openai_client
     encoded_zip = zip_skill_folder_as_base64(INLINE_SKILL_FOLDER)
+    print(f"Packaged inline Skill folder: {INLINE_SKILL_FOLDER}")
 
-    # Step 1: Create a container with lifecycle, memory, network policy, and Skills.
+    # Step 2: Create a container with lifecycle, memory, network policy, and Skills.
+    print("\n<------------- Step 2: Create shell + skills container ------------>")
     container = client.containers.create(
         name=CONTAINER_NAME,
         expires_after={"anchor":"last_active_at","minutes":CONTAINER_EXPIRES_AFTER_MINUTES},
         memory_limit=CONTAINER_MEMORY_LIMIT,
         network_policy= {"type": "disabled"},
-        # Different usages of network_policy
+        # Alternative network_policy shapes for later experiments:
         # network_policy= {
         #     "type": "allowlist",
         #     "allowed_domains": ALLOWED_NETWORK_DOMAINS,
@@ -121,6 +146,8 @@ def main() -> None:
     
     print(f"Created shell + skills container: {container.id}\n")
 
+    # Step 3: Ask the Responses API to run Shell Tool inside the created container.
+    print("<------------- Step 3: Run Shell Tool with inline Skill ------------>")
     response = client.responses.create(
         model=MODEL_ID,
         tools=[
@@ -145,7 +172,8 @@ def main() -> None:
     print("<------------- Shell + Skills response ------------>\n")
     print(response.output_text)
 
-    # Step 3: List generated files for inspection or retrieval.
+    # Step 4: List generated files for inspection or retrieval.
+    print("\n<------------- Step 4: List generated container files ------------>")
     files_page = client.containers.files.list(container_id=container.id, limit=20, order="desc")
     print("\n<------------- Container files ------------>")
     for container_file in files_page.data:
@@ -154,6 +182,8 @@ def main() -> None:
             f"bytes={getattr(container_file, 'bytes', 'unknown')}"
         )
 
+    # Step 5: Delete the test container when cleanup is enabled.
+    print("\n<------------- Step 5: Cleanup ------------>")
     if DELETE_CONTAINER_AT_END:
         client.containers.delete(container.id)
         print(f"\nDeleted container: {container.id}")

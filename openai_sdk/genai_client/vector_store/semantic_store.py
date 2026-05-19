@@ -1,16 +1,25 @@
-"""What this file does:
-Runs a semantic search directly against an existing vector store.
+""" What this file does:
+Demonstrates direct semantic search against an existing vector store:
+1) Read the vector store id from the workshop configuration.
+2) Submit a search query without generating a model answer.
+3) Print matching files, attributes, snippets, and scores.
 
 Documentation for reference:
 - OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
 - Vector stores API reference: https://platform.openai.com/docs/api-reference/vector-stores
 - GenAI platform GA docs: https://confluence.oraclecorp.com/confluence/display/OCAS/Generative+AI+Platform+Agentic+Capabilities+-+March+2026+GA+User+Guide#expand-ExpandtolearnmoreifyouaremigratingfromLABetatoGA
 
-Environment setup:
-- Configure OCI credentials in `sandbox.yaml`.
-- Set `VECTOR_STORE_ID` constant or env var `VECTOR_STORE_ID`.
+Relevant Slack channels:
+- #generative-ai-users: Questions about OCI Generative AI
+- #igiu-innovation-lab: General project discussions
+- #igiu-ai-learning: Help with sandbox environment and execution for this repo
+- #genai-hosted-deployment-users: GA deployment and integration updates with latest SDK
 
-How to run from repo root:
+Environment setup:
+- Configure OCI credentials, project, compartment, and profile in `sandbox.yaml`.
+- Set `oci.unstructured_vector_store_id` in `sandbox.yaml` to the vector store you want to search.
+
+How to run the file:
 uv run openai_sdk/genai_client/vector_store/semantic_store.py
 
 Safe experiments:
@@ -36,12 +45,17 @@ MAX_RESULTS = 8
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
+    print("Step 1 - Building OCI OpenAI client.")
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    # Step 2: Resolve required vector store id.
+    # Step 2: Resolve required vector store id. Semantic search needs an
+    # already-created vector store with processed files.
+    print("Step 2 - Resolving vector store id from sandbox.yaml.")
     vector_store_id = OpenAIClientProvider().oci_openai_unstructured_vector_store_id
 
-    # Step 3: Run semantic search.
+    # Step 3: Run semantic search. This returns retrieved chunks directly
+    # instead of asking a model to turn them into an answer.
+    print(f"Step 3 - Searching vector store {vector_store_id} for: {SEARCH_QUERY}")
     result = client.vector_stores.search(
         vector_store_id=vector_store_id,
         query=SEARCH_QUERY,

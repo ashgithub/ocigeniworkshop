@@ -34,7 +34,7 @@ from openai_client_provider import OpenAIClientProvider
 
 
 MODEL_ID = "openai.gpt-5.2"
-MAX_LOCAL_SHELL_ROUNDS = 4
+MAX_LOCAL_SHELL_ROUNDS = 10
 COMMAND_TIMEOUT_SECONDS = 30
 
 SKILLS_DIR = Path(__file__).resolve().parent / "samples"
@@ -43,7 +43,7 @@ MODULE_DOCS_SKILL = SKILLS_DIR / "module-docs-explainer"
 WORKSHOP_RUNNER_SKILL = SKILLS_DIR / "workshop-result-runner"
 
 PROMPT = """
-Use the repo-tour-guide, module-docs-explainer, and workshop-result-runner Skills.
+Use the repo-tour-guide skill.
 
 Scenario:
 - I am onboarding beginner developers in an innovation lab.
@@ -52,6 +52,8 @@ Scenario:
 - Include a short result summary if you use the bundled script.
 
 Use the bundled script if helpful, then return a compact learning path.
+
+uv run openai_sdk/skills/local_skill_usage.py
 """
 
 

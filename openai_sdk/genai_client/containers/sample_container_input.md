@@ -1,6 +1,6 @@
 # Container File Sample
 
-This small file is used by `container_files_shell_workflow.py`.
+This small file is used by `files_shell_flow.py`.
 
 Workshop context:
 

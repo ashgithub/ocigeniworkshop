@@ -1,10 +1,11 @@
-"""What this file does:
+""" What this file does:
 Demonstrates file operations inside a container:
-1) Upload a file into a container
-2) List container files
-3) Retrieve file metadata
-4) Retrieve file content
-5) Delete a container file
+1) Create a short-lived container for the file example
+2) Upload a file into a container
+3) List container files
+4) Retrieve file metadata
+5) Retrieve file content
+6) Delete a container file
 
 Documentation for reference:
 - OpenAI SDK overview: https://developers.openai.com/api/docs/quickstart
@@ -13,33 +14,40 @@ Documentation for reference:
 
 Environment setup:
 - Configure OCI credentials in `sandbox.yaml`.
-- Replace placeholder values (`container_id`, `file_id`) with real ids.
-- Make sure `data.csv` exists locally (or replace with your own file path).
+- Confirm `openai_sdk/output/fema_outage_flyer.pdf` exists, or replace the path.
+- This script creates a test container and then uses ids returned by the API.
 
 How to run from repo root:
 uv run openai_sdk/genai_client/containers/container_files.py
 
 Safe experiments:
-1. Use a small CSV first to inspect content retrieval easily.
+1. Use a small text or CSV file first to inspect content retrieval easily.
 2. Run upload + list only before enabling delete.
 3. Print full response objects to learn response schema.
 
 Important sections:
 1. Step 1: Build configured OpenAI client.
-2. Step 2: Execute upload/list/retrieve/content/delete flow.
+2. Step 2: Create a container for the uploaded file.
+3. Step 3: Upload a local file.
+4. Step 4: List files in the container.
+5. Step 6: Retrieve file metadata.
+6. Step 7: Retrieve file content.
+7. Step 8: Delete the uploaded file and container.
 """
 
 from openai import OpenAI
 import os
 import sys
 
+# Allow this sample to import the shared client provider when run from repo root.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
 PREVIEW_LIMIT = 500
 
-# helper function to preview the content without filling screen
-def print_preview(label, value, limit=PREVIEW_LIMIT):
+# Helper function to preview returned content without filling the terminal.
+def print_preview(label, value, limit=PREVIEW_LIMIT) -> None:
+    """Print a short preview for bytes, strings, or stream-like response values."""
     if isinstance(value, bytes):
         total = len(value)
         unit = "bytes"
@@ -61,9 +69,11 @@ def print_preview(label, value, limit=PREVIEW_LIMIT):
 
 def main():
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
+    print("<------------- Step 1: Configure OpenAI client ------------>")
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    # Create a container as in the base_example.py on this same folder.
+    # Step 2: Create a short-lived container as in `base_example.py`.
+    print("\n<------------- Step 2: Create container ------------>")
     container = client.containers.create(
         name="workshop_container",
         expires_after={"anchor":"last_active_at","minutes":5}
@@ -71,7 +81,8 @@ def main():
     print(f"Created container with name: {container.name} and ID:")
     print(container.id)
 
-    # Step 2a: Upload file to container.
+    # Step 3: Upload a local file to the container workspace.
+    print("\n<------------- Step 3: Upload file ------------>")
     container_file = client.containers.files.create(
         container_id=container.id,
         file=open("./openai_sdk/output/fema_outage_flyer.pdf", "rb"),
@@ -79,7 +90,8 @@ def main():
     print("Uploaded file with ID:")
     print(container_file.id)
 
-    # Step 2b: List container files.
+    # Step 4: List files in the container and inspect the first returned record.
+    print("\n<------------- Step 4: List container files ------------>")
     page = client.containers.files.list(
         container_id=container.id,
     )
@@ -87,7 +99,8 @@ def main():
     print("File data found:")
     print(page.id)
 
-    # Step 2c: Retrieve file metadata.
+    # Step 6: Retrieve file metadata by file id. This returns metadata, not bytes.
+    print("\n<------------- Step 6: Retrieve file metadata ------------>")
     file = client.containers.files.retrieve(
         file_id=container_file.id,
         container_id=container.id,
@@ -95,7 +108,9 @@ def main():
     print("File data retrieved")
     print(file.id)
 
-    # Step 2d: Retrieve file content stream.
+    # Step 7: Retrieve file content. The response is stream-like, so read it
+    # before printing the downloaded bytes.
+    print("\n<------------- Step 7: Retrieve file content ------------>")
     content = client.containers.files.content.retrieve(
         file_id=container_file.id,
         container_id=container.id,
@@ -104,11 +119,13 @@ def main():
     data = content.read()
     print_preview("File data", data)
 
-    # Step 2e: Delete file from container.
+    # Step 8: Delete the uploaded file and then delete the test container.
+    print("\n<------------- Step 8: Clean up file and container ------------>")
     client.containers.files.delete(
         file_id=container_file.id,
         container_id=container.id,
     )
+    print(f"Deleted file with ID: {container_file.id}")
 
     client.containers.delete(
         container_id=container.id,

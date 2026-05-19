@@ -19,16 +19,15 @@ Use this folder when you want to learn how to:
 - Valid OCI/OpenAI-compatible setup in `sandbox.yaml`.
 - Access to a project/compartment with permissions for container operations.
 - If you run `container_files.py`, provide:
-  - A valid `container_id`.
-  - A local sample file (`data.csv` in the sample, or your own path).
-  - A valid `file_id` for retrieve/content/delete calls.
-- New Shell and Skills examples default to preview mode. Set `RUN_LIVE_API=True` only after the feature is enabled in your environment.
+  - The included sample PDF at `openai_sdk/output/fema_outage_flyer.pdf`, or your own small file path.
+  - Cleanup awareness: the script deletes its uploaded file and test container at the end.
+- Shell examples call the live API when run. Keep cleanup flags enabled for throwaway runs, or set them to `False` only when you intentionally want to inspect generated artifacts afterward.
 
 Run scripts from repo root:
 
 - `uv run openai_sdk/genai_client/containers/base_example.py`
 - `uv run openai_sdk/genai_client/containers/container_files.py`
-- `uv run openai_sdk/genai_client/containers/container_files_shell_workflow.py`
+- `uv run openai_sdk/genai_client/containers/files_shell_flow.py`
 - `uv run openai_sdk/genai_client/containers/container_shell_skills.py`
 
 ## Folder Contents
@@ -40,24 +39,27 @@ Run scripts from repo root:
      - `client.containers.retrieve(...)`
      - `client.containers.delete(...)`
    - Best first file for understanding container resources.
+   - Starting comments explain the lifecycle, setup, run command, safe experiments, and each numbered step.
 
 2. `container_files.py`
    - Demonstrates file lifecycle inside a container:
+     - Create a short-lived test container.
      - Upload file to a container.
      - List container files.
      - Retrieve file metadata.
      - Retrieve file content stream.
      - Delete a file from the container.
    - Good follow-up once `base_example.py` is clear.
+   - Uses `print_preview(...)` so beginners can inspect returned content without flooding the terminal.
 
-3. `container_files_shell_workflow.py`
+3. `files_shell_flow.py`
    - Demonstrates the newer container + Shell Tool workflow:
-     - Create or reuse a container.
+     - Create a container.
      - Upload `sample_container_input.md`.
      - Use Shell Tool with `container_reference`.
      - Generate a Markdown report inside `/mnt/data`.
      - List files and retrieve generated content.
-   - Defaults to preview mode.
+   - Prints each major step before the API call so the terminal output matches the code flow.
 
 4. `container_shell_skills.py`
    - Demonstrates newer `containers.create(...)` fields:
@@ -67,10 +69,10 @@ Run scripts from repo root:
      - `skills`
    - Uses an inline local Skill by default so beginners can see the full shape while hosted Skill upload is on hold.
    - Uses Shell Tool with `container_reference` after creating the container.
-   - Defaults to preview mode.
+   - Includes commented network policy variants for disabled networking, allowlists, and domain secrets.
 
 5. `sample_container_input.md`
-   - Small text input used by `container_files_shell_workflow.py`.
+   - Small text input used by `files_shell_flow.py`.
 
 6. `containers.ipynb`
    - Notebook version of container examples for interactive learning and step-by-step experiments.
@@ -79,11 +81,11 @@ Run scripts from repo root:
 
 1. Start with `base_example.py` and run each operation one by one.
 2. Move to `container_files.py` to practice file upload and retrieval.
-3. Run `container_files_shell_workflow.py` in preview mode to see how uploaded files become Shell Tool inputs.
-4. Run `container_shell_skills.py` in preview mode to see how network policy and Skills attach at container creation time.
+3. Run `files_shell_flow.py` to see how uploaded files become Shell Tool inputs.
+4. Run `container_shell_skills.py` to see how network policy and Skills attach at container creation time.
 5. Use `containers.ipynb` to iterate with your own IDs and sample files.
 
-## New Container Fields From The May Guide
+## New Container Fields From The May 2026 Guide
 
 `client.containers.create(...)` can now describe more of the hosted workspace:
 
