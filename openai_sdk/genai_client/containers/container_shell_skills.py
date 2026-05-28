@@ -34,14 +34,11 @@ Important sections:
 5. Step 5: Clean up the container when enabled.
 """
 
-from __future__ import annotations
-
 import base64
 import io
 import os
 import sys
 from pathlib import Path
-from typing import Any
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from openai import OpenAI
@@ -52,8 +49,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from openai_client_provider import OpenAIClientProvider
 
 MODEL_ID = "openai.gpt-5.2"
-# Reserved for a future preview/live toggle. The current sample calls the API when run.
-RUN_LIVE_API = False
 
 # Container settings used by the create call below.
 CONTAINER_NAME = "workshop-shell-skills-container"
@@ -79,8 +74,6 @@ ENABLE_DOMAIN_SECRET_EXAMPLE = False
 DOMAIN_SECRET_DOMAIN = "api.example.com"
 DOMAIN_SECRET_NAME = "API_TOKEN"
 DOMAIN_SECRET_VALUE = "<secret-value>"
-
-DELETE_CONTAINER_AT_END = True
 
 def zip_skill_folder_as_base64(skill_folder: Path) -> str:
     """Package a local Skill folder as a base64 zip for inline Skill upload."""
@@ -152,6 +145,7 @@ def main() -> None:
         model=MODEL_ID,
         tools=[
             {
+                # Race conditions
                 "type": "shell",
                 "environment": {
                     "type": "container_reference",
@@ -184,10 +178,8 @@ def main() -> None:
 
     # Step 5: Delete the test container when cleanup is enabled.
     print("\n<------------- Step 5: Cleanup ------------>")
-    if DELETE_CONTAINER_AT_END:
-        client.containers.delete(container.id)
-        print(f"\nDeleted container: {container.id}")
-
+    client.containers.delete(container.id)
+    print(f"\nDeleted container: {container.id}")
 
 if __name__ == "__main__":
     main()

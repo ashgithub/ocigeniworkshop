@@ -49,8 +49,6 @@ Important sections:
 from openai import OpenAI
 import os
 import sys
-from datetime import datetime
-import time
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
@@ -58,8 +56,7 @@ from openai_client_provider import OpenAIClientProvider
 VECTOR_STORE_NAME = "workshop-vector-store"
 VECTOR_STORE_DESCRIPTION = "Sample vector store created by vector_api.py"
 SEARCH_QUERY = "Give me the key points from these documents."
-# Set file id here. or use the `files.list` function to list the files on vector store
-ATTACH_FILE_ID = "file-ord-459fa3aa-6e29-46ab-a1ce-e0e8a7683873"
+UPLOAD_CLIENT_FILE = False
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
@@ -92,20 +89,20 @@ def main():
 
     # Step 4: Update vector store name and metadata so beginners can see how
     # server-side metadata changes appear in API responses.
-    print("Step 4 - Updating vector store name and metadata.")
-    update_result = client.vector_stores.update(
-        vector_store_id=vector_store_id,
-        name=f"{VECTOR_STORE_NAME}-updated",
-        metadata={"topic": "oci", "sample": "vector_api", "state": "updated", "update_id": str(datetime.now())},
-    )
-    print("Updated vector store on name:")
-    print(update_result.name)
-    print("Updated vector store on metadata:")
-    print(update_result.metadata)
+    # print("Step 4 - Updating vector store name and metadata.")
+    # update_result = client.vector_stores.update(
+    #     vector_store_id=vector_store_id,
+    #     name=f"{VECTOR_STORE_NAME}-updated",
+    #     metadata={"topic": "oci", "sample": "vector_api", "state": "updated", "update_id": str(datetime.now())},
+    # )
+    # print("Updated vector store on name:")
+    # print(update_result.name)
+    # print("Updated vector store on metadata:")
+    # print(update_result.metadata)
 
-    # Wait for the changes to apply and for complete status on the vector store.
-    print("Waiting 30 seconds for vector store changes to settle before searching.")
-    time.sleep(30)
+    # # Wait for the changes to apply and for complete status on the vector store.
+    # print("Waiting 30 seconds for vector store changes to settle before searching.")
+    # time.sleep(30)
     # After the updates are applied, proceed with search.
 
     # Step 5: Search vector store and print the retrieved chunks.
@@ -129,10 +126,17 @@ def main():
     for file in file_list.data:
         print(f"ID: {file.id}\nAttributes: {file.attributes}\nStatus: {file.status}\n")
 
+    client_files_list = client.files.list(order="asc", limit=20)
+    sample_file = client_files_list.data[0]
+
+    print("Adding client file to the store:")
+    print(f"File ID: {sample_file.id}")
+    print(f"File name: {sample_file.filename}")
+
     # Step 6: Optional vector store file operations. This is separate from the
     # Files API upload step: here you attach an existing file id to a vector store.
-    attach_file_id = ATTACH_FILE_ID
-    if attach_file_id:
+    attach_file_id = sample_file.id
+    if attach_file_id and UPLOAD_CLIENT_FILE:
         try:
             print(f"Step 6 - Attaching file id to vector store: {attach_file_id}")
             create_file_result = search_client.vector_stores.files.create(
@@ -165,7 +169,7 @@ def main():
         
     else:
         print(
-            "Skipping file attach flow. Set ATTACH_FILE_ID constant "
+            "Skipping file attach flow. Set UPLOAD_CLIENT_FILE constant "
             "to inspect one existing Files API object."
         )
 

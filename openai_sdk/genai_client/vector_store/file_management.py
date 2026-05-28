@@ -48,7 +48,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from openai_client_provider import OpenAIClientProvider
 
 UPLOAD_FILE_PATH = "./openai_sdk/output/fema_outage_flyer.pdf"  # Set local file path here
-DELETE_FILE_AT_END = True  # Set False for persistent session files
 
 def main():
     # Step 1: Build the OCI OpenAI client from sandbox.yaml values.
@@ -124,12 +123,9 @@ def main():
     print(f"Model response:\n{response.output_text}")
 
     # Step 6: Delete the uploaded file when the sample is configured to clean up.
-    if DELETE_FILE_AT_END:
-        print(f"Step 6 - Deleting file id: {file_id}")
-        delete_result = client.files.delete(file_id=file_id)
-        print(f"Delete job result:\n{delete_result}")
-    else:
-        print("Skipping delete. Set DELETE_FILE_AT_END=True to delete the file.")
+    print(f"Step 6 - Deleting file id: {file_id}")
+    delete_result = client.files.delete(file_id=file_id)
+    print(f"Delete job result:\n{delete_result}")
 
 if __name__ == "__main__":
     main()

@@ -27,9 +27,6 @@ Important sections:
 2. Step 2: List hosted skills.
 3. Step 3: Retrieve one skill and inspect its versions.
 """
-
-from __future__ import annotations
-
 import os
 import sys
 
@@ -39,15 +36,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from openai_client_provider import OpenAIClientProvider
 
+LIST_LIMIT = 5
 
-LIST_LIMIT = 10
-SKILL_ID = "replace-with-your-skill-id"
+def main() -> None:
+    # Step 1: Build a configured OpenAI client for Skills endpoint usage.
+    client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-
-def print_skill_summary(client: OpenAI) -> None:
-    """List hosted skills in the current OCI GenAI project."""
+    #steo 2: list hosted skills on current project
     skills_page = client.skills.list(limit=LIST_LIMIT, order="desc")
-
     print("<------------- Hosted skills in this project ------------>")
     if not skills_page.data:
         print("No hosted skills were found. Upload one first with `upload_skill.py`.\n")
@@ -58,16 +54,11 @@ def print_skill_summary(client: OpenAI) -> None:
             f"id={skill.id} | name={skill.name} | "
             f"default_version={skill.default_version} | latest_version={skill.latest_version}"
         )
-    print()
 
+    sample_skill = skills_page.data[0]
 
-def print_skill_details(client: OpenAI, skill_id: str) -> None:
-    """Retrieve one hosted skill and list its versions."""
-    if skill_id == "replace-with-your-skill-id":
-        print("Skip retrieve example: replace `SKILL_ID` with a real hosted skill id first.\n")
-        return
-
-    skill = client.skills.retrieve(skill_id)
+    # Step 3: Retrieve one hosted skill and inspect its versions.
+    skill = client.skills.retrieve(sample_skill.id)
     print("<------------- Skill details ------------>")
     print(f"id: {skill.id}")
     print(f"name: {skill.name}")
@@ -75,7 +66,7 @@ def print_skill_details(client: OpenAI, skill_id: str) -> None:
     print(f"default_version: {skill.default_version}")
     print(f"latest_version: {skill.latest_version}\n")
 
-    versions_page = client.skills.versions.list(skill_id=skill_id, limit=LIST_LIMIT, order="desc")
+    versions_page = client.skills.versions.list(skill_id=sample_skill.id, limit=LIST_LIMIT, order="desc")
     print("<------------- Skill versions ------------>")
     if not versions_page.data:
         print("No versions were returned for this skill.\n")
@@ -86,19 +77,6 @@ def print_skill_details(client: OpenAI, skill_id: str) -> None:
             f"skill_id={version.skill_id} | version={version.version} | "
             f"name={version.name}"
         )
-    print()
-
-
-def main() -> None:
-    # Step 1: Build a configured OpenAI client for Skills endpoint usage.
-    client: OpenAI = OpenAIClientProvider().oci_openai_client
-
-    # Step 2: List hosted skills for the current project.
-    print_skill_summary(client)
-
-    # Step 3: Retrieve one hosted skill and inspect its versions.
-    print_skill_details(client, SKILL_ID)
-
 
 if __name__ == "__main__":
     main()

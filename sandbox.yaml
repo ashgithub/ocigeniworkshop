@@ -5,14 +5,13 @@
 # file (or export in your shell) to populate them.
 
 oci:
-   
   configFile: $OCI_CONFIG_FILE|~/.oci/config  # Path to your OCI CLI config
   profile: $OCI_PROFILE|DEFAULT               # Profile inside the OCI config file that has access to AI-Sandbox
   compartment: $OCI_COMPARTMENT_OCID|ocid1.compartment.oc1..aaaaaaaaboqoghc43bbqvei5y4pmnzia36wuh7fpcxn6fia7pfyelyg4rj7a          # OCID of compartment you have access to in AI sandbox
   project: $OCI_PROJECT|ocid1.generativeaiproject.oc1.us-chicago-1.amaaaaaaghwivzaayhqtgla464kakelp3fwi6afhx5ca7l4h4k67rpnsesvq
   api_key: $OCI_AI_API_KEY| OCI
-  unstructured_vector_store_id: $UNSTRUCTURED_VECTOR_STORE_ID|vs_ord_tgcknsijp4c5zcc64s37ftoddmegpnquxepj7zkmvyhfdpfi
-  structured_vector_store_id: $STRUCTURED_VECTOR_STORE_ID|ocid1.generativeaisemanticstore.oc1.phx.amaaaaaaghwivzaa4r3cg2ebniryy7tgq7mfrkyjdmpmushpncla2mdc4gza
+  unstructured_vector_store_id: $UNSTRUCTURED_VECTOR_STORE_ID|vs_phx_1tp9xepq5xar0vuz0oqn4f4vfbx855lsyh3v4t8prt5s5ui8
+  structured_vector_store_id: $STRUCTURED_VECTOR_STORE_ID|ocid1.generativeaisemanticstore.oc1.phx.amaaaaaaghwivzaatozfmlljvg3p76kqe3ma4rdpbjatc3cnzkav5e7zhsyq
 db:
   dsn: $DB_DSN|aisandboxadw_medium                    # this is the default database that everyone has access to 
   username: $DB_USER|aisandboxuser                    # same user is shared by everyone

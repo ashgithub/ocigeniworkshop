@@ -55,8 +55,6 @@ LOCAL_FILE_PATHS = [
 
 POLL_INTERVAL_SECONDS = 5
 CANCEL_BATCH_IMMEDIATELY = False
-DELETE_VECTOR_STORE_FILES_AT_END = False
-DELETE_UPLOADED_FILES_AT_END = False
 
 def cleanup_vector_store_files(client: OpenAI, vector_store_id: str, file_ids: list[str]) -> None:
     """Detach uploaded files from the vector store while keeping the Files API objects."""
@@ -195,25 +193,12 @@ def main():
     # Step 9: Optional cleanup. These flags are False by default so beginners
     # can inspect the uploaded files after the first run.
     print("Step 9 - Running optional cleanup checks.")
-    if DELETE_VECTOR_STORE_FILES_AT_END:
-        cleanup_vector_store_files(
-            client=client,
-            vector_store_id=vector_store_id,
-            file_ids=uploaded_file_ids,
-        )
-    else:
-        print(
-            "Skipping vector store file cleanup. "
-            "Set DELETE_VECTOR_STORE_FILES_AT_END=True to detach the files from the vector store."
-        )
-
-    if DELETE_UPLOADED_FILES_AT_END:
-        cleanup_uploaded_files(client=client, file_ids=uploaded_file_ids)
-    else:
-        print(
-            "Skipping uploaded file cleanup. "
-            "Set DELETE_UPLOADED_FILES_AT_END=True to delete the Files API objects."
-        )
+    cleanup_uploaded_files(client=client, file_ids=uploaded_file_ids)
+    cleanup_vector_store_files(
+        client=client,
+        vector_store_id=vector_store_id,
+        file_ids=uploaded_file_ids,
+    )
 
 if __name__ == "__main__":
     main()

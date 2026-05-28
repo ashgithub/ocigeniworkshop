@@ -17,8 +17,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEFAULT_SANDBOX_CONFIG = "sandbox.yaml"
-DEFAUL_OPENAI_ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
-DEFAUL_OPENAI_VECTOR_ENDPOINT = "https://generativeai.us-chicago-1.oci.oraclecloud.com/20231130/openai/v1"
+DEFAUL_OPENAI_ENDPOINT = "https://inference.generativeai.us-phoenix-1.oci.oraclecloud.com/openai/v1"
+DEFAUL_OPENAI_VECTOR_ENDPOINT = "https://generativeai.us-phoenix-1.oci.oraclecloud.com/20231130/openai/v1"
 DEFAULT_OPENAI_SKILLS_ENDPOINT = "https://ppe.inference.generativeai.eu-frankfurt-1.oci.oraclecloud.com/20231130/openai/v1"
 NL2SQL_ENDPOINT = "https://inference.generativeai.us-phoenix-1.oci.oraclecloud.com/20260325"
 
@@ -31,7 +31,7 @@ class OpenAIClientProvider:
         self.scfg = self.load_config(self.config_path)       
         
         # get the values from env variables
-        self.oci_openai_endpoint = DEFAULT_OPENAI_SKILLS_ENDPOINT
+        self.oci_openai_endpoint = DEFAUL_OPENAI_ENDPOINT
         self.oci_openai_vector_endpoint = DEFAUL_OPENAI_VECTOR_ENDPOINT
         self.oci_openai_nl2sql_endpoint = NL2SQL_ENDPOINT
         self.oci_openai_api_key = self.scfg['oci']['api_key']

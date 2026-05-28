@@ -48,7 +48,11 @@ import httpx
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from openai_client_provider import OpenAIClientProvider
 
-NATURAL_LANGUAGE_QUERY = "Explain the data on WL_CALLS table, just the top rows"
+# NATURAL_LANGUAGE_QUERY = "Select the tables from the current schema"
+NATURAL_LANGUAGE_QUERY = "List the available energy sources and their providers use the schema provided"
+# NATURAL_LANGUAGE_QUERY = "For each customer, show the energy type and provider used in each reading period"
+# NATURAL_LANGUAGE_QUERY = "List only commercial customers and their energy usage"
+# NATURAL_LANGUAGE_QUERY = "Show total kWh used by energy source"
 REQUEST_TIMEOUT_SECONDS = 120.0
 MAX_ROWS = 20
 

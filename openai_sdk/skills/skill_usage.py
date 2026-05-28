@@ -35,10 +35,8 @@ from openai_client_provider import OpenAIClientProvider
 
 
 MODEL_ID = "openai.gpt-5.2"
-SKILL_ID = "replace-with-your-skill-id"
-SKILL_VERSION: str | int = "latest"
 PROMPT = (
-    "Use the attached beginner skill to explain what the skill does and create a short "
+    "Use the attached skill to explain what the skill does and create a short "
     "study note for a beginner."
 )
 
@@ -47,8 +45,11 @@ def main() -> None:
     # Step 1: Build a configured OpenAI client for OCI endpoint usage.
     client: OpenAI = OpenAIClientProvider().oci_openai_client
 
-    if SKILL_ID == "replace-with-your-skill-id":
-        raise ValueError("Replace `SKILL_ID` with a real hosted skill id before running this example.")
+    #Step 2: check for skills
+    skills_page = client.skills.list(limit=5, order="desc")
+    sample_skill = skills_page.data[0]
+    print("Using sample skill with:")
+    print(f"Name: {sample_skill.name}\nVersion: {sample_skill.latest_version}\nDescription: {sample_skill.description}")
 
     # Step 2: Ask the model to use a hosted skill through the Shell tool.
     response = client.responses.create(
@@ -61,8 +62,8 @@ def main() -> None:
                     "skills": [
                         {
                             "type": "skill_reference",
-                            "skill_id": SKILL_ID, #type:ignore
-                            "version": SKILL_VERSION,
+                            "skill_id": sample_skill.id,
+                            "version": sample_skill.latest_version,
                         }
                     ],
                 },

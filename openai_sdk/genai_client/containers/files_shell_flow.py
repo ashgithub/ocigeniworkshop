@@ -52,13 +52,10 @@ MODEL_ID = "openai.gpt-5.2"
 
 CONTAINER_NAME = "workshop-container-files-shell"
 CONTAINER_MEMORY_LIMIT = "1g"
-CONTAINER_EXPIRES_AFTER_MINUTES = 30
+CONTAINER_EXPIRES_AFTER_MINUTES = 5
 
 SAMPLE_INPUT_PATH = Path(__file__).with_name("sample_container_input.md")
 GENERATED_REPORT_PATH = "/mnt/data/container_file_shell_report.md"
-
-DELETE_UPLOADED_FILE_AT_END = True
-DELETE_CONTAINER_AT_END = True
 
 def shell_prompt(uploaded_path: str) -> str:
     """Build the instruction sent to the Shell Tool inside the hosted container."""
@@ -159,13 +156,10 @@ def main() -> None:
 
     # Step 6: Clean up the uploaded file and container according to the flags above.
     print("\n<------------- Step 6: Cleanup ------------>")
-    if DELETE_UPLOADED_FILE_AT_END:
-        client.containers.files.delete(container_id=container.id, file_id=uploaded_file.id)
-        print(f"Deleted uploaded file: {uploaded_file.id}")
-
-    if DELETE_CONTAINER_AT_END:
-        client.containers.delete(container.id)
-        print(f"Deleted container: {container.id}")
+    client.containers.files.delete(container_id=container.id, file_id=uploaded_file.id)
+    print(f"Deleted uploaded file: {uploaded_file.id}")
+    client.containers.delete(container.id)
+    print(f"Deleted container: {container.id}")
 
 
 if __name__ == "__main__":

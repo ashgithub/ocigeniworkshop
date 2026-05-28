@@ -40,12 +40,18 @@ For the shared explanation of how Skills connect to Shell Tool, containers, and 
    - Good first file for understanding skill objects and versions.
 
 2. `upload_skill.py`
-   - Beginner-friendly upload script with editable values at the top of the file.
-   - Uses `OpenAIClientProvider().oci_openai_skills_endpoint` because Skills are not served from the regular Responses endpoint in the May PDF.
+   - Beginner-friendly Skills API CRUD script with editable values at the top of the file.
+   - Uses the same OCI user principal signing pattern as the other workshop examples.
    - Covers:
+     - `GET /openai/v1/skills`
+     - `GET /openai/v1/skills/{skill_id}`
      - `POST /openai/v1/skills`
+     - `GET /openai/v1/skills/{skill_id}/versions`
+     - `GET /openai/v1/skills/{skill_id}/versions/{version}`
      - `POST /openai/v1/skills/{skill_id}/versions`
      - `POST /openai/v1/skills/{skill_id}`
+     - `DELETE /openai/v1/skills/{skill_id}`
+     - `DELETE /openai/v1/skills/{skill_id}/versions/{version}`
 
 3. `skill_usage.py`
    - Smallest hosted skill usage example in a Responses API call.

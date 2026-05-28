@@ -61,6 +61,8 @@ def main():
     for container in page.data:
         print(container.name)
         print(container.id)
+        print(container.status)
+        print("-----------------------")
         # Optional client clean up while experimenting with test containers.
         # client.containers.delete(
         #     container_id=container.id

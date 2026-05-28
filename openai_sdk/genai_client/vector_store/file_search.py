@@ -54,12 +54,6 @@ def main():
     print("Step 2 - Resolving vector store id from sandbox.yaml.")
     vector_store_id = OpenAIClientProvider().oci_openai_unstructured_vector_store_id
 
-    if not vector_store_id:
-        raise ValueError(
-            "Missing vector store id. Set oci.unstructured_vector_store_id "
-            "in sandbox.yaml before running this file."
-        )
-
     # Step 3: Call Responses API with file_search. The model sees the user
     # prompt and can call the tool against the configured vector store.
     print(f"Step 3 - Asking model with file_search over vector store: {vector_store_id}")
