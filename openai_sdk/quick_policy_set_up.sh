@@ -73,6 +73,10 @@ allow group <group> to manage generative-ai-vectorstore-file in compartment <com
 allow group <group> to manage generative-ai-file in compartment <compartment>
 # Upload documents
 
+# SHARED WORKSHOP VECTOR STORES (pre-created by admins)
+allow group <group> to use generative-ai-vectorstore in compartment <compartment>
+# Use/list/search shared vector stores without granting create/delete on parent stores
+
 # REQUIRED WORKFLOW (IMPORTANT):
 # 1. Upload file
 # 2. Create vector store
