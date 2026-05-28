@@ -98,6 +98,14 @@ allow group <group> to manage generative-ai-vectorstore-file in compartment <com
 allow group <group> to manage generative-ai-file in compartment <compartment>
 ```
 
+For a workshop with pre-created shared vector stores, use this lower parent-store grant instead of `manage generative-ai-vectorstore`:
+
+```bash
+allow group <group> to use generative-ai-vectorstore in compartment <compartment>
+allow group <group> to manage generative-ai-vectorstore-file in compartment <compartment>
+allow group <group> to manage generative-ai-file in compartment <compartment>
+```
+
 ### Required Workflow
 
 1. Upload file
